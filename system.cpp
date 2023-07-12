@@ -44,16 +44,16 @@ std::vector <Particle *>* System::particles = &particles_;
 
 
 
-std::string kernel_code =
-"        void kernel gravity(global const double* par1x, global const double* par1y, global const double* par2x, global const double* par2y, global const double* m1, global const double* m2, global const int* step, global const double* g, global double* forcex, global double* forcey){"
+// std::string kernel_code =//  OPENCL implementation currently kindof working though 1)slower 2) prone to crashing
+// "        void kernel gravity(global const double* par1x, global const double* par1y, global const double* par2x, global const double* par2y, global const double* m1, global const double* m2, global const int* step, global const double* g, global double* forcex, global double* forcey){"
 
-"                       double dist = sqrt(pow(par1x[get_global_id(0)] - par2x[get_global_id(0)] , 2) + pow(par1y[get_global_id(0)] - par2y[get_global_id(0)] , 2));"//calculates distance
-""
-"                       double grav = -(g[get_global_id(0)] * m1[get_global_id(0)] * m2[get_global_id(0)]) / pow(dist , 2);"//calculates gravitational force
-""
-"                       forcex[get_global_id(0)] = step[get_global_id(0)] * (g[get_global_id(0)] / 0.0048)  * grav * (par1x[get_global_id(0)] - par2x[get_global_id(0)]) / dist;"// calculates x component of acceleration due to gravity
-"                       forcey[get_global_id(0)] = step[get_global_id(0)] * (g[get_global_id(0)] / 0.0048)  * grav * (par1y[get_global_id(0)] - par2y[get_global_id(0)]) / dist;"// y component of gravity
-"          }";
+// "                       double dist = sqrt(pow(par1x[get_global_id(0)] - par2x[get_global_id(0)] , 2) + pow(par1y[get_global_id(0)] - par2y[get_global_id(0)] , 2));"//calculates distance
+// ""
+// "                       double grav = -(g[get_global_id(0)] * m1[get_global_id(0)] * m2[get_global_id(0)]) / pow(dist , 2);"//calculates gravitational force
+// ""
+// "                       forcex[get_global_id(0)] = step[get_global_id(0)] * (g[get_global_id(0)] / 0.0048)  * grav * (par1x[get_global_id(0)] - par2x[get_global_id(0)]) / dist;"// calculates x component of acceleration due to gravity
+// "                       forcey[get_global_id(0)] = step[get_global_id(0)] * (g[get_global_id(0)] / 0.0048)  * grav * (par1y[get_global_id(0)] - par2y[get_global_id(0)]) / dist;"// y component of gravity
+// "          }";
 
 System::System()
 {
@@ -118,14 +118,15 @@ Particle* System::addParticle(int Mass, long double _x, long double _y , long do
     return par;
 }
 
-void System::collision(Particle* par, Particle* par1){// collision between particles
+void System::collision(Particle* par, Particle* par1){
+    // collision between particles
     //std::cout<<par->getid()<<std::endl;
 
     if(!par->getcol() && !par1->getcol()){
         par->hascol();
         par1->hascol();
 
-        double posx = (par1->getx()*par1->Getmass()+par->getx()*par->Getmass())/(par->Getmass()+par1->Getmass());// new particle components
+        double posx = (par1->getx()*par1->Getmass()+par->getx()*par->Getmass())/(par->Getmass()+par1->Getmass());// new particle position
 
         double posy = (par1->gety()*par1->Getmass()+par->gety()*par->Getmass())/(par->Getmass()+par1->Getmass());
 
@@ -156,7 +157,6 @@ void System::collision(Particle* par, Particle* par1){// collision between parti
             relmass = mass/(mass1);
         }
 //        std::cout<<"relmass: "<<relmass<<std::endl;
-//        std::cout<<"relmass: "<<par->Getmass()/(par1->Getmass())<<std::endl;
 
 
 //        std::cout<<"calc : "<</*(abs(par->Getmass() - par1->Getmass()))*/ 100000 / ( 1/rel_speed / ((collision_angle)+10)) / (0.5 + relmass * 4) <<std::endl;
@@ -165,20 +165,20 @@ void System::collision(Particle* par, Particle* par1){// collision between parti
         double breakmass = 0;
         double break_mom_x = 0;//break away particles momentum
         double break_mom_y = 0;
-        if((1000) / ( 1/rel_speed * ((collision_angle+20))+1) * (0.1 + relmass * 0.5)  > *col_threshold && rel_speed > 20){//determines if any new particles will be created
+        if((1000) / ( 1/rel_speed * ((collision_angle+20))+1) * (0.1 + relmass * 0.5)  > *col_threshold && rel_speed > 20){//determines if any new particles will be created from collision
             //std::cout<<"new Particles"<<std::endl;
             double breaksize;
             double breakvelx;
             double breakvely;
 
-            if(par->Getmass()>par1->Getmass()){//determines the smallest particle
+            if(par->Getmass()>par1->Getmass()){//determines the smallest particle in the collision
                 breaksize = (par1->Getmass()/5);//breakaway mass
 
             }else{
                 breaksize = (par->Getmass()/5);
 
             }if (breaksize>2){
-                bool side = true;
+                bool side = true;//puts a particle on either side 
                 for(int i = 0;i < *num_col_particles;i++){;
                     if(side){
                         breakvelx = (rel_speed*relunitposy*-1 - relunitposx*rel_speed) * .1;
@@ -306,8 +306,8 @@ bool System::process(){
 
 };
 bool System::update(int start, int end){
-    //takes the first par id to compute to the last particle to compute motion
-    //returns if a collision has occured
+    //takes the first par id to compute to the last particle there respective motion
+    //returns if a colision has occured
 
     bool col = false; //if collision
 
@@ -315,7 +315,7 @@ bool System::update(int start, int end){
 
     double stepfactor = .0005;
 
-//    static std::vector<cl::Platform> all_platforms;
+//    static std::vector<cl::Platform> all_platforms;//  OPENCL implementation currently kindof working though 1)slower 2) prone to crashing
 //    cl::Platform::get(&all_platforms);
 //    if (all_platforms.size() == 0) {
 //        std::cout << " No OpenCL platforms found.\n";
@@ -383,7 +383,7 @@ bool System::update(int start, int end){
             par->sety(par->gety() + par->getvy() **step * stepfactor);
 
 
-//            int j = 0;
+//            int j = 0;//  OPENCL implementation currently kindof working though 1)slower 2) prone to crashing
 //            double* parx=new double[*size ];//opencl stuff
 //            double* pary=new double[*size ];
 //            double* parvx=new double[*size ];
@@ -411,7 +411,7 @@ bool System::update(int start, int end){
                         //break;
 
                     }else{
-//                        parx[j] = par1->getx();//opencl stuff
+//                        parx[j] = par1->getx();//opencl stuff//  OPENCL implementation currently kindof working though 1)slower 2) prone to crashing
 //                        pary[j] = par1->gety();
 //                        parvy[j] = par1->getvy();
 //                        parvx[j] = par1->getvx();
@@ -436,12 +436,12 @@ bool System::update(int start, int end){
 
                         par1->setvy(par1->getvy() - (k1.y + 2*k2.y + 2*k3.y + k4.y)/6/par1->Getmass());
 
-                    }                    //j++;
+                    }                    //j++;//  OPENCL implementation currently kindof working though 1)slower 2) prone to crashing
 
                 }
             }
 
-//            double * cparx=new double[*size];//  OPENCL currently kindofworking though 1)slower 2) crashes with large particle count
+//            double * cparx=new double[*size];//  OPENCL implementation currently kindof working though 1)slower 2) prone to crashing
 //            double * cpary=new double[*size];
 //            double * cparm=new double[*size];
 //            int * cstep=new int[*size];
