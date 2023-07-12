@@ -53,19 +53,20 @@ void MainWindow::pause(){// stops the signal from the timer
 }
 
 void MainWindow::timetick(){
+    //happens every tick
 
 
     timer->stop();
 
     if (system.process()){// calculates the particle movements
-
+        //executs if there has been a collision in the system
         for (auto &par : system.Getparticles()){
             if(par->scene() == nullptr){
 
                 scene->addItem(par);
 
             }
-            if(par->getcol()){
+            if(par->getcol()){//removes particles that have collided
 
                 //std::cout<<"here";
 
@@ -94,8 +95,9 @@ void MainWindow::addParticle(int Mass, long double _x, long double _y , long dou
 }
 
 void MainWindow::Sysfactory(int sel){
+    //factory to set up various different systems 
 
-    on_pushButton_clicked();
+    on_pushButton_clicked();//clear
 
     if(sel == 0){//Earth-Moon
         on_horizontalSlider_valueChanged(90);
@@ -245,6 +247,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 void MainWindow::mousePressEvent(QMouseEvent *event){
+    //lets the user add a particle to the interface by first clicking to specify location and then clicking to specify velocity
 
 
 //   qApp->processEvents();
@@ -321,12 +324,6 @@ void MainWindow::mousePressEvent(QMouseEvent *event){
 }
 
 
-
-void MainWindow::on_Gameview_rubberBandChanged(const QRect &viewportRect, const QPointF &fromScenePoint, const QPointF &toScenePoint)
-{
-
-}
-
 void MainWindow::on_MassSlider_valueChanged(int value)
 {
     *mSlider = value+1;
@@ -396,9 +393,6 @@ void MainWindow::on_actionRings_triggered()
 void MainWindow::on_pushButton_2_pressed()
 {
     pause();
-}
-void MainWindow::on_pushButton_2_clicked()
-{
 }
 
 
