@@ -436,7 +436,8 @@ bool System::update(int start, int end){
 
                         par1->setvy(par1->getvy() - (k1.y + 2*k2.y + 2*k3.y + k4.y)/6/par1->Getmass());
 
-                    }                    //j++;//  OPENCL implementation currently kindof working though 1)slower 2) prone to crashing
+                    }                    
+                    //j++;//  OPENCL implementation currently kindof working though 1)slower 2) prone to crashing
 
                 }
             }
