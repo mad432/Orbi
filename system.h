@@ -17,8 +17,8 @@ class System
 public:
     static System& getInstance()
             {
-                static System    instance; // Guaranteed to be destroyed.
-                                      // Instantiated on first use.
+                static System    instance; 
+                                      
                 return instance;
             }
 
