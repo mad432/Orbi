@@ -322,7 +322,7 @@ bool System::update(int start, int end){
 //        exit(1);
 //    }
 
-//    //We are going to use the platform of id == 0
+
 //    static cl::Platform default_platform = all_platforms[0];
 //    //std::cout << "Using platform: " <<default_platform.getInfo<CL_PLATFORM_NAME>() << "\n";
 
@@ -358,14 +358,12 @@ bool System::update(int start, int end){
 //    cl::Program::Sources sources;
 //    sources.push_back({ kernel_code.c_str(),kernel_code.length() });
 
-//    //OpenCL compiles the kernel in runtime, that's the reason it is expressed as a string.
-//    //There are also ways to compile the device-side code offline.
+
 //    cl::Program program(context, sources);
 
 //    cl::NDRange global(*size);
 
-
-    //cl::make_kernel<cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer> gravity(cl::Kernel(program, "gravity"));
+//    cl::make_kernel<cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer> gravity(cl::Kernel(program, "gravity"));
 
 
 
@@ -475,7 +473,6 @@ bool System::update(int start, int end){
 
 //            cl::make_kernel<cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer> gravity(cl::Kernel(program, "gravity"));
 
-//            //Details to enqueue the kernel for execution.
 //            //cl::NDRange global(*size);
 //            gravity(cl::EnqueueArgs(queue, global), A_d, B_d, C_d, D_d, E_d, F_d , G_d, H_d, I_d, J_d).wait();
 
@@ -485,7 +482,6 @@ bool System::update(int start, int end){
 //            queue.enqueueReadBuffer(J_d, CL_TRUE, 0, sizeof(double) * *size, J_h);
 //            myMutex.unlock();
 
-//            //std::cout << " result: \n";
 //            for (int i = 0; i<*size-1; i++) {
 //                par->setvx(par->getvx()+I_h[i]/par->Getmass()*2);
 //                par->setvy(par->getvy()+J_h[i]/par->Getmass()*2       );
