@@ -2,10 +2,10 @@
 #define SYSTEM_H
 #include <vector>
 #include "Particle.h"
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <CL/opencl.h>
-//#include <CL/cl.hpp>
+#include <stdio.h>
+#include <stdlib.h>
+#include <CL/opencl.h>
+#include <CL/cl.hpp>
 
 struct cords{
     long double x;
@@ -53,6 +53,26 @@ public:
 
 
 private:
+
+   static cl::make_kernel<cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer> gravity;
+   static cl::Buffer A_d;//Kernal input arrays
+   static cl::Buffer B_d;
+   static cl::Buffer C_d;
+   static cl::Buffer D_d;
+   static cl::Buffer E_d;
+   static cl::Buffer F_d;
+   static cl::Buffer G_d;
+   static cl::Buffer H_d;
+   static cl::Buffer I_d;
+   static cl::Buffer J_d;
+   //static cl::make_kernel<cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer>;
+   static cl::Program program;
+   static cl::Program::Sources sources;
+   static cl::CommandQueue queue;
+
+   static cl::Device default_device;
+
+   static cl::Context context;
 
     //int tickcount=0;
 
