@@ -365,11 +365,7 @@ bool System::update(int start, int end){
 
                         if(!par->getcol() && !par1->getcol()){//check to see if a particle has already collided
 
-                            //par->hascol();
-
                             par->setcol(par1->getid());
-
-                            //par1->hascol();
 
                             par1->setcol(par->getid());
 
