@@ -327,7 +327,7 @@ bool System::update(int start, int end){
                     }else{
 
 
-                        cords k1 = gravity1(par->getx() , par->gety() , par1->getx(), par1->gety(), par->Getmass(), par1->Getmass());// Runge - Kutta calculate force
+                        cords k1 = gravity1(par->getx() , par->gety() , par1->getx(), par1->gety(), par->Getmass(), par1->Getmass());// Runge - Kutta calculates force on the particles
 
                         cords k2 = gravity1(par->getx() + k1.x/2**step * stepfactor , par->gety() + k1.y/2**step * stepfactor , par1->getx() - k1.x/2**step * stepfactor , par1->gety() -k1.y/2**step * stepfactor, par->Getmass(), par1->Getmass());
 
