@@ -422,7 +422,7 @@ bool System::update(int start, int end){
 
            cl::make_kernel<cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer> gravity(cl::Kernel(program, "gravity"));
 
-           //cl::NDRange global(*size);
+           cl::NDRange global(*size);
            gravity(cl::EnqueueArgs(queue, global), A_d, B_d, C_d, D_d, E_d, F_d , G_d, H_d, I_d, J_d).wait();
 
            double* I_h = new double[*size];
