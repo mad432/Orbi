@@ -4,11 +4,6 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <mutex>
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <CL/opencl.h>
-//#include <CL/cl.hpp>
-//#include <CL/cl.h>
 
 
 
@@ -43,17 +38,6 @@ std::vector <Particle *> particles_;
 std::vector <Particle *>* System::particles = &particles_;
 
 
-
-// std::string kernel_code =//  OPENCL implementation currently kindof working though 1)slower 2) prone to crashing
-// "        void kernel gravity(global const double* par1x, global const double* par1y, global const double* par2x, global const double* par2y, global const double* m1, global const double* m2, global const int* step, global const double* g, global double* forcex, global double* forcey){"
-
-// "                       double dist = sqrt(pow(par1x[get_global_id(0)] - par2x[get_global_id(0)] , 2) + pow(par1y[get_global_id(0)] - par2y[get_global_id(0)] , 2));"//calculates distance
-// ""
-// "                       double grav = -(g[get_global_id(0)] * m1[get_global_id(0)] * m2[get_global_id(0)]) / pow(dist , 2);"//calculates gravitational force
-// ""
-// "                       forcex[get_global_id(0)] = step[get_global_id(0)] * (g[get_global_id(0)] / 0.0048)  * grav * (par1x[get_global_id(0)] - par2x[get_global_id(0)]) / dist;"// calculates x component of acceleration due to gravity
-// "                       forcey[get_global_id(0)] = step[get_global_id(0)] * (g[get_global_id(0)] / 0.0048)  * grav * (par1y[get_global_id(0)] - par2y[get_global_id(0)]) / dist;"// y component of gravity
-// "          }";
 
 System::System()
 {
@@ -120,7 +104,7 @@ Particle* System::addParticle(int Mass, long double _x, long double _y , long do
 
 void System::collision(Particle* par, Particle* par1){
     // collision between particles
-    //std::cout<<par->getid()<<std::endl;
+    // std::cout<<par->getid()<<std::endl;
 
     if(!par->getcol() && !par1->getcol()){
         par->hascol();
@@ -315,61 +299,6 @@ bool System::update(int start, int end){
 
     double stepfactor = .0005;
 
-//    static std::vector<cl::Platform> all_platforms;//  OPENCL implementation currently kindof working though 1)slower 2) prone to crashing
-//    cl::Platform::get(&all_platforms);
-//    if (all_platforms.size() == 0) {
-//        std::cout << " No OpenCL platforms found.\n";
-//        exit(1);
-//    }
-
-
-//    static cl::Platform default_platform = all_platforms[0];
-//    //std::cout << "Using platform: " <<default_platform.getInfo<CL_PLATFORM_NAME>() << "\n";
-
-
-
-//    static std::vector<cl::Device> all_devices;
-//    default_platform.getDevices(CL_DEVICE_TYPE_ALL, &all_devices);
-//    if (all_devices.size() == 0) {
-//        std::cout << " No devices found.\n";
-//        exit(1);
-//    }
-
-//    static cl::Device default_device = all_devices[0];
-//    //std::cout << "Using device: " << default_device.getInfo<CL_DEVICE_NAME>() << "\n";
-
-//    static cl::Context context({ default_device });
-//    //cl::Context context = *cont;
-
-
-//    cl::Buffer A_d(context, CL_MEM_READ_ONLY, sizeof(double) * 10000);
-//    cl::Buffer B_d(context, CL_MEM_READ_ONLY, sizeof(double) * 10000);
-//    cl::Buffer C_d(context, CL_MEM_READ_ONLY, sizeof(double) * 10000);
-//    cl::Buffer D_d(context, CL_MEM_READ_ONLY, sizeof(double) * 10000);
-//    cl::Buffer E_d(context, CL_MEM_READ_ONLY, sizeof(double) * 10000);
-//    cl::Buffer F_d(context, CL_MEM_READ_ONLY, sizeof(double) * 10000);
-//    cl::Buffer G_d(context, CL_MEM_READ_ONLY, sizeof(int) * 10000);
-//    cl::Buffer H_d(context, CL_MEM_READ_ONLY, sizeof(double) * 10000);
-//    cl::Buffer I_d(context, CL_MEM_WRITE_ONLY, sizeof(double) * 10000);
-//    cl::Buffer J_d(context, CL_MEM_WRITE_ONLY, sizeof(double) * 10000);
-
-//    static cl::CommandQueue queue(context, default_device);
-
-//    cl::Program::Sources sources;
-//    sources.push_back({ kernel_code.c_str(),kernel_code.length() });
-
-
-//    cl::Program program(context, sources);
-
-//    cl::NDRange global(*size);
-
-//    cl::make_kernel<cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer> gravity(cl::Kernel(program, "gravity"));
-
-
-
-
-
-
     for (int i = start ; i < end ; i++){
 
         Particle* par = hold[i];
@@ -380,13 +309,6 @@ bool System::update(int start, int end){
 
             par->sety(par->gety() + par->getvy() **step * stepfactor);
 
-
-//            int j = 0;//  OPENCL implementation currently kindof working though 1)slower 2) prone to crashing
-//            double* parx=new double[*size ];//opencl stuff
-//            double* pary=new double[*size ];
-//            double* parvx=new double[*size ];
-//            double* parvy=new double[*size ];
-//            double* parm=new double[*size ];
             for(auto &par1 : hold){
                 if(par1->getid() != par->getid() && par1->getcolnum() == -1){
 
@@ -405,17 +327,8 @@ bool System::update(int start, int end){
                         }
                         *beencol = true;
 
-                        //goto end;
-                        //break;
 
                     }else{
-//                        parx[j] = par1->getx();//opencl stuff//  OPENCL implementation currently kindof working though 1)slower 2) prone to crashing
-//                        pary[j] = par1->gety();
-//                        parvy[j] = par1->getvy();
-//                        parvx[j] = par1->getvx();
-//                        parm[j] = par1->Getmass();
-
-
 
 
                         cords k1 = gravity1(par->getx() , par->gety() , par1->getx(), par1->gety(), par->Getmass(), par1->Getmass());// Runge - Kutta calculate force
@@ -434,75 +347,12 @@ bool System::update(int start, int end){
 
                         par1->setvy(par1->getvy() - (k1.y + 2*k2.y + 2*k3.y + k4.y)/6/par1->Getmass());
 
-                    }                    
-                    //j++;//  OPENCL implementation currently kindof working though 1)slower 2) prone to crashing
+                    }
 
                 }
             }
 
-//            double * cparx=new double[*size];//  OPENCL implementation currently kindof working though 1)slower 2) prone to crashing
-//            double * cpary=new double[*size];
-//            double * cparm=new double[*size];
-//            int * cstep=new int[*size];
-//            double * cg = new double[*size];
-//            for(int j = 0;j<*size;j++){
-//                cparx[j]=par->getx();
-//                cpary[j]=par->gety();
-//                cparm[j]=par->Getmass();
-//                cstep[j]=*step;
-//                cg[j]=*g;
-//            }
-//            myMutex.lock();
 
-//            //std::cout<<"B_h:"<<B_h[0]<<std::endl;
-
-
-//            queue.enqueueWriteBuffer(A_d, CL_TRUE, 0, sizeof(double) * *size, cparx);
-//            queue.enqueueWriteBuffer(B_d, CL_TRUE, 0, sizeof(double) * *size, cpary);
-//            queue.enqueueWriteBuffer(C_d, CL_TRUE, 0, sizeof(double) * *size, parx);
-//            queue.enqueueWriteBuffer(D_d, CL_TRUE, 0, sizeof(double) * *size, pary);
-//            queue.enqueueWriteBuffer(E_d, CL_TRUE, 0, sizeof(double) * *size, parm);
-//            queue.enqueueWriteBuffer(F_d, CL_TRUE, 0, sizeof(double) * *size, cparm);
-//            queue.enqueueWriteBuffer(G_d, CL_TRUE, 0, sizeof(int) * *size, cstep);
-//            queue.enqueueWriteBuffer(H_d, CL_TRUE, 0, sizeof(double) * *size, cg);
-
-//            if (program.build({ default_device }) != CL_SUCCESS) {
-//                std::cout << " Error building: " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(default_device) << "\n";
-//                exit(1);
-//            }
-
-//            cl::make_kernel<cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer, cl::Buffer> gravity(cl::Kernel(program, "gravity"));
-
-//            //cl::NDRange global(*size);
-//            gravity(cl::EnqueueArgs(queue, global), A_d, B_d, C_d, D_d, E_d, F_d , G_d, H_d, I_d, J_d).wait();
-
-//            double* I_h = new double[*size];
-//            queue.enqueueReadBuffer(I_d, CL_TRUE, 0, sizeof(double) * *size, I_h);
-//            double* J_h = new double[*size];
-//            queue.enqueueReadBuffer(J_d, CL_TRUE, 0, sizeof(double) * *size, J_h);
-//            myMutex.unlock();
-
-//            for (int i = 0; i<*size-1; i++) {
-//                par->setvx(par->getvx()+I_h[i]/par->Getmass()*2);
-//                par->setvy(par->getvy()+J_h[i]/par->Getmass()*2       );
-//            }
-//           //std::cout<<std::endl;
-
-
-
-//            delete [] cg;
-//            delete [] cstep;
-//            delete [] cparx;
-//            delete [] cpary;
-//            delete [] cparm;
-
-//            end:
-
-//            delete[] parx;
-//            delete[] pary;
-//            delete[] parvx;
-//            delete[] parvy;
-//            delete[] parm;
 
 
 
@@ -512,7 +362,6 @@ bool System::update(int start, int end){
 
 
     }
-//    end:;
 
     return col;
 }
