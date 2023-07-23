@@ -97,16 +97,16 @@ void MainWindow::addParticle(int Mass, long double _x, long double _y , long dou
 void MainWindow::Sysfactory(int sel){
     //factory to set up various different systems 
 
-    on_pushButton_clicked();//clear
+    on_pushButton_clicked();
 
     if(sel == 0){//Earth-Moon
         on_horizontalSlider_valueChanged(90);
 
         addParticle(5000,1425/2 ,700/2 ,0,0,1);
 
-        addParticle(1000,1425/2 ,700/8 ,40,0,0);
+        addParticle(1000,1425/2 ,700/8 ,28,0,0);
 
-        addParticle(50,1425/2 ,700/8+20 ,-15,0,0);
+        addParticle(50,1425/2 ,700/8+20 ,-30,0,0);
 
 
     }else if(sel == 1){//binary
@@ -147,21 +147,21 @@ void MainWindow::Sysfactory(int sel){
 
     }else if(sel == 3){//rings
 
-        on_horizontalSlider_valueChanged(42);
+        on_horizontalSlider_valueChanged(40);
 
         addParticle(5000,1425/2 ,700/2 , 0, 0, 1);
 
-        for(double i = 0;i<250;i++){
+        for(double i = 0; i<250 ;i++){
 
             double rinx = sin(i/20*acos(0));
 
             double riny = cos(i/20*acos(0));
 
-            addParticle(4, 1425/2 + rinx*270 + rand()%20 - 10  , 700/2+riny*270+rand()%20 - 10 ,-riny*17+rand()%1,rinx*17+rand()%2,0);
+            addParticle(4, 1425/2 + rinx*270 + rand()%20 - 10  , 700/2+riny*270+rand()%20 - 10 ,-riny*17.5+rand()%1,rinx*17.5+rand()%1,0);
 
-            addParticle(4, 1425/2 + rinx*250 + rand()%20 - 10 , 700/2+riny*250+rand()%20 - 10 ,-riny*16+rand()%1,rinx*16+rand()%2,0);
+            addParticle(4, 1425/2 + rinx*250 + rand()%20 - 10 , 700/2+riny*250+rand()%20 - 10 ,-riny*18+rand()%1,rinx*18+rand()%1,0);
 
-            addParticle(4, 1425/2 + rinx*230 + rand()%20 - 10 , 700/2+riny*230+rand()%20 - 10 ,-riny*15+rand()%1,rinx*15+rand()%2,0);
+            addParticle(4, 1425/2 + rinx*230 + rand()%20 - 10 , 700/2+riny*230+rand()%20 - 10 ,-riny*18.5+rand()%1,rinx*18.5+rand()%1,0);
 
         }
     }else if(sel == 4){//Moonception
@@ -170,15 +170,15 @@ void MainWindow::Sysfactory(int sel){
 
         addParticle(2900, 1425/2, 700/2,0,0,1);
 
-        addParticle(1000, 1425/2,700/8,30,0,0);
+        addParticle(1000, 1425/2,700/8,20,0,0);
 
-        addParticle(200,1425/2+60,700/8,30,34,0);
+        addParticle(200,1425/2+60,700/8,20,34,0);
 
-        addParticle(20,1425/2+60,700/8 + 8,-12,37,0);
+        addParticle(20,1425/2+60,700/8 + 8,-22,37,0);
 
     }else if (sel == 5){//random
 
-        on_horizontalSlider_valueChanged(90);
+        on_horizontalSlider_valueChanged(70);
 
         int num = 800+rand()%400;
 
@@ -200,7 +200,7 @@ void MainWindow::Sysfactory(int sel){
 
     }else if (sel == 6){//random twist
 
-        on_horizontalSlider_valueChanged(90);
+        on_horizontalSlider_valueChanged(70);
 
         int num = 800+rand()%400;
 
