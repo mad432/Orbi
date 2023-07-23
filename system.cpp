@@ -348,12 +348,6 @@ bool System::update(int start, int end){
                 }
             }
 
-
-
-
-
-
-
         }
 
 
