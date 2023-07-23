@@ -2,10 +2,7 @@
 #define SYSTEM_H
 #include <vector>
 #include "Particle.h"
-//#include <stdio.h>
-//#include <stdlib.h>
-//#include <CL/opencl.h>
-//#include <CL/cl.hpp>
+
 
 struct cords{
     long double x;
