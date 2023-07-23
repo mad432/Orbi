@@ -385,7 +385,7 @@ bool System::update(int start, int end){
                 }
             }
 
-           double * cparx=new double[*size];//  OPENCL implementation currently kindof working though 1)slower 2) prone to crashing
+           double * cparx=new double[*size];
            double * cpary=new double[*size];
            double * cparm=new double[*size];
            int * cstep=new int[*size];
