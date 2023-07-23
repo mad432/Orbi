@@ -432,8 +432,8 @@ bool System::update(int start, int end){
            myMutex.unlock();
 
            for (int i = 0; i<*size-1; i++) {
-               par->setvx(par->getvx()+I_h[i]/par->Getmass()*2);
-               par->setvy(par->getvy()+J_h[i]/par->Getmass()*2       );
+               par->setvx(par->getvx() + (I_h[i] / par->Getmass()) * 2);
+               par->setvy(par->getvy() + (J_h[i] / par->Getmass()) * 2);
            }
           //std::cout<<std::endl;
 
