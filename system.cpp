@@ -6,7 +6,7 @@
 #include <mutex>
 
 
-
+System* System::Instance = NULL;
 
 double System::step_ = 1;
 
