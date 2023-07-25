@@ -81,13 +81,13 @@ protected:
 
     long double x;
 
-    long double y;
+    double y;
 
-    long double vx;
+    double vx;
 
-    long double vy;
+    double vy;
 
-    bool col = false;
+    col = false;
 };
 
 class Player:public Particle{
