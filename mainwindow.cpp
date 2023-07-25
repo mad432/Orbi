@@ -58,9 +58,9 @@ void MainWindow::timetick(){
 
     timer->stop();
 
-    if (system.process()){// calculates the particle movements
+    if (system->process()){// calculates the particle movements
         //executs if there has been a collision in the system
-        for (auto &par : system.Getparticles()){
+        for (auto &par : system->Getparticles()){
             if(par->scene() == nullptr){
 
                 scene->addItem(par);
@@ -70,7 +70,7 @@ void MainWindow::timetick(){
 
                 //std::cout<<"here";
 
-                system.Remove(par->getid(),system.Getparticles());
+                system->Remove(par->getid(),system->Getparticles());
 
                 delete par;
 
@@ -90,7 +90,7 @@ void MainWindow::timetick(){
 
 void MainWindow::addParticle(int Mass, long double _x, long double _y , long double _vx, long double _vy, bool fixed){
 
-    scene->addItem(system.addParticle(Mass, _x,_y , _vx, _vy, fixed));
+    scene->addItem(system->addParticle(Mass, _x,_y , _vx, _vy, fixed));
 
 }
 
@@ -310,7 +310,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event){
 
             }
 
-        scene->addItem(system.addParticle(*mSlider*100, x, y, (gx - x),(gy - y), fixedcheck));
+        scene->addItem(system->addParticle(*mSlider*100, x, y, (gx - x),(gy - y), fixedcheck));
 
         this->scene->removeItem(liny);
 
@@ -333,7 +333,7 @@ void MainWindow::on_TimeSlider_valueChanged(int value)
 {
     *tSlider = value+1;
 
-    system.setStep(.05 * *tSlider);
+    system->setStep(.05 * *tSlider);
 }
 
 void MainWindow::on_pushButton_clicked()//clear
@@ -341,9 +341,9 @@ void MainWindow::on_pushButton_clicked()//clear
     pause();
 
 
-    for (auto &par : system.Getparticles()){
+    for (auto &par : system->Getparticles()){
 
-        system.Remove(par->getid(),system.Getparticles());
+        system->Remove(par->getid(),system->Getparticles());
 
         delete par;
 
@@ -358,7 +358,7 @@ void MainWindow::on_horizontalSlider_valueChanged(int value)//G
 {
     g = (value+1) * 0.0001;
 
-    system.System::setG(g);
+    system->System::setG(g);
 
     this->ui->horizontalSlider->setSliderPosition(value);
 }
