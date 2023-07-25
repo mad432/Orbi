@@ -148,7 +148,7 @@ void System::collision(Particle* par, Particle* par1){
         double breakmass = 0;
         double break_mom_x = 0;//break away particles momentum
         double break_mom_y = 0;
-        if((1000) / ( 1/rel_speed * ((collision_angle+20))+1) * (0.1 + relmass * 0.5)  > *col_threshold && rel_speed > 20){//determines if any new particles will be created from collision
+        if((1000 * rel_speed) / (collision_angle+20) * (0.1 + relmass * 0.5) > *col_threshold && rel_speed > 20){//determines if any new particles will be created from collision
             //std::cout<<"new Particles"<<std::endl;
             double breaksize;
             double breakvelx;
