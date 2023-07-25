@@ -41,13 +41,13 @@ public:
 
     double getsize(){return size;}
 
-    long double getx(){return x;}
+    double getx(){return x;}
 
-    long double gety(){return y;}
+    double gety(){return y;}
 
-    long double getvx(){return vx;}
+    double getvx(){return vx;}
 
-    long double getvy(){return vy;}
+    double getvy(){return vy;}
 
     bool getcol(){return col;}
 
