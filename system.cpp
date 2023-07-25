@@ -12,37 +12,34 @@
 
 
 
-std::mutex myMutex;
 
-double step_ = 1;
+double System::step_ = 1;
 
 double* System::step = &step_;
 
-double g_ = .001;
+double System::g_ = .001;
 
 double* System::g = &g_;
 
-int size_ = 0;
+int System::size_ = 0;
 
 int* System::size = &size_;
 
-bool beencol_ = false;
+bool System::beencol_ = false;
 
 bool* System::beencol = &beencol_;
 
-float col_threshold_ = 50;
+float System::col_threshold_ = 50;
 
 float* System::col_threshold = &col_threshold_;
 
-int num_col_particles_ = 2;
+int System::num_col_particles_ = 2;
 
 int* System::num_col_particles = &num_col_particles_;
 
-std::vector <Particle *> particles_;
+std::vector <Particle *> System::particles_;
 
 std::vector <Particle *>* System::particles = &particles_;
-
-std::vector<cl::Device> all_devices;
 
 int store = cl::Platform::get().getDevices(CL_DEVICE_TYPE_ALL,&all_devices);
 
