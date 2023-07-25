@@ -70,11 +70,28 @@ private:
    static cl::Program::Sources sources;
    static cl::CommandQueue queue;
 
-   static cl::Device default_device;
 
-   static cl::Context context;
+    const std::mutex myMutex;
 
-    //int tickcount=0;
+    static float col_threshold_;
+
+    static float *col_threshold;// = &col_threshold_;
+
+    static double step_;
+
+    static double g_;
+
+    static int size_;
+
+    static bool beencol_;
+
+    static int num_col_particles_;
+
+    static std::vector <Particle *> particles_;
+
+    static cl::Device default_device;
+
+    static cl::Context context;
 
     static bool* beencol;
 
