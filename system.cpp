@@ -228,7 +228,7 @@ cords System::gravity1(double par1x , double par1y , double par2x , double par2y
 
 
 bool System::process(){
-    //allocates threads to particles
+    //allocates threads to particles and returns if any paricles collided
 
     int parper = *size/threads + 1;
 
@@ -268,13 +268,18 @@ bool System::process(){
         Mythreads[i].join();
     }
 
-    if(*beencol){
+    if(*beencol){//checks to see if any paricles have collided
+        
         const std::vector <Particle *> hold = *particles;
+        
         for(auto &par : *particles){
-            //par->hascol();
+            
             if(par->getcolnum() != -1 && !par->getcol()){
+                
                 for(auto &par1 : *particles){
-                    if(par->getcolnum()==par1->getid()){
+                    
+                    if(par->getcolnum() == par1->getid()){
+                        
                         collision(par,par1);
                     }
                 }
@@ -288,6 +293,8 @@ bool System::process(){
     return *beencol;
 
 };
+
+
 bool System::update(int start, int end){
     //takes the first par id to compute to the last particle there respective motion
     //returns if a colision has occured
