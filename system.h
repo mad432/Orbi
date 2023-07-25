@@ -12,17 +12,23 @@ struct cords{
 class System
 {
 public:
-    static System& getInstance()
-            {
-                static System    instance; 
-                                      
-                return instance;
-            }
 
-    System(System const&)               = delete;
-    void operator=(System const&)  = delete;
 
-    System();
+
+    System(const System& obj) = delete;
+
+    static System* getInstance()//singleton class
+      {
+        if (Instance == NULL)
+        {
+          Instance = new System();
+          return Instance;
+        }
+        else
+        {
+          return Instance;
+        }
+      }
 
     static Particle* addParticle(Particle* par);
 
@@ -79,11 +85,9 @@ private:
 
     static std::vector <Particle *> particles_;
 
-    //System();
+    static System* Instance;
 
-    //System(System const&);
-
-    //void operator=(System const&);
+    System();
 
     static cords gravity1(double par1x , double par1y , double par2x , double par2y , double m1, double m2);
 
