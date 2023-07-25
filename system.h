@@ -61,6 +61,24 @@ private:
 
     static double* g;
 
+    const std::mutex myMutex;
+
+    static float col_threshold_;
+
+    static float *col_threshold;
+
+    static double step_;
+
+    static double g_;
+
+    static int size_;
+
+    static bool beencol_;
+
+    static int num_col_particles_;
+
+    static std::vector <Particle *> particles_;
+
     //System();
 
     //System(System const&);
