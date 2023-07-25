@@ -87,7 +87,7 @@ private:
 
     float g = 1; //gravitational const
 
-    System system;
+    System *system = System::getInstance();
 
     QTimer *timer = new QTimer(this);
 
