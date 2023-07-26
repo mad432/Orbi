@@ -28,7 +28,7 @@ Particle::Particle(int Mass, long double _x, long double _y , long double _vx, l
 
     col = false;
 
-    if (mass < 100){//select color randomly based on size
+    if (mass < 100){//select color semi-randomly based on size
         color = Qt::white;
     }else if(mass <1500){
         int sel = rand()%5;
