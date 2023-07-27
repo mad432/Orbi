@@ -50,8 +50,6 @@ private slots:
 
     void on_pushButton_2_clicked();
 
-    void on_pushButton_2_pressed();
-
     void on_actionInner_Solar_System_triggered();
 
     void on_Refresh_clicked();
