@@ -356,7 +356,7 @@ void MainWindow::on_pushButton_clicked()//clear
 
 void MainWindow::on_horizontalSlider_valueChanged(int value)//G
 {
-    g = (value+1) * 0.0001;
+    g = (value+1) * 0.0014;
 
     system->System::setG(g);
 
