@@ -214,8 +214,8 @@ cords System::gravity1(double par1x , double par1y , double par2x , double par2y
 
     cords ret;
 
-    ret.x = *step * (*g / 0.0048)  *grav * (par1x - par2x) / dist;// calculates x component of acceleation due to gravity
-    ret.y = *step * (*g / 0.0048)  *grav * (par1y - par2y) / dist;// y component of gravity
+    ret.x = *step * (*g )  *grav * (par1x - par2x) / dist;// calculates x component of acceleation due to gravity
+    ret.y = *step * (*g )  *grav * (par1y - par2y) / dist;// y component of gravity
 
 
 //    std::cout<<ret.y<<":";
