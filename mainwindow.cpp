@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     scene->clear();
 
-    //on_TimeSlider_valueChanged(10);
+    on_TimeSlider_valueChanged(10);
 
     QObject::connect(timer1, SIGNAL(timeout()), this, SLOT(timetick()));
 
