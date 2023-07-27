@@ -303,17 +303,15 @@ bool System::update(int start, int end){
 
     const std::vector <Particle *> hold = *particles;
 
-    double stepfactor = .0005;
-
     for (int i = start ; i < end ; i++){
 
         Particle* par = hold[i];
 
         if(par->getfix() == false){
 
-            par->setx(par->getx() + par->getvx() **step * stepfactor);//move particle
+            par->setx(par->getx() + par->getvx() **step );//move particle
 
-            par->sety(par->gety() + par->getvy() **step * stepfactor);
+            par->sety(par->gety() + par->getvy() **step );
 
             for(auto &par1 : hold){
                 if(par1->getid() != par->getid() && par1->getcolnum() == -1){
@@ -335,11 +333,11 @@ bool System::update(int start, int end){
 
                         cords k1 = gravity1(par->getx() , par->gety() , par1->getx(), par1->gety(), par->Getmass(), par1->Getmass());// Runge - Kutta calculates force on the particles
 
-                        cords k2 = gravity1(par->getx() + k1.x/2**step * stepfactor , par->gety() + k1.y/2**step * stepfactor , par1->getx() - k1.x/2**step * stepfactor , par1->gety() -k1.y/2**step * stepfactor, par->Getmass(), par1->Getmass());
+                        cords k2 = gravity1(par->getx() + k1.x/2**step  , par->gety() + k1.y/2**step , par1->getx() - k1.x/2**step , par1->gety() -k1.y/2**step , par->Getmass(), par1->Getmass());
 
-                        cords k3 = gravity1(par->getx() + k2.x/2**step * stepfactor , par->gety() + k2.y/2**step * stepfactor ,  par1->getx() - k1.x/2**step * stepfactor , par1->gety() -k1.y/2**step * stepfactor , par->Getmass(), par1->Getmass());
+                        cords k3 = gravity1(par->getx() + k2.x/2**step , par->gety() + k2.y/2**step ,  par1->getx() - k1.x/2**step , par1->gety() -k1.y/2**step , par->Getmass(), par1->Getmass());
 
-                        cords k4 = gravity1(par->getx() + k3.x**step * stepfactor , par->gety() + k3.y**step * stepfactor ,  par1->getx() - k1.x**step * stepfactor , par1->gety() -k1.y**step * stepfactor , par->Getmass(), par1->Getmass());
+                        cords k4 = gravity1(par->getx() + k3.x**step  , par->gety() + k3.y**step ,  par1->getx() - k1.x**step , par1->gety() -k1.y**step , par->Getmass(), par1->Getmass());
 
                         par->setvx(par->getvx() + (k1.x + 2*k2.x + 2*k3.x + k4.x)/6/par->Getmass());
 
