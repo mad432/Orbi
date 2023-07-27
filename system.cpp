@@ -264,7 +264,7 @@ bool System::process(){
 
     update(0,parper);
 
-    for(int i = 1; i < threads ; i++ ){
+    for(int i = 0; i < threads ; i++ ){
         Mythreads[i].join();
     }
 
