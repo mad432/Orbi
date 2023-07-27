@@ -333,7 +333,7 @@ void MainWindow::on_TimeSlider_valueChanged(int value)
 {
     *tSlider = value+1;
 
-    system->setStep(.05 * *tSlider);
+    system->setStep(.00005 * *tSlider);
 }
 
 void MainWindow::on_pushButton_clicked()//clear
@@ -356,7 +356,7 @@ void MainWindow::on_pushButton_clicked()//clear
 
 void MainWindow::on_horizontalSlider_valueChanged(int value)//G
 {
-    g = (value+1) * 0.0014;
+    g = (value+1) * 0.064;
 
     system->System::setG(g);
 
