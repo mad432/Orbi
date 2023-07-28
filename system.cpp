@@ -42,7 +42,7 @@ double System::ref_frame_vy = 0;
 
 bool System::Special_rel = false;
 
-double System::C = 200;
+double System::C = 1000;
 
 
 
@@ -93,7 +93,7 @@ Particle* System::addParticle(Particle* par){
 
     particles->push_back(par);
 
-    *size = *size + 1;
+    *size += 1;
 
     return par;
 }
@@ -102,11 +102,23 @@ Particle* System::addParticle(int Mass, long double _x, long double _y , long do
 
     //adds a particle to system
 
+    if(Special_rel){// must not travel faster then C
+        if(pow(_vx , 2) + pow(_vy , 2) + 10 > pow(C , 2)){
+
+            double unitvec = 1 / sqrt(pow(_vx , 2) + pow(_vy , 2));
+
+            _vx = _vx * unitvec * C - 1;
+
+            _vy = _vy * unitvec * C - 1;
+
+        }
+    }
+
     Particle* par = new Particle( Mass, _x, _y , _vx, _vy, fixed, *size);
 
     particles->push_back(par);
 
-    *size = *size + 1;
+    *size += 1;
 
     return par;
 }
@@ -215,7 +227,7 @@ void System::clear(){
 
 }
 
-cords System::gravity1(double par1x , double par1y , double par2x , double par2y , double m1, double m2){
+cords System::gravity1(double par1x , double par1y , double par2x , double par2y , double m1, double m2, double step_size){
     //input x and y cordiantes and mass of 2 particles
     //returns gravitational attraction
     long double dist = sqrt(pow(par1x - par2x , 2) + pow(par1y - par2y , 2));
@@ -224,8 +236,8 @@ cords System::gravity1(double par1x , double par1y , double par2x , double par2y
 
     cords ret;
 
-    ret.x = *step * grav * (par1x - par2x) / dist;// calculates x component of force due to gravity
-    ret.y = *step * grav * (par1y - par2y) / dist;// y component of gravity
+    ret.x = step_size * grav * (par1x - par2x) / dist;// calculates x component of force due to gravity
+    ret.y = step_size * grav * (par1y - par2y) / dist;// y component of gravity
 
 
 //    std::cout<<ret.y<<":";
@@ -338,13 +350,13 @@ bool System::update(int start, int end){
 
                 parlorenz = lorenz(par->getvx(),par->getvy());// used for relativistic mass
 
-                rel_step = *step / lorenz(par->getvx(),par->getvy()); // time dilation
+                rel_step = *step / parlorenz; // time dilation
 
             }
 
-            par->setx(par->getx() + par->getvx() *rel_step );//move particle
+            par->setx(par->getx() + (par->getvx() * rel_step));//move particle
 
-            par->sety(par->gety() + par->getvy() *rel_step );
+            par->sety(par->gety() + (par->getvy() * rel_step));
 
             for(auto &par1 : hold){
                 if(par1->getid() != par->getid() && par1->getcolnum() == -1){
@@ -372,30 +384,41 @@ bool System::update(int start, int end){
                         }
 
 
-                        cords k1 = gravity1(par->getx() , par->gety() , par1->getx(), par1->gety(), par->Getmass() * parlorenz, par1->Getmass() * par1lorenz);// Runge - Kutta calculates force on the particles
+                        cords k1 = gravity1(par->getx() , par->gety() , par1->getx(), par1->gety(), par->Getmass() * parlorenz, par1->Getmass() * par1lorenz , rel_step);// Runge - Kutta calculates force on the particles
 
-                        cords k2 = gravity1(par->getx() + k1.x/2 * rel_step  , par->gety() + k1.y/2 * rel_step , par1->getx() - k1.x/2* rel_step  , par1->gety() - k1.y/2 * rel_step , par->Getmass()* parlorenz, par1->Getmass() * par1lorenz);
+                        cords k2 = gravity1(par->getx() + (k1.x/2/(par->Getmass()* parlorenz) * rel_step)  , par->gety() + (k1.y/2/ (par->Getmass()* parlorenz) * rel_step) , par1->getx() - (k1.x/2/(par1->Getmass() * par1lorenz) * rel_step)  , par1->gety() - (k1.y/2/ (par1->Getmass() * par1lorenz) * rel_step) , par->Getmass() * parlorenz, par1->Getmass() * par1lorenz, rel_step);
 
-                        cords k3 = gravity1(par->getx() + k2.x/2 * rel_step  , par->gety() + k2.y/2 * rel_step   ,  par1->getx() - k1.x/2*rel_step  , par1->gety() - k1.y/2 * rel_step  , par->Getmass()* parlorenz, par1->Getmass() * par1lorenz);
+                        cords k3 = gravity1(par->getx() + (k2.x/2/(par->Getmass()* parlorenz) * rel_step)  , par->gety() + (k2.y/2/ (par->Getmass()* parlorenz) * rel_step)  ,  par1->getx() - (k2.x/2/(par1->Getmass() * par1lorenz) * rel_step)  , par1->gety() - (k2.y/2/ (par1->Getmass() * par1lorenz) * rel_step)  , par->Getmass() * parlorenz, par1->Getmass() * par1lorenz, rel_step);
 
-                        cords k4 = gravity1(par->getx() + k3.x * rel_step  , par->gety() + k3.y * rel_step  ,  par1->getx() - k1.x*rel_step  , par1->gety() - k1.y * rel_step  , par->Getmass()* parlorenz, par1->Getmass() * par1lorenz);
+                        cords k4 = gravity1(par->getx() + (k3.x/(par->Getmass()* parlorenz) * rel_step)  , par->gety() + (k3.y/ (par->Getmass()* parlorenz) * rel_step)  ,  par1->getx() - (k3.x/(par1->Getmass() * par1lorenz) * rel_step)  , par1->gety() - (k3.y/ (par1->Getmass() * par1lorenz) * rel_step)  , par->Getmass() * parlorenz, par1->Getmass() * par1lorenz, rel_step);
 
 
                         if (Special_rel){
 
-                            par->setvx(par->getvx() + (k1.x + 2*k2.x + 2*k3.x + k4.x)/6 / par->Getmass() *2);
+                            par->setvx( par->getvx() + 2 * (k1.x + 2*k2.x + 2*k3.x + k4.x)/6 / (par->Getmass() * parlorenz));
 
-                            par->setvy(par->getvy() + (k1.y + 2*k2.y + 2*k3.y + k4.y)/6 / par->Getmass() *2);
+                            par->setvy( par->getvy() + 2 * (k1.y + 2*k2.y + 2*k3.y + k4.y)/6 / (par->Getmass() * parlorenz));
+
+                            //std::cout<<sqrt(pow(par->getvx(),2) + pow(par->getvy(),2)) / C<<std::endl;
 
                         }else{
 
-                            par->setvx(par->getvx() + (k1.x + 2*k2.x + 2*k3.x + k4.x)/6 / par->Getmass());
+                            if(par1->getfix()){ // keeps force consistant
 
-                            par->setvy(par->getvy() + (k1.y + 2*k2.y + 2*k3.y + k4.y)/6 / par->Getmass());
+                                par->setvx( par->getvx() + 2 * (k1.x + 2*k2.x + 2*k3.x + k4.x)/6 / par->Getmass());
 
-                            par1->setvx(par1->getvx() - (k1.x + 2*k2.x + 2*k3.x + k4.x)/6 / par1->Getmass());
+                                par->setvy( par->getvy() + 2 * (k1.y + 2*k2.y + 2*k3.y + k4.y)/6 / par->Getmass());
 
-                            par1->setvy(par1->getvy() - (k1.y + 2*k2.y + 2*k3.y + k4.y)/6 / par1->Getmass());
+                            }else{
+
+                                par->setvx( par->getvx() + (k1.x + 2*k2.x + 2*k3.x + k4.x)/6 / par->Getmass());
+
+                                par->setvy( par->getvy() + (k1.y + 2*k2.y + 2*k3.y + k4.y)/6 / par->Getmass());
+
+                                par1->setvx( par1->getvx() - (k1.x + 2*k2.x + 2*k3.x + k4.x)/6 / par1->Getmass());
+
+                                par1->setvy( par1->getvy() - (k1.y + 2*k2.y + 2*k3.y + k4.y)/6 / par1->Getmass());
+                            }
 
                         }
 
