@@ -2,7 +2,12 @@
 #define SYSTEM_H
 #include <vector>
 #include "Particle.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <mutex>
 
+//#include <CL/opencl.h>
+//#include <CL/cl.hpp>
 
 struct cords{
     long double x;
@@ -29,6 +34,7 @@ public:
           return Instance;
         }
       }
+    //System();
 
     static Particle* addParticle(Particle* par);
 
@@ -50,22 +56,23 @@ public:
 
     std::vector <Particle *> Getparticles(){return *particles;};
 
-    static float *col_threshold;
-
     static int *num_col_particles;
 
+    void setSpecial_rel(bool checked){Special_rel = checked;};
+
+    void setC(int C_){C = C_;};
 
 private:
 
-    //int tickcount=0;
+    static bool Special_rel;
 
-    static bool* beencol;
+    static double lorenz(double vx, double vy);
 
-    static double* step;
+    static double ref_frame_vx;
 
-    static bool update(int start, int end);
+    static double ref_frame_vy;
 
-    static double* g;
+    static double C;
 
     const std::mutex myMutex;
 
@@ -85,9 +92,15 @@ private:
 
     static std::vector <Particle *> particles_;
 
-    static System* Instance;
+    int tickcount=0;
 
-    System();
+    static bool* beencol;
+
+    static double* step;
+
+    static bool update(int start, int end);
+
+    static double* g;
 
     static cords gravity1(double par1x , double par1y , double par2x , double par2y , double m1, double m2);
 
@@ -98,6 +111,10 @@ private:
     int threads = 16;
 
     static int* size;
+
+    static System* Instance;
+
+    System();
 
 };
 
