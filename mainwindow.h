@@ -48,7 +48,7 @@ private slots:
 
     void on_actionRings_triggered();
 
-    void on_pushButton_2_clicked();
+    void on_pushButton_2_pressed();
 
     void on_actionInner_Solar_System_triggered();
 
@@ -58,6 +58,10 @@ private slots:
 
 
     void on_actionRandom_Twist_triggered();
+
+    void on_Specialrel_check_clicked(bool checked);
+
+    void on_horizontalSlider_2_valueChanged(int value);
 
 private:
 
