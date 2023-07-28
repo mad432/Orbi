@@ -8,7 +8,7 @@
 
 System* System::Instance = NULL;
 
-double System::step_ = 1;
+double System::step_ = .0005;
 
 double* System::step = &step_;
 
@@ -35,6 +35,16 @@ int* System::num_col_particles = &num_col_particles_;
 std::vector <Particle *> System::particles_;
 
 std::vector <Particle *>* System::particles = &particles_;
+
+double System::ref_frame_vx = 0;
+
+double System::ref_frame_vy = 0;
+
+bool System::Special_rel = false;
+
+double System::C = 200;
+
+
 
 
 
@@ -161,7 +171,7 @@ void System::collision(Particle* par, Particle* par1){
                 breaksize = (par->Getmass()/5);
 
             }if (breaksize>2){
-                bool side = true;//puts a particle on either side 
+                bool side = true;//puts a particle on either side
                 for(int i = 0;i < *num_col_particles;i++){;
                     if(side){
                         breakvelx = (rel_speed*relunitposy*-1 - relunitposx*rel_speed) * .1;
@@ -224,6 +234,17 @@ cords System::gravity1(double par1x , double par1y , double par2x , double par2y
 
 }
 
+double System::lorenz(double vx, double vy){
+    //returns the lorenz factor for a given velocity
+    double speed = pow( sqrt( abs(vx - ref_frame_vx) + abs(vy - ref_frame_vy)) , 2);
+
+    if(pow(speed , 2) > pow(C,2)){
+        return 0.00000000001;
+    }
+
+    return 1 / sqrt(1 - (pow(speed , 2) / pow(C , 2)));
+}
+
 
 
 
@@ -269,17 +290,17 @@ bool System::process(){
     }
 
     if(*beencol){//checks to see if any paricles have collided
-        
+
         const std::vector <Particle *> hold = *particles;
-        
+
         for(auto &par : *particles){
-            
+
             if(par->getcolnum() != -1 && !par->getcol()){
-                
+
                 for(auto &par1 : *particles){
-                    
+
                     if(par->getcolnum() == par1->getid()){
-                        
+
                         collision(par,par1);
                     }
                 }
@@ -309,9 +330,21 @@ bool System::update(int start, int end){
 
         if(par->getfix() == false){
 
-            par->setx(par->getx() + par->getvx() **step );//move particle
+            double rel_step = *step;
 
-            par->sety(par->gety() + par->getvy() **step );
+            double parlorenz = 1;
+
+            if (Special_rel){
+
+                parlorenz = lorenz(par->getvx(),par->getvy());// used for relativistic mass
+
+                rel_step = *step / lorenz(par->getvx(),par->getvy()); // time dilation
+
+            }
+
+            par->setx(par->getx() + par->getvx() *rel_step );//move particle
+
+            par->sety(par->gety() + par->getvy() *rel_step );
 
             for(auto &par1 : hold){
                 if(par1->getid() != par->getid() && par1->getcolnum() == -1){
@@ -330,22 +363,41 @@ bool System::update(int start, int end){
 
                     }else{
 
+                        double par1lorenz = 1;
 
-                        cords k1 = gravity1(par->getx() , par->gety() , par1->getx(), par1->gety(), par->Getmass(), par1->Getmass());// Runge - Kutta calculates force on the particles
+                        if (Special_rel){
 
-                        cords k2 = gravity1(par->getx() + k1.x/2**step  , par->gety() + k1.y/2**step , par1->getx() - k1.x/2**step , par1->gety() -k1.y/2**step , par->Getmass(), par1->Getmass());
+                            par1lorenz = lorenz(par1->getvx(),par1->getvy());// used for relativistic mass
 
-                        cords k3 = gravity1(par->getx() + k2.x/2**step , par->gety() + k2.y/2**step ,  par1->getx() - k1.x/2**step , par1->gety() -k1.y/2**step , par->Getmass(), par1->Getmass());
+                        }
 
-                        cords k4 = gravity1(par->getx() + k3.x**step  , par->gety() + k3.y**step ,  par1->getx() - k1.x**step , par1->gety() -k1.y**step , par->Getmass(), par1->Getmass());
 
-                        par->setvx(par->getvx() + (k1.x + 2*k2.x + 2*k3.x + k4.x)/6/par->Getmass());
+                        cords k1 = gravity1(par->getx() , par->gety() , par1->getx(), par1->gety(), par->Getmass() * parlorenz, par1->Getmass() * par1lorenz);// Runge - Kutta calculates force on the particles
 
-                        par->setvy(par->getvy() + (k1.y + 2*k2.y + 2*k3.y + k4.y)/6/par->Getmass());
+                        cords k2 = gravity1(par->getx() + k1.x/2 * rel_step  , par->gety() + k1.y/2 * rel_step , par1->getx() - k1.x/2* rel_step  , par1->gety() - k1.y/2 * rel_step , par->Getmass()* parlorenz, par1->Getmass() * par1lorenz);
 
-                        par1->setvx(par1->getvx() - (k1.x + 2*k2.x + 2*k3.x + k4.x)/6/par1->Getmass());
+                        cords k3 = gravity1(par->getx() + k2.x/2 * rel_step  , par->gety() + k2.y/2 * rel_step   ,  par1->getx() - k1.x/2*rel_step  , par1->gety() - k1.y/2 * rel_step  , par->Getmass()* parlorenz, par1->Getmass() * par1lorenz);
 
-                        par1->setvy(par1->getvy() - (k1.y + 2*k2.y + 2*k3.y + k4.y)/6/par1->Getmass());
+                        cords k4 = gravity1(par->getx() + k3.x * rel_step  , par->gety() + k3.y * rel_step  ,  par1->getx() - k1.x*rel_step  , par1->gety() - k1.y * rel_step  , par->Getmass()* parlorenz, par1->Getmass() * par1lorenz);
+
+
+                        if (Special_rel){
+
+                            par->setvx(par->getvx() + (k1.x + 2*k2.x + 2*k3.x + k4.x)/6 / par->Getmass() *2);
+
+                            par->setvy(par->getvy() + (k1.y + 2*k2.y + 2*k3.y + k4.y)/6 / par->Getmass() *2);
+
+                        }else{
+
+                            par->setvx(par->getvx() + (k1.x + 2*k2.x + 2*k3.x + k4.x)/6 / par->Getmass());
+
+                            par->setvy(par->getvy() + (k1.y + 2*k2.y + 2*k3.y + k4.y)/6 / par->Getmass());
+
+                            par1->setvx(par1->getvx() - (k1.x + 2*k2.x + 2*k3.x + k4.x)/6 / par1->Getmass());
+
+                            par1->setvy(par1->getvy() - (k1.y + 2*k2.y + 2*k3.y + k4.y)/6 / par1->Getmass());
+
+                        }
 
                     }
 
