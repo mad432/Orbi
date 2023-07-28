@@ -53,20 +53,19 @@ void MainWindow::pause(){// stops the signal from the timer
 }
 
 void MainWindow::timetick(){
-    //happens every tick
 
 
     timer->stop();
 
     if (system->process()){// calculates the particle movements
-        //executs if there has been a collision in the system
+
         for (auto &par : system->Getparticles()){
             if(par->scene() == nullptr){
 
                 scene->addItem(par);
 
             }
-            if(par->getcol()){//removes particles that have collided
+            if(par->getcol()){
 
                 //std::cout<<"here";
 
@@ -95,7 +94,6 @@ void MainWindow::addParticle(int Mass, long double _x, long double _y , long dou
 }
 
 void MainWindow::Sysfactory(int sel){
-    //factory to set up various different systems 
 
     on_pushButton_clicked();
 
@@ -147,7 +145,7 @@ void MainWindow::Sysfactory(int sel){
 
     }else if(sel == 3){//rings
 
-        on_horizontalSlider_valueChanged(40);
+        on_horizontalSlider_valueChanged(23);
 
         addParticle(5000,1425/2 ,700/2 , 0, 0, 1);
 
@@ -172,9 +170,9 @@ void MainWindow::Sysfactory(int sel){
 
         addParticle(1000, 1425/2,700/8,20,0,0);
 
-        addParticle(200,1425/2+60,700/8,20,34,0);
+        addParticle(200,1425/2+60,700/8,20,33,0);
 
-        addParticle(20,1425/2+60,700/8 + 8,-22,37,0);
+        addParticle(20,1425/2+60,700/8 + 8,-18,25,0);
 
     }else if (sel == 5){//random
 
@@ -247,7 +245,6 @@ MainWindow::~MainWindow()
     delete ui;
 }
 void MainWindow::mousePressEvent(QMouseEvent *event){
-    //lets the user add a particle to the interface by first clicking to specify location and then clicking to specify velocity
 
 
 //   qApp->processEvents();
@@ -324,6 +321,12 @@ void MainWindow::mousePressEvent(QMouseEvent *event){
 }
 
 
+
+void MainWindow::on_Gameview_rubberBandChanged(const QRect &viewportRect, const QPointF &fromScenePoint, const QPointF &toScenePoint)
+{
+
+}
+
 void MainWindow::on_MassSlider_valueChanged(int value)
 {
     *mSlider = value+1;
@@ -356,7 +359,7 @@ void MainWindow::on_pushButton_clicked()//clear
 
 void MainWindow::on_horizontalSlider_valueChanged(int value)//G
 {
-    g = (value+1) * 0.3;
+    g = (value) * 0.3;
 
     system->System::setG(g);
 
@@ -395,7 +398,6 @@ void MainWindow::on_pushButton_2_pressed()
     pause();
 }
 
-
 void MainWindow::on_actionInner_Solar_System_triggered()//Moonception
 {
     Sysfactory(4);
@@ -416,3 +418,14 @@ void MainWindow::on_actionRandom_Twist_triggered()
     Sysfactory(6);
 }
 
+
+void MainWindow::on_Specialrel_check_clicked(bool checked)
+{
+    system->setSpecial_rel(checked);
+}
+
+
+void MainWindow::on_horizontalSlider_2_valueChanged(int value)//C
+{
+    system->setC(value*30 + 150);
+}
