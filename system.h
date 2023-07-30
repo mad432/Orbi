@@ -102,7 +102,7 @@ private:
 
     static double* g;
 
-    static cords gravity1(double par1x , double par1y , double par2x , double par2y , double m1, double m2);
+    static cords gravity(double par1x , double par1y , double par2x , double par2y , double m1, double m2);
 
     static void collision(Particle* par, Particle* par1);
 
