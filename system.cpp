@@ -179,7 +179,7 @@ void System::collision(Particle* par, Particle* par1){
         double breakmass = 0;
         double break_mom_x = 0;//break away particles momentum
         double break_mom_y = 0;
-        if((100 * pow(rel_speed,2)) / (collision_angle+20) * (0.3 + relmass * 0.3) > *col_threshold && rel_speed > 10){//determines if any new particles will be created from collision
+        if((100 * pow(rel_speed,2)) / (collision_angle+20) * (0.3 + relmass * 0.3) > *col_threshold && rel_speed > 10 && !Special_rel){//determines if any new particles will be created from collision
             //std::cout<<"new Particles"<<std::endl;
             double breaksize;
             double breakvelx;
@@ -212,9 +212,17 @@ void System::collision(Particle* par, Particle* par1){
             }
         }
 
-        double vx = (par1->getvx() * par1->Getmass() + par->getvx()*par->Getmass() - break_mom_x) / (par->Getmass() + par1->Getmass());//new particle velocity
+        double parlorentz = 1;
+        double par1lorentz = 1;
 
-        double vy = (par1->getvy() * par1->Getmass() + par->getvy()*par->Getmass() - break_mom_y) / (par->Getmass() + par1->Getmass());
+        if (Special_rel){
+            parlorentz = lorentz( par->getvx(), par->getvy());
+            par1lorentz = lorentz( par1->getvx(), par1->getvy());
+        }
+
+        double vx = (par1->getvx() * par1->Getmass() + par->getvx()*par->Getmass() - break_mom_x) / (par->Getmass() * parlorentz + par1->Getmass() * par1lorentz);//new particle velocity
+
+        double vy = (par1->getvy() * par1->Getmass() + par->getvy()*par->Getmass() - break_mom_y) / (par->Getmass() * parlorentz + par1->Getmass() * par1lorentz);
 
         bool fix = false;
 
@@ -257,12 +265,12 @@ cords System::gravity(double par1x , double par1y , double par2x , double par2y 
 
 
 
-double System::lorenz(double vx, double vy){
-    //returns the lorenz factor for a given velocity
+double System::lorentz(double vx, double vy){
+    //returns the lorentz factor for a given velocity
     double speed2 =  pow((vx - ref_frame_vx) , 2) + pow((vy - ref_frame_vy) , 2);
 
-    if(speed2  > pow(C , 2)){
-        std::cout<<"warning exceded lorenz"<<std::endl;
+    if(speed2 + 10  > pow(C , 2)){
+        std::cout<<"warning exceded lorentz"<<std::endl;
 
         return 100;
     }
@@ -290,6 +298,8 @@ bool System::process(){
 
     *beencol = false;
 
+    std::vector <Particle *> hold = *particles;
+
     for(int i = 0; i < threads ; i++ ){
         //std::lock_guard<std::mutex> guard(myMutex);
         if(start < length - parper){
@@ -316,8 +326,6 @@ bool System::process(){
 
     if(*beencol){//checks to see if any paricles have collided
 
-        std::vector <Particle *> hold = *particles;
-
         for(auto &par : *particles){
 
             if(par->getcolnum() != -1 && !par->getcol()){
@@ -327,8 +335,6 @@ bool System::process(){
                     if(par->getcolnum() == par1->getid()){
 
                         collision(par,par1);
-
-                        //break;
                     }
                 }
             }
@@ -346,12 +352,22 @@ std::mutex myMutex;
 
 
 bool System::update(int start, int end){
-    //takes the first par id to compute to the last particle there respective motion
-    //returns if a colision has occured
+    //takes the first par id to compute to the last particle (there respective motion)
+    //returns if a collision has occured
 
     bool col = false; //if collision
 
     const std::vector <Particle *> hold = *particles;
+
+    static double *lorentztable =new double[*size];//tabulation
+
+    for(int i = 0; i < *size; i++){
+        if(Special_rel){
+            lorentztable[i] = lorentz(hold[i]->getvx() , hold[i]->getvy());
+        }else{
+            break;
+        }
+    }
 
     for (int i = start ; i < end ; i++){
 
@@ -361,13 +377,13 @@ bool System::update(int start, int end){
 
             double rel_step = *step;
 
-            double parlorenz = 1;
+            double parlorentz = 1;
 
             if (Special_rel){
 
-                parlorenz = lorenz( par->getvx(), par->getvy());
+                parlorentz = lorentztable[par->getid()];
 
-                rel_step = *step / parlorenz; // time dilation
+                rel_step = *step / parlorentz; // time dilation
 
             }
 
@@ -394,30 +410,30 @@ bool System::update(int start, int end){
 
                     }else{
 
-                        double par1lorenz = 1;
+                        double par1lorentz = 1;
 
                         if (Special_rel){
 
-                            par1lorenz = lorenz(par1->getvx(),par1->getvy());
+                            par1lorentz = lorentztable[par1->getid()];
 
                         }
 
 
                         cords k1 = gravity(par->getx() , par->gety() , par1->getx(), par1->gety(), par->Getmass() , par1->Getmass() , rel_step);// Runge - Kutta calculates force on the particles
 
-                        cords k2 = gravity(par->getx() + (k1.x/2/(par->Getmass()* parlorenz) * rel_step)  , par->gety() + (k1.y/2/ (par->Getmass()* parlorenz) * rel_step) , par1->getx() - (k1.x/2/(par1->Getmass() * par1lorenz) * rel_step)  , par1->gety() - (k1.y/2/ (par1->Getmass() * par1lorenz) * rel_step) , par->Getmass() , par1->Getmass() , rel_step);
+                        cords k2 = gravity(par->getx() + (k1.x/2/(par->Getmass()* parlorentz) * rel_step)  , par->gety() + (k1.y/2/ (par->Getmass()* parlorentz) * rel_step) , par1->getx() - (k1.x/2/(par1->Getmass() * par1lorentz) * rel_step)  , par1->gety() - (k1.y/2/ (par1->Getmass() * par1lorentz) * rel_step) , par->Getmass() , par1->Getmass() , rel_step);
 
-                        cords k3 = gravity(par->getx() + (k2.x/2/(par->Getmass()* parlorenz) * rel_step)  , par->gety() + (k2.y/2/ (par->Getmass()* parlorenz) * rel_step)  ,  par1->getx() - (k2.x/2/(par1->Getmass() * par1lorenz) * rel_step)  , par1->gety() - (k2.y/2/ (par1->Getmass() * par1lorenz) * rel_step)  , par->Getmass() , par1->Getmass() , rel_step);
+                        cords k3 = gravity(par->getx() + (k2.x/2/(par->Getmass()* parlorentz) * rel_step)  , par->gety() + (k2.y/2/ (par->Getmass()* parlorentz) * rel_step)  ,  par1->getx() - (k2.x/2/(par1->Getmass() * par1lorentz) * rel_step)  , par1->gety() - (k2.y/2/ (par1->Getmass() * par1lorentz) * rel_step)  , par->Getmass() , par1->Getmass() , rel_step);
 
-                        cords k4 = gravity(par->getx() + (k3.x/(par->Getmass()* parlorenz) * rel_step)  , par->gety() + (k3.y/ (par->Getmass()* parlorenz) * rel_step)  ,  par1->getx() - (k3.x/(par1->Getmass() * par1lorenz) * rel_step)  , par1->gety() - (k3.y/ (par1->Getmass() * par1lorenz) * rel_step)  , par->Getmass(), par1->Getmass(), rel_step);
+                        cords k4 = gravity(par->getx() + (k3.x/(par->Getmass()* parlorentz) * rel_step)  , par->gety() + (k3.y/ (par->Getmass()* parlorentz) * rel_step)  ,  par1->getx() - (k3.x/(par1->Getmass() * par1lorentz) * rel_step)  , par1->gety() - (k3.y/ (par1->Getmass() * par1lorentz) * rel_step)  , par->Getmass(), par1->Getmass(), rel_step);
 
                         //myMutex.lock();
 
                         if (Special_rel){
 
-                            par->setvx( par->getvx() + 2 * (k1.x + 2*k2.x + 2*k3.x + k4.x)/6 / (par->Getmass() * parlorenz));
+                            par->setvx( par->getvx() + 2 * (k1.x + 2*k2.x + 2*k3.x + k4.x)/6 / (par->Getmass() * parlorentz));
 
-                            par->setvy( par->getvy() + 2 * (k1.y + 2*k2.y + 2*k3.y + k4.y)/6 / (par->Getmass() * parlorenz));
+                            par->setvy( par->getvy() + 2 * (k1.y + 2*k2.y + 2*k3.y + k4.y)/6 / (par->Getmass() * parlorentz));
 
                             if((pow(par->getvx(),2) + pow(par->getvy(),2)) >= pow(C,2)){//make sure we didn't overshoot C
 
