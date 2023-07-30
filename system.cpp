@@ -4,6 +4,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <mutex>
+#include <stdio.h>
+
 
 
 System* System::Instance = NULL;
@@ -50,6 +52,7 @@ double System::C = 1000;
 
 System::System()
 {
+        //checkCudaErrors(cudaSetDevice(0));
 
 
 }
@@ -66,7 +69,7 @@ void System::Idreset(){
 //    *particles = hold;
 }
 
-void System::Remove(int id, std::vector <Particle *> input){
+void System::Remove(int id){
 
     // removes a particle from index id
 
@@ -126,15 +129,13 @@ Particle* System::addParticle(int Mass, long double _x, long double _y , long do
 void System::collision(Particle* par, Particle* par1){
     // collision between particles
     // std::cout<<par->getid()<<std::endl;
+    double posx = (par1->getx() * par1->Getmass() + par->getx() * par->Getmass()) / (par->Getmass() + par1->Getmass());// new particle position
+    double posy = (par1->gety() * par1->Getmass() + par->gety() * par->Getmass()) / (par->Getmass() + par1->Getmass());
 
-    if(!par->getcol() && !par1->getcol()){
+
+    if(!par->getcol() && !par1->getcol() && abs(posx - par->getx()) < par->getsize() + par1->getsize() && abs(posy - par->gety()) < par->getsize() + par1->getsize()){
         par->hascol();
         par1->hascol();
-
-        double posx = (par1->getx()*par1->Getmass()+par->getx()*par->Getmass())/(par->Getmass()+par1->Getmass());// new particle position
-
-        double posy = (par1->gety()*par1->Getmass()+par->gety()*par->Getmass())/(par->Getmass()+par1->Getmass());
-
 
         double rel_vel_x = par->getvx() - par1->getvx();//relative velocities
         double rel_vel_y = par->getvy() - par1->getvx();
@@ -146,9 +147,10 @@ void System::collision(Particle* par, Particle* par1){
         double rel_pos_x = par->getx() - par1->getx();//relative position
         double rel_pos_y = par->gety() - par1->gety();
 
-        double rel_d_pos = sqrt(pow(rel_pos_x,2)+pow(rel_pos_y,2));
-        double relunitposx = rel_pos_x/rel_d_pos;
-        double relunitposy = rel_pos_y/rel_d_pos;
+
+        double rel_d_pos = sqrt(pow(rel_pos_x , 2) + pow(rel_pos_y , 2));
+        double relunitposx = rel_pos_x / rel_d_pos;
+        double relunitposy = rel_pos_y / rel_d_pos;
 
         double collision_angle = acos((relunitvecx*relunitposx)+(relunitvecy*relunitposy))/M_PI * 90;
         //std::cout<<"angle : "<<collision_angle<<std::endl;
@@ -156,9 +158,16 @@ void System::collision(Particle* par, Particle* par1){
         double relmass = 0;
         double mass1 = par1->Getmass();
         double mass = par->Getmass();
-        if(par->Getmass()>par1->Getmass()){
+        double nvx = 0;// keeps track of collision speed
+        double nvy = 0;
+
+        if(par->Getmass()>par1->Getmass()){//finds the smaller of the particles
+            nvx = par->getvx();
+            nvy = par->getvy();
             relmass = mass1/(mass);
         }else {
+            nvx = par1->getvx();
+            nvy = par1->getvy();
             relmass = mass/(mass1);
         }
 //        std::cout<<"relmass: "<<relmass<<std::endl;
@@ -170,7 +179,7 @@ void System::collision(Particle* par, Particle* par1){
         double breakmass = 0;
         double break_mom_x = 0;//break away particles momentum
         double break_mom_y = 0;
-        if((1000 * rel_speed) / (collision_angle+20) * (0.1 + relmass * 0.5) > *col_threshold && rel_speed > 20){//determines if any new particles will be created from collision
+        if((100 * pow(rel_speed,2)) / (collision_angle+20) * (0.3 + relmass * 0.3) > *col_threshold && rel_speed > 10){//determines if any new particles will be created from collision
             //std::cout<<"new Particles"<<std::endl;
             double breaksize;
             double breakvelx;
@@ -184,15 +193,15 @@ void System::collision(Particle* par, Particle* par1){
 
             }if (breaksize>2){
                 bool side = true;//puts a particle on either side
-                for(int i = 0;i < *num_col_particles;i++){;
+                for(int i = 0 ; i < *num_col_particles ; i++){;
                     if(side){
-                        breakvelx = (rel_speed*relunitposy*-1 - relunitposx*rel_speed) * .1;
-                        breakvely = (rel_speed*relunitposx - relunitposy*rel_speed) * .1;
-                        addParticle(breaksize,  par->getx()-(rel_pos_x)-(sqrt(breaksize/3.14))*relunitposx-2*relunitposy,  par->gety() - (rel_pos_y)-(sqrt(breaksize/3.14)) * relunitposy+2*relunitposx,  breakvelx,  breakvely, 0);
+                        breakvelx = (rel_speed * relunitposy * -1 - relunitposx * rel_speed) * .1 + nvx;
+                        breakvely = (rel_speed * relunitposx - relunitposy * rel_speed) * .1 + nvy;
+                        addParticle(breaksize,  par->getx() - (rel_pos_x) - (sqrt(breaksize/3.15)) * relunitposx - 2*relunitposy,  par->gety() - (rel_pos_y)-(sqrt(breaksize/3.14)) * relunitposy + 2*relunitposx,  breakvelx,  breakvely, 0);
                     }else{
-                        breakvelx = (rel_speed*relunitposy - relunitposx*rel_speed) * .1;
-                        breakvely = (rel_speed*relunitposx*-1 - relunitposy*rel_speed) * .1;
-                        addParticle(breaksize,  par->getx()-(rel_pos_x)-(sqrt(breaksize/3.14))*relunitposx+2*relunitposy,  par->gety() - (rel_pos_y)-(sqrt(breaksize/3.14)) * relunitposy-2*relunitposx,  breakvelx,  breakvely, 0);
+                        breakvelx = (rel_speed*relunitposy - relunitposx*rel_speed) * .1 + nvx;
+                        breakvely = (rel_speed*relunitposx*-1 - relunitposy*rel_speed) * .1 + nvy;
+                        addParticle(breaksize,  par->getx() - (rel_pos_x) - (sqrt(breaksize/3.15)) * relunitposx + 2*relunitposy,  par->gety() - (rel_pos_y)-(sqrt(breaksize/3.14)) * relunitposy - 2*relunitposx,  breakvelx,  breakvely, 0);
                     }
                     break_mom_x += breakvelx * breaksize;
                     break_mom_y += breakvely * breaksize;
@@ -203,9 +212,9 @@ void System::collision(Particle* par, Particle* par1){
             }
         }
 
-        double vx = (par1->getvx()*par1->Getmass()+par->getvx()*par->Getmass()-break_mom_x)/(par->Getmass()+par1->Getmass());//new particle velocity
+        double vx = (par1->getvx() * par1->Getmass() + par->getvx()*par->Getmass() - break_mom_x) / (par->Getmass() + par1->Getmass());//new particle velocity
 
-        double vy = (par1->getvy()*par1->Getmass()+par->getvy()*par->Getmass()-break_mom_y)/(par->Getmass()+par1->Getmass());
+        double vy = (par1->getvy() * par1->Getmass() + par->getvy()*par->Getmass() - break_mom_y) / (par->Getmass() + par1->Getmass());
 
         bool fix = false;
 
@@ -246,15 +255,19 @@ cords System::gravity(double par1x , double par1y , double par2x , double par2y 
 
 }
 
+
+
 double System::lorenz(double vx, double vy){
     //returns the lorenz factor for a given velocity
-    double speed = pow( sqrt( abs(vx - ref_frame_vx) + abs(vy - ref_frame_vy)) , 2);
+    double speed2 =  pow((vx - ref_frame_vx) , 2) + pow((vy - ref_frame_vy) , 2);
 
-    if(pow(speed , 2) > pow(C,2)){
-        return 0.00000000001;
+    if(speed2  > pow(C , 2)){
+        std::cout<<"warning exceded lorenz"<<std::endl;
+
+        return 100;
     }
 
-    return 1 / sqrt(1 - (pow(speed , 2) / pow(C , 2)));
+    return 1 / sqrt(1 - (speed2 / pow(C , 2)));
 }
 
 
@@ -271,7 +284,7 @@ bool System::process(){
 
     //std::cout<<parper<<std::endl;
 
-    std::thread *Mythreads=new std::thread[threads];
+    static std::thread *Mythreads=new std::thread[threads];
 
     int start =  parper;
 
@@ -303,7 +316,7 @@ bool System::process(){
 
     if(*beencol){//checks to see if any paricles have collided
 
-        const std::vector <Particle *> hold = *particles;
+        std::vector <Particle *> hold = *particles;
 
         for(auto &par : *particles){
 
@@ -314,6 +327,8 @@ bool System::process(){
                     if(par->getcolnum() == par1->getid()){
 
                         collision(par,par1);
+
+                        //break;
                     }
                 }
             }
@@ -326,6 +341,8 @@ bool System::process(){
     return *beencol;
 
 };
+
+std::mutex myMutex;
 
 
 bool System::update(int start, int end){
@@ -348,7 +365,7 @@ bool System::update(int start, int end){
 
             if (Special_rel){
 
-                parlorenz = lorenz(par->getvx(),par->getvy());// used for relativistic mass
+                parlorenz = lorenz( par->getvx(), par->getvy());
 
                 rel_step = *step / parlorenz; // time dilation
 
@@ -361,7 +378,9 @@ bool System::update(int start, int end){
             for(auto &par1 : hold){
                 if(par1->getid() != par->getid() && par1->getcolnum() == -1){
 
-                    if((par->getsize() + par1->getsize()) / 2 > sqrt(pow(par->getx() - par1->getx(),2) + pow(par->gety() - par1->gety() , 2))){//check for collision
+                    //myMutex.lock();
+
+                    if((par->getsize() + par1->getsize()) / 2 > sqrt(pow(par->getx() - par1->getx() , 2) + pow(par->gety() - par1->gety() , 2))){//check for collision
 
                         if(!par->getcol() && !par1->getcol()){//check to see if a particle has already collided
 
@@ -379,7 +398,7 @@ bool System::update(int start, int end){
 
                         if (Special_rel){
 
-                            par1lorenz = lorenz(par1->getvx(),par1->getvy());// used for relativistic mass
+                            par1lorenz = lorenz(par1->getvx(),par1->getvy());
 
                         }
 
@@ -391,7 +410,8 @@ bool System::update(int start, int end){
                         cords k3 = gravity(par->getx() + (k2.x/2/(par->Getmass()* parlorenz) * rel_step)  , par->gety() + (k2.y/2/ (par->Getmass()* parlorenz) * rel_step)  ,  par1->getx() - (k2.x/2/(par1->Getmass() * par1lorenz) * rel_step)  , par1->gety() - (k2.y/2/ (par1->Getmass() * par1lorenz) * rel_step)  , par->Getmass() , par1->Getmass() , rel_step);
 
                         cords k4 = gravity(par->getx() + (k3.x/(par->Getmass()* parlorenz) * rel_step)  , par->gety() + (k3.y/ (par->Getmass()* parlorenz) * rel_step)  ,  par1->getx() - (k3.x/(par1->Getmass() * par1lorenz) * rel_step)  , par1->gety() - (k3.y/ (par1->Getmass() * par1lorenz) * rel_step)  , par->Getmass(), par1->Getmass(), rel_step);
-                        
+
+                        //myMutex.lock();
 
                         if (Special_rel){
 
@@ -399,7 +419,20 @@ bool System::update(int start, int end){
 
                             par->setvy( par->getvy() + 2 * (k1.y + 2*k2.y + 2*k3.y + k4.y)/6 / (par->Getmass() * parlorenz));
 
-                            //std::cout<<sqrt(pow(par->getvx(),2) + pow(par->getvy(),2)) / C<<std::endl;
+                            if((pow(par->getvx(),2) + pow(par->getvy(),2)) >= pow(C,2)){//make sure we didn't overshoot C
+
+                                std::cout<<"warning exceded C"<<std::endl;
+                                if(par->getvx()>0){
+                                    par->setvx(par->getvx() - 1);
+                                }else{
+                                    par->setvx(par->getvx() + 1);
+                                }
+                                if(par->getvy()>0){
+                                    par->setvy(par->getvy() - 1);
+                                }else{
+                                    par->setvy(par->getvy() + 1);
+                                }
+                            }
 
                         }else{
 
@@ -422,7 +455,9 @@ bool System::update(int start, int end){
 
                         }
 
+
                     }
+                    //myMutex.unlock();
 
                 }
             }
