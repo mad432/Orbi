@@ -437,7 +437,7 @@ bool System::update(int start, int end){
 
                             if((pow(par->getvx(),2) + pow(par->getvy(),2)) >= pow(C,2)){//make sure we didn't overshoot C
 
-                                std::cout<<"warning exceded C"<<std::endl;
+                                std::cout<<"warning exceeded C"<<std::endl;
                                 if(par->getvx()>0){
                                     par->setvx(par->getvx() - 1);
                                 }else{
