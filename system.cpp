@@ -348,8 +348,6 @@ bool System::process(){
 
 };
 
-std::mutex myMutex;
-
 
 bool System::update(int start, int end){
     //takes the first par id to compute to the last particle (there respective motion)
@@ -427,8 +425,6 @@ bool System::update(int start, int end){
 
                         cords k4 = gravity(par->getx() + (k3.x/(par->Getmass()* parlorentz) * rel_step)  , par->gety() + (k3.y/ (par->Getmass()* parlorentz) * rel_step)  ,  par1->getx() - (k3.x/(par1->Getmass() * par1lorentz) * rel_step)  , par1->gety() - (k3.y/ (par1->Getmass() * par1lorentz) * rel_step)  , par->Getmass(), par1->Getmass(), rel_step);
 
-                        //myMutex.lock();
-
                         if (Special_rel){
 
                             par->setvx( par->getvx() + 2 * (k1.x + 2*k2.x + 2*k3.x + k4.x)/6 / (par->Getmass() * parlorentz));
@@ -473,7 +469,6 @@ bool System::update(int start, int end){
 
 
                     }
-                    //myMutex.unlock();
 
                 }
             }
