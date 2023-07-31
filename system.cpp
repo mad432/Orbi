@@ -356,8 +356,8 @@ bool System::update(int start, int end){
     bool col = false; //if collision
 
     const std::vector <Particle *> hold = *particles;
-
-    static double *lorentztable =new double[*size];//tabulation
+    
+    double *lorentztable =new double[*size];//tabulation
 
     for(int i = 0; i < *size; i++){
         if(Special_rel){
