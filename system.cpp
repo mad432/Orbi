@@ -478,5 +478,7 @@ bool System::update(int start, int end){
 
     }
 
+    delete[] lorentztable;
+        
     return col;
 }
