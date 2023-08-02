@@ -87,7 +87,7 @@ protected:
 
     double vy;
 
-    col = false;
+    bool col = false;
 };
 
 class Player:public Particle{
