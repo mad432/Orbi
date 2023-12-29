@@ -19,3 +19,5 @@ Clicking on the system view will cause a line to appear between where you click 
 the G slider adjusts the force of gravity, and the time slider adjusts how large of a step each particle will move per tick (since the step size is adjusted slower speeds should be more accurate).
 #
 In the top left under file there are various prebuilt systems.
+# 
+A Rocket can be spawned by pressing the spawn rocket button then clicking anywhere on screen the rocket is controled with the W , A , and D keys. the blue bar below the rocket represents the remaining fuel. 
