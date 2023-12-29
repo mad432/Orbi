@@ -81,11 +81,11 @@ void Rocket::thrust(int n){
 
         double masseval = mass; // makes mass a double for dv calculation
 
-        double dv = EV*log((masseval) / (masseval - 5));//dv rocket equation
+        double dv = EV * log((masseval) / (masseval - 5));//dv rocket equation
 
-        vy -= cos(heading*(3.14/180)) * dv;
+        vy -= cos(heading * (3.14 / 180)) * dv;
 
-        vx += sin(heading*(3.14/180)) * dv;
+        vx += sin(heading * (3.14 / 180)) * dv;
 
         fuel -=5;
 
@@ -100,7 +100,6 @@ void Rocket::thrust(int n){
     //std::cout<<fuel<<std::endl;
 
 };
-
 
 void Rocket::DrawPartical(long double _x, long double _y, QGraphicsScene *scene){
 
