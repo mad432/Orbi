@@ -13,11 +13,13 @@ class Particle: public QObject, public QGraphicsItem{
 
 public:
 
+    ~Particle() override;
+
     Particle();
 
-    Particle(int Mass,long double _x,long double _y ,long double _vx,long double _vy, bool fixed,int _id);
+    Particle(int Mass,long double _x,long double _y ,long double _vx,long double _vy, bool fixed, int _id);
 
-    void DrawPartical(long double _x,long double _y,QGraphicsScene* scene);
+    virtual void DrawPartical(long double _x,long double _y,QGraphicsScene* scene);
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWidget *widget) override;
 
@@ -41,13 +43,13 @@ public:
 
     double getsize(){return size;}
 
-    double getx(){return x;}
+    long double getx(){return x;}
 
-    double gety(){return y;}
+    long double gety(){return y;}
 
-    double getvx(){return vx;}
+    long double getvx(){return vx;}
 
-    double getvy(){return vy;}
+    long double getvy(){return vy;}
 
     bool getcol(){return col;}
 
@@ -63,7 +65,7 @@ public:
 
 signals:
 
-    void DeleteParticle(Particle * p);
+     void DeleteParticle(Particle * p);
 
 protected:
 
@@ -79,7 +81,7 @@ protected:
 
     double size;
 
-    long double x;
+    double x;
 
     double y;
 
@@ -88,18 +90,6 @@ protected:
     double vy;
 
     bool col = false;
-};
-
-class Player:public Particle{
-
-public:
-
-    Player(int Mass,long double _x,long double _y ,long double _vx,long double _vy, bool fixed);
-
-
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWidget *widget) override;
-
-
 };
 
 #endif // PARTICAL_H
