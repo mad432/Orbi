@@ -140,7 +140,7 @@ Rocket* System::addRocket(int Mass, long double _x, long double _y , long double
         }
     }
 
-    Rocket* par = new Rocket( Mass, _x, _y , _vx, _vy, fixed, *size );
+    Rocket* par = new Rocket( Mass, _x, _y , _vx, _vy, 0, *size);
 
     particles->push_back(par);
 
@@ -401,6 +401,13 @@ bool System::update(int start, int end){
     for (int i = start ; i < end ; i++){
 
         Particle* par = hold[i];
+
+        if (par->object() == "Rocket"){
+
+            par->getheading();
+
+            par->changeheading(par->getaV());
+        }
 
         if(par->getfix() == false){
 

@@ -10,11 +10,16 @@
 #include <math.h>
 #include <vector>
 #include <QMouseEvent>
+#include "flight_plan.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+
 {
+    setWindowIcon(QIcon(":Image/thumb.png"));
+
+    srand (time(0));
 
     ui->setupUi(this);
 
@@ -32,45 +37,55 @@ MainWindow::MainWindow(QWidget *parent)
 
     scene->clear();
 
+    system->setC(0*30 + 150);
+
     on_TimeSlider_valueChanged(10);
 
-    on_horizontalSlider_2_valueChanged(0);
+    //on_horizontalSlider_2_valueChanged(0);
+
+    C_slider w;
 
     QObject::connect(timer1, SIGNAL(timeout()), this, SLOT(timetick()));
 
     timer1->start(0);
 
-    Sysfactory(1);
+    Sysfactory(-1);
+
+
 
 }
 
-void MainWindow::keyPressEvent(QKeyEvent *event)
-{
-    //connects keys to functions
-    if( event->key() == Qt::Key_W )
-   {
+void MainWindow::keyPressEvent(QKeyEvent *event){
+//lets the player move
+    if(player != nullptr){
+        if( event->key() == Qt::Key_W ){
 
-       player->thrust(100);
+           player->thrust(100);
 
-   }
-    if( event->key() == Qt::Key_A)
-   {
+        }
+        if( event->key() == Qt::Key_A){
 
-       player->changeheading(-10);
-   }
-    if( event->key() == Qt::Key_D )
-   {
+           player->changeaV(-.1);
 
-       player->changeheading(10);
-   }
+        }
+        if( event->key() == Qt::Key_D ){
+
+           player->changeaV(.1);
+
+        }
+    }
 }
 
 void MainWindow::pause(){// stops the signal from the timer
 
     if(this->timer1->signalsBlocked()){
+
         this->timer1->blockSignals(false);
+
     }else{
+
         this->timer1->blockSignals(true);
+
     }
 
 }
@@ -82,7 +97,8 @@ void MainWindow::timetick(){
 
     if (system->process()){// calculates the particle movements
 
-        for (auto &par : system->Getparticles()){
+        for (Particle *par : system->Getparticles()){
+
             if(par->scene() == nullptr){
 
                 scene->addItem(par);
@@ -94,8 +110,6 @@ void MainWindow::timetick(){
 
                 delete par;
             }
-
-            //qApp->processEvents();
 
         }
 
@@ -113,14 +127,21 @@ void MainWindow::addParticle(int Mass, long double _x, long double _y , long dou
 
 }
 
-void MainWindow::addRocket(int Mass, long double _x, long double _y , long double _vx, long double _vy, bool fixed){
+void MainWindow::addRocket(int Mass, long double _x, long double _y , long double _vx, long double _vy, int plan){
 
-    Rocket *rock = system->addRocket(Mass, _x,_y , _vx, _vy, fixed);
+    Rocket *rock = system->addRocket(Mass, _x,_y , _vx, _vy, 0);
 
     scene->addItem(rock);
 
     player = rock;
 
+    if(plan!=0){
+
+        std::vector <Particle *> references = system->Getparticles();
+
+        Flight_plan(rock , system , plan , references);
+
+    }
 }
 
 
@@ -130,13 +151,25 @@ void MainWindow::Sysfactory(int sel){
 
     if(sel == -1){
 
-        addRocket(400, 1425/2 , 700/2, 0, 0, 0);
+        on_GSlider_valueChanged(50);//sets G
+
+        addParticle(25000,1425/2 ,700/2 ,0,0,1);
+
+        double ang = (rand()%360)*180/3.14;
+
+        double p_h = rand()%100 + 200;
+
+        double r_h = rand()%25 + 75;
+
+        addParticle(500, 1425/2 + p_h * sin(ang) , 700/2 + p_h * cos(ang) , sqrt(g*25000/p_h) * cos(ang), -sqrt(g*25000/p_h) * sin(ang), 0);
+
+        addRocket(200,1425/2 + r_h ,700/2 , 0, -sqrt(g*25000/r_h) , 1);
 
     }
 
     if(sel == 0){//Earth-Moon
 
-        on_horizontalSlider_valueChanged(50);
+        on_GSlider_valueChanged(50);
 
         addParticle(5000,1425/2 ,700/2 ,0,0,1);
 
@@ -147,7 +180,7 @@ void MainWindow::Sysfactory(int sel){
 
     }else if(sel == 1){//binary
 
-        on_horizontalSlider_valueChanged(60);
+        on_GSlider_valueChanged(60);
 
         addRocket(200, 1425/2+400 , 700/2+70, -25, 20, 0);
 
@@ -165,7 +198,7 @@ void MainWindow::Sysfactory(int sel){
 
     }else if(sel == 2){//binary-binary
 
-        on_horizontalSlider_valueChanged(90);
+        on_GSlider_valueChanged(90);
 
         addParticle(3000, 2 * 1425/6, 700/2 + 45, 30, 22, 0);
 
@@ -185,7 +218,7 @@ void MainWindow::Sysfactory(int sel){
 
     }else if(sel == 3){//rings
 
-        on_horizontalSlider_valueChanged(13);
+        on_GSlider_valueChanged(13);
 
         addParticle(6000,1425/2 ,700/2 , 0, 0, 1);
 
@@ -204,7 +237,7 @@ void MainWindow::Sysfactory(int sel){
         }
     }else if(sel == 4){//Moonception
 
-        on_horizontalSlider_valueChanged(90);
+        on_GSlider_valueChanged(90);
 
         addParticle(2900, 1425/2, 700/2,0,0,1);
 
@@ -216,7 +249,7 @@ void MainWindow::Sysfactory(int sel){
 
     }else if (sel == 5){//random
 
-        on_horizontalSlider_valueChanged(70);
+        on_GSlider_valueChanged(70);
 
         int num = 800+rand()%400;
 
@@ -238,7 +271,7 @@ void MainWindow::Sysfactory(int sel){
 
     }else if (sel == 6){//random twist
 
-        on_horizontalSlider_valueChanged(70);
+        on_GSlider_valueChanged(70);
 
         int num = 800+rand()%400;
 
@@ -257,7 +290,7 @@ void MainWindow::Sysfactory(int sel){
             addParticle(rmass,rxp,ryp,rxv,ryv,0);
          }
     }else if (sel == 7) {//performance test
-            on_horizontalSlider_valueChanged(90);
+            on_GSlider_valueChanged(90);
 
             int num = 10000+rand()%400;
 
@@ -276,7 +309,7 @@ void MainWindow::Sysfactory(int sel){
                 addParticle(rmass,rxp,ryp,rxv,ryv,0);
             }
     }else if (sel == 8){//smash
-        on_horizontalSlider_valueChanged(40);
+        on_GSlider_valueChanged(40);
 
         int num = 300+rand()%200;
 
@@ -344,14 +377,6 @@ void MainWindow::mousePressEvent(QMouseEvent *event){
 
         int y = view->mapToScene(event->pos()).y() + yoff;
 
-        if(rocket){
-
-            addRocket(200,x,y,0,0,0);
-
-            rocket = false;
-
-        }else{
-
 
         *bre1 = true;
 
@@ -392,12 +417,20 @@ void MainWindow::mousePressEvent(QMouseEvent *event){
 
             }
 
-        scene->addItem(system->addParticle(*mSlider*100, x, y, (gx - x),(gy - y), fixedcheck));
+            if(rocket){
 
-        this->scene->removeItem(liny);
+                addRocket(200,x,y,(gx - x),(gy - y),0);
 
+                rocket = false;
+
+            }else{
+
+                scene->addItem(system->addParticle(*mSlider*100, x, y, (gx - x),(gy - y), fixedcheck));
+
+            }
+            this->scene->removeItem(liny);
             //create Particle
-        }}else{//second click
+        }else{//second click
 
                 *bre1 = false;
 
@@ -429,7 +462,7 @@ void MainWindow::on_pushButton_clicked()//clear
     pause();
 
 
-    for (auto &par : system->Getparticles()){
+    for (Particle *par : system->Getparticles()){
 
         system->Remove(par->getid());
 
@@ -443,13 +476,13 @@ void MainWindow::on_pushButton_clicked()//clear
     //scene->setSceneRect(0, 0, scene->width(), scene->height());
 }
 
-void MainWindow::on_horizontalSlider_valueChanged(int value)//G
+void MainWindow::on_GSlider_valueChanged(int value)//G
 {
-    g = (value) * 0.3;
+    g = (value) * 0.3 * 2;
 
-    system->System::setG(g);
+    system->System::setG(g/2);
 
-    this->ui->horizontalSlider->setSliderPosition(value);
+    this->ui->GSlider->setSliderPosition(value);
 }
 
 void MainWindow::on_checkBox_clicked(bool checked)//fixed
@@ -500,24 +533,9 @@ void MainWindow::on_actionSmash_triggered()
     Sysfactory(8);
 }
 
-void MainWindow::on_pushButton_2_pressed()
-{
-    pause();
-}
-
-void MainWindow::on_Specialrel_check_clicked(bool checked)
-{
-    system->setSpecial_rel(checked);
-}
-
-void MainWindow::on_horizontalSlider_2_valueChanged(int value)//C
+void MainWindow::SetC(int value)//C
 {
     system->setC(value*30 + 150);
-}
-
-void MainWindow::on_actionStep_2_triggered()//step
-{
-    timetick();
 }
 
 void MainWindow::on_Collision_triggered(bool checked)
@@ -530,8 +548,35 @@ void MainWindow::on_actionEnable_Debris_triggered(bool checked)
     system->setDebris(checked);
 }
 
-void MainWindow::on_Spawn_rocket_clicked()
+
+void MainWindow::on_Refresh_clicked()
 {
-    rocket = true;
+    pause();
+}
+
+void MainWindow::on_Spawn_rocket_triggered()
+{
+     rocket = true;
+}
+
+
+void MainWindow::on_actionset_Speed_of_Light_triggered()
+{
+    w.show();
+
+    QObject::connect(&w,&C_slider::valueChanged,this,&MainWindow::SetC);
+
+}
+
+
+void MainWindow::on_Specialrel_toggled(bool arg1)
+{
+    system->setSpecial_rel(arg1);
+}
+
+
+void MainWindow::on_actionTransfer_triggered()
+{
+    Sysfactory(-1);
 }
 

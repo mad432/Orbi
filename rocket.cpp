@@ -32,7 +32,6 @@ void Rocket::paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWid
             cycle++;
         }
     }
-
 }
 
 Rocket::Rocket(int Mass, long double _x, long double _y, long double _vx, long double _vy, bool fixed, int _id)
@@ -64,24 +63,34 @@ Rocket::Rocket(int Mass, long double _x, long double _y, long double _vx, long d
     thrusting = false;
 
     cycle = 0;
+
+    aV = 0;
+
+    malloc(sizeof(int));
 }
 
-void Rocket::changeheading(int change){
+void Rocket::changeheading(double change){
 
     heading+=change;
 
 };
 
-void Rocket::thrust(int n){
+void Rocket::changeaV(double i){
+
+    aV += i;
+
+};
+
+void Rocket::thrust(double EV){
     //fires the engines in the heading
 
     if(fuel > 0){
 
-        double EV = 500;
+        //double EV = 500;
 
         double masseval = mass; // makes mass a double for dv calculation
 
-        double dv = EV * log((masseval) / (masseval - 5));//dv rocket equation
+        double dv = EV *log((masseval) / (masseval - 5));//dv rocket equation
 
         vy -= cos(heading * (3.14 / 180)) * dv;
 
@@ -101,10 +110,14 @@ void Rocket::thrust(int n){
 
 };
 
+
 void Rocket::DrawPartical(long double _x, long double _y, QGraphicsScene *scene){
 
 }
 
 Rocket::~Rocket(){
 
+
 }
+
+void Rocket::print(){std::cout<<"why"<<std::endl;}

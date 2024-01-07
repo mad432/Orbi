@@ -13,6 +13,8 @@ class Particle: public QObject, public QGraphicsItem{
 
 public:
 
+    virtual std::string object(){return "Partical";};
+
     ~Particle() override;
 
     Particle();
@@ -62,6 +64,16 @@ public:
     void setcol(int num){colnum = num;}
 
     int getcolnum(){return colnum;}
+
+    virtual int getheading(){return NULL;};
+
+    virtual void changeheading(double change){;};
+
+    virtual double getaV(){return NULL;};
+
+    virtual void changeaV(double i){;};
+
+    virtual void thrust(double EV){;};
 
 signals:
 

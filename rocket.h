@@ -6,6 +6,8 @@
 class Rocket:public Particle {
 public:
 
+    std::string object() override {return "Rocket";};
+
     ~Rocket() override;
 
     Rocket(int Mass, long double _x, long double _y , long double _vx, long double _vy, bool fixed ,int _id);
@@ -14,11 +16,25 @@ public:
 
     void DrawPartical(long double _x, long double _y, QGraphicsScene *scene) override;
 
-    void changeheading(int change);
+    void changeheading(double change) override;
 
-    void thrust(int n);
+    void thrust(double EV) override;
+
+    int getFuel(){return fuel;};
+
+    int getheading() override {return heading;};
+
+    double getaV() override{return aV;};
+
+    void changeaV(double i) override;
+
+    void print();
+
+    int o = 10;
 
 protected:
+
+    double aV;
 
     int cycle;
 
@@ -26,7 +42,11 @@ protected:
 
     int fuel;
 
-    int heading;
+    double heading;
+
+    double Av;
+
+    double I;
 
 
 };

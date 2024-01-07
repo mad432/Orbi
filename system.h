@@ -5,9 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <mutex>
-
-//#include <CL/opencl.h>
-//#include <CL/cl.hpp>
+#include "rocket.h"
+#include <thread>
 
 struct cords{
     long double x;
@@ -17,8 +16,6 @@ struct cords{
 class System
 {
 public:
-
-
 
     System(const System& obj) = delete;
 
@@ -36,15 +33,23 @@ public:
       }
     //System();
 
+    void setcollision(bool checked){collisionEnabled = checked;}
+
+    void setDebris(bool checked){DebrisEnabled = checked;}
+
     static Particle* addParticle(Particle* par);
 
     static Particle* addParticle(int Mass, long double _x, long double _y , long double _vx, long double _vy, bool fixed);
 
-    static void Remove(int id, std::vector <Particle *> input);
+    static Rocket* System::addRocket(int Mass, long double _x, long double _y , long double _vx, long double _vy, bool fixed);
+
+    static void Remove(int id);
 
     int getSize(){return *size;};
 
     void setG(double G_){*g = G_;};
+
+    double getG(){return *g * 2;};
 
     static void clear();
 
@@ -64,9 +69,13 @@ public:
 
 private:
 
+    static bool collisionEnabled;
+
+    static bool DebrisEnabled;
+
     static bool Special_rel;
 
-    static double lorenz(double vx, double vy);
+    static double lorentz(double vx, double vy);
 
     static double ref_frame_vx;
 
@@ -102,13 +111,13 @@ private:
 
     static double* g;
 
-    static cords gravity(double par1x , double par1y , double par2x , double par2y , double m1, double m2);
+    static cords gravity(double par1x , double par1y , double par2x , double par2y , double m1, double m2, double step_size);
 
     static void collision(Particle* par, Particle* par1);
 
     static std::vector <Particle *>* particles;
 
-    int threads = 16;
+    static const int threads = 16;
 
     static int* size;
 
