@@ -6,7 +6,7 @@ orbi is a n-body simulation built to simulate the evolution of various solar sys
 
 the Particle file contains whats nessesary for each particle.
 the System file (that I should probably rename) contains the functions for particle-particle interactions which is currently using cpu multithreading, though I've been trying with limited success to incorperate Opencl and gpu processing on another branch (that implementation is currently slower).
-then the mainwindow file deals with the user interface.
+then the mainwindow file deals with the user interface. the Rocket file contains a flyable rocket that can be spawned. the Flight_plan file contains programs that can be used to have a rocket perform certain maneuvers
 
 #
 
@@ -18,6 +18,7 @@ Clicking on the system view will cause a line to appear between where you click 
 #
 the G slider adjusts the force of gravity, and the time slider adjusts how large of a step each particle will move per tick (since the step size is adjusted slower speeds should be more accurate).
 #
-In the top left under file there are various prebuilt systems.
-# 
-A Rocket can be spawned by pressing the spawn rocket button then clicking anywhere on screen the rocket is controled with the W , A , and D keys. the blue bar below the rocket represents the remaining fuel. 
+In the top left under file there are various prebuilt systems and controls for collisions.
+next to file under the rocket tab lets you spawn rockets and contains pre-programed flights.
+the Rocket can be controled using the W,A,D keys.
+the relativity tab lets you enable special relativity in the program (the current implemetation of the rockets and collision are not properly modeled when this setting is enabled)
