@@ -21,4 +21,4 @@ the G slider adjusts the force of gravity, and the time slider adjusts how large
 In the top left under file there are various prebuilt systems and controls for collisions.
 next to file under the rocket tab lets you spawn rockets and contains pre-programed flights.
 the Rocket can be controled using the W,A,D keys.
-the relativity tab lets you enable special relativity in the program (the current implemetation of the rockets and collision are not properly modeled when this setting is enabled)
+the relativity tab lets you enable special relativity in the program (the current implemetation of the rockets and collisions are not properly modeled when this setting is enabled)
