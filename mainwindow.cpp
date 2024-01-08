@@ -106,6 +106,12 @@ void MainWindow::timetick(){
             }
             if(par->getcol()){
 
+                if(par == player){
+
+                    player = nullptr;
+
+                }
+
                 system->Remove(par->getid());
 
                 delete par;
@@ -465,6 +471,8 @@ void MainWindow::on_pushButton_clicked()//clear
     for (Particle *par : system->Getparticles()){
 
         system->Remove(par->getid());
+
+        player = nullptr;
 
         delete par;
 
