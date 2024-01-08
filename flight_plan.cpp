@@ -1,6 +1,7 @@
 #include "flight_plan.h"
 #include <iostream>
 #include <windows.h>
+#include <chrono>
 
 
 //Rocket * Flight_plan::current() = nullptr;
@@ -48,6 +49,8 @@ Particle * Flight_plan::planet(int pla){
 
 }
 
+
+
 Rocket * Flight_plan::current(){
     //fetches the attaced rocket
 
@@ -75,6 +78,10 @@ Rocket * Flight_plan::current(){
     }
 }
 
+void Flight_plan::wait(int time){
+    std::this_thread::sleep_for(std::chrono::milliseconds(time));
+}
+
 Flight_plan::~Flight_plan(){
 
 }
@@ -87,10 +94,31 @@ double Flight_plan::distance(int planet_1 , int planet_2){
 
 }
 
+double Flight_plan::off_set(int planet_){
+
+    double x = current()->getx() - planet(planet_)->getx();
+    double y = current()->gety() - planet(planet_)->gety();
+    double vx = current()->getvx() - planet(planet_)->getvx();
+    double vy = current()->getvy() - planet(planet_)->getvy();
+
+    double step_1 = tan(acos((vx * x + vy * y)/(sqrt(pow(vx, 2) + pow(vy, 2)) * sqrt(pow(x, 2) + pow(y, 2))))) * sqrt(pow(x, 2) + pow(y, 2));
+
+    double correction = step_1/abs(step_1) * ((Sys->getG() * planet(planet_)->Getmass() *current()->Getmass() / pow(distance(rocket , 1) , 2)) / current()->Getmass()) * sqrt(pow(x, 2) + pow(y, 2))/sqrt(pow(vx, 2) + pow(vy, 2))/4;
+
+    std::cout<<"correction"<<correction<<std::endl;
+
+    if(abs(step_1) > abs(correction)){
+
+        return step_1 - correction;
+    }else{
+        return step_1 - correction;
+    }
+}
+
 
 void Flight_plan::program_sel(int program){
     //selects a flight plan to follow
-    Sleep(30);
+    wait(30);
 
     try{
 
@@ -138,40 +166,49 @@ void Flight_plan::program_sel(int program){
 
            burn(dv);
 
-           while(distance(1,rocket) > 50){
-               double x = current()->getx() - planet(1)->getx();
-               double y = current()->gety() - planet(1)->gety();
-               double vx = current()->getvx() - planet(1)->getvx();
-               double vy = current()->getvy() - planet(1)->getvy();
+           bool heading = true;
 
-               off = (tan(acos((vx * x + vy * y)/(sqrt(pow(vx, 2) + pow(vy, 2)) * sqrt(pow(x, 2) + pow(y, 2))))) * sqrt(pow(x, 2) + pow(y, 2)));
+           while(distance(1,rocket) > 75){
 
-               if((off < 40 && off > 0)||(off < -40)){
+               off = off_set(1);
 
-                  setheading("radial out" , 1);
+               if((off > 30)||(off < -30)){
+
+                  setheading("radial in" , 1);
+                  heading = true;
 
                }else{
 
-                  setheading("radial in" , 1);
+                  setheading("radial out" , 1);
+                  heading = false;
 
                }
 
-               Sleep(10);
+               wait(10);
+           }
+
+           while(distance(1,rocket) > 50){
+               if (heading){
+
+                   setheading("radial out" , 1);
+
+               }else{
+
+                   setheading("radial in" , 1);
+
+               }
+
+               wait(10);
            }
            //int F_alt = 0;
 
-           while( (off < 35 || off > 45)){
+           while( (off < 25 || off > 35)){
 
-               double x = current()->getx() - planet(1)->getx();
-               double y = current()->gety() - planet(1)->gety();
-               double vx = current()->getvx() - planet(1)->getvx();
-               double vy = current()->getvy() - planet(1)->getvy();
-
-               off = abs((tan(acos((vx * x + vy * y)/(sqrt(pow(vx, 2) + pow(vy, 2)) * sqrt(pow(x, 2) + pow(y, 2))))) * sqrt(pow(x, 2) + pow(y, 2))));
+               off = abs(off_set(1));
 
                //off = (off - Sys->getG() * planet(1)->Getmass() * current()->Getmass())/ pow(off,2);
 
-               Sleep(10);
+               wait(10);
 
 
                burn(0.1,1);
@@ -189,7 +226,7 @@ void Flight_plan::program_sel(int program){
 
                d_i = distance(rocket,1);
 
-               Sleep(10);
+               wait(10);
 
                setheading("retrograde" , 1);
            }
@@ -343,7 +380,7 @@ void Flight_plan::setheading(int angle){
             }
 
             while((angle - 2 >= abs_ang(rockangle()) || abs_ang(rockangle()) >= angle + 2) && current() != nullptr){
-                Sleep(10);
+                wait(10);
                 //std::cout<<rockangle()%360<<" : "<<angle<<std::endl;
             }
 
@@ -439,7 +476,7 @@ void Flight_plan::burn(double dv){
 
         std::cout<<dv<<" : "<<sqrt((pow(current()->getvx(),2) + pow(current()->getvy(),2)))-sqrt(pow(vx_0,2) + pow(vy_0,2))<<std::endl;
 
-        Sleep(10);
+        wait(10);
 
     }
 
@@ -472,7 +509,7 @@ void Flight_plan::burn(double dv,int planet_){
 
         std::cout<<dv<<" : "<<sqrt((pow(current()->getvx() - planet(planet_)->getvx(),2) + pow(current()->getvy() - planet(planet_)->getvy(),2)))-sqrt(pow(vx_0,2) + pow(vy_0,2))<<std::endl;
 
-        Sleep(10);
+        wait(10);
 
     }
 
