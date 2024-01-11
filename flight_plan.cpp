@@ -97,7 +97,7 @@ double Flight_plan::distance(int planet_1 , int planet_2){
 }
 
 double Flight_plan::off_set(int planet_){
-    //calculates parihapsis height assuming a dtheta = 90 degrees and minimal external interferance
+    //calculates parihapsis height assuming minimal external interferance
 
     double x = current()->getx() - planet(planet_)->getx();
     double y = current()->gety() - planet(planet_)->gety();
