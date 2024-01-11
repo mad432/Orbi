@@ -1,7 +1,9 @@
 #include "flight_plan.h"
 #include <iostream>
-#include <windows.h>
 #include <chrono>
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 
 
 //Rocket * Flight_plan::current() = nullptr;
@@ -95,24 +97,32 @@ double Flight_plan::distance(int planet_1 , int planet_2){
 }
 
 double Flight_plan::off_set(int planet_){
+    //calculates parihapsis height assuming a dtheta = 90 degrees and minimal external interferance
 
     double x = current()->getx() - planet(planet_)->getx();
     double y = current()->gety() - planet(planet_)->gety();
     double vx = current()->getvx() - planet(planet_)->getvx();
     double vy = current()->getvy() - planet(planet_)->getvy();
+    double r  = sqrt(pow(x , 2)+pow(y , 2));
+    double rdot = vx * (x / r) + vy * (y / r);
+    //double theta = acos(y/r);
+    double thetadot = sqrt((pow(vx,2)+pow(vy,2))-(pow(rdot,2)))/r;
+    double L = thetadot*pow(r,2);
 
-    double step_1 = tan(acos((vx * x + vy * y)/(sqrt(pow(vx, 2) + pow(vy, 2)) * sqrt(pow(x, 2) + pow(y, 2))))) * sqrt(pow(x, 2) + pow(y, 2));
+    double GM = Sys->getG() * planet(planet_)->Getmass();
 
-    double correction = step_1/abs(step_1) * ((Sys->getG() * planet(planet_)->Getmass() *current()->Getmass() / pow(distance(rocket , 1) , 2)) / current()->Getmass()) * sqrt(pow(x, 2) + pow(y, 2))/sqrt(pow(vx, 2) + pow(vy, 2))/4;
+    double c = .5 * ( pow(rdot , 2) + pow(r * thetadot, 2)) - GM / r;
 
-    std::cout<<"correction"<<correction<<std::endl;
+    double solved = (GM - sqrt(pow(GM, 2) + 4 * c * pow(L, 2) / 2))/(-2 * c);
 
-    if(abs(step_1) > abs(correction)){
+//    double correction = (step_1/abs(step_1) * ((Sys->getG() * planet(planet_)->Getmass() *current()->Getmass() / pow(distance(rocket , 1) , 2)) / current()->Getmass()) * sqrt(pow(x, 2) + pow(y, 2))/sqrt(pow(vx, 2) + pow(vy, 2)));
 
-        return step_1 - correction;
-    }else{
-        return step_1 - correction;
-    }
+    std::cout<<"solved : "<<solved<<std::endl;
+
+    std::cout<<r<<std::endl;
+
+    return (solved);
+
 }
 
 
@@ -153,10 +163,12 @@ void Flight_plan::program_sel(int program){
            std::cout<<"transfer angle : "<<trans_angle<<std::endl<<"Dv required : "<<dv<<std::endl;
 
 
-           while((trans_angle - 1 > angle(1,0,2) || angle(1,0,2) > trans_angle + 1 || current()->getvx() * (planet(1)->getx()-planet(0)->getx()) + current()->getvy() * (planet(1)->gety()-planet(0)->gety()) < 0) ){
+           while((trans_angle - 1 > angle(1,0,2) || angle(1,0,2) > trans_angle + 1 || current()->getvx() * (planet(1)->getx()-planet(0)->getx()) + current()->getvy() * (planet(1)->gety()-planet(0)->gety()) < 0)){
 
 
                setheading("prograde" , 0);
+
+               wait(10);
 
            }
 
@@ -172,7 +184,7 @@ void Flight_plan::program_sel(int program){
 
                off = off_set(1);
 
-               if((off > 30)||(off < -30)){
+               if((off < 20 )||(off > -20)){
 
                   setheading("radial in" , 1);
                   heading = true;
@@ -202,20 +214,29 @@ void Flight_plan::program_sel(int program){
            }
            //int F_alt = 0;
 
-           while( (off < 25 || off > 35)){
+           while((off < 15 || off > 25)){
 
-               off = abs(off_set(1));
+               off = off_set(1);
 
                //off = (off - Sys->getG() * planet(1)->Getmass() * current()->Getmass())/ pow(off,2);
+               if (heading){
 
-               wait(10);
+                              setheading("radial out" , 1);
+
+                          }else{
+
+                              setheading("radial in" , 1);
+
+                          }
 
 
                burn(0.1,1);
 
+               //wait(5);
+
            }
 
-           std::cout<<"Final alt calc: "<<off<<std::endl;
+           std::cout<<"Final alt calc: "<<abs(off_set(1))<<std::endl;
 
 
 
@@ -245,6 +266,8 @@ void Flight_plan::program_sel(int program){
 
                 std::cout<<"Flight plan terminated with error code : "<<cat<<std::endl;
 
+    }catch(...){
+
     }
 
     //worker->~thread();
@@ -268,7 +291,7 @@ double Flight_plan::angle(int a, int b, int c){
         double vec_cbx = (cx - bx);
         double vec_cby = (cy - by);
 
-        return acos((vec_cbx * vec_abx + vec_cby * vec_aby)/( sqrt( pow(vec_cbx , 2) + pow(vec_cby , 2)) * sqrt( pow(vec_abx , 2) + pow(vec_aby , 2) ))) * 180 / 3.14;
+        return acos((vec_cbx * vec_abx + vec_cby * vec_aby)/( sqrt( pow(vec_cbx , 2) + pow(vec_cby , 2)) * sqrt( pow(vec_abx , 2) + pow(vec_aby , 2) ))) * 180 / M_PI;
 
 }
 
@@ -407,11 +430,11 @@ void Flight_plan::setheading(std::string dir, int planet_){
 
     if(dir == "prograde"){
 
-       int prograde = - atan((x/y)) * 180 / 3.14;
+       int prograde = - atan((x/y)) * 180 / M_PI;
 
        if((x <= 0 && y >=0) || (x >= 0 && y >= 0)){
 
-            prograde = - atan((x/y)) * 180 / 3.14 + 180;
+            prograde = - atan((x/y)) * 180 / M_PI + 180;
 
         }
 
@@ -419,22 +442,22 @@ void Flight_plan::setheading(std::string dir, int planet_){
 
     }else if(dir == "retrograde"){
 
-        int retrograde = - atan((x/y)) * 180 / 3.14 +180;
+        int retrograde = - atan((x/y)) * 180 / M_PI +180;
 
         if((x <= 0 && y >=0) || (x >= 0 && y >= 0)){
 
-            retrograde = - atan((x/y)) * 180 / 3.14;
+            retrograde = - atan((x/y)) * 180 / M_PI;
 
         }
 
         setheading(retrograde);
      }else if(dir == "radial out"){
 
-        int radial =  -atan((x/y)) * 180 / 3.14 + 90;
+        int radial =  -atan((x/y)) * 180 / M_PI + 90;
 
         if((x <= 0 && y >=0) || (x >= 0 && y >= 0)){
 
-            radial =  -atan((x/y)) * 180 / 3.14 - 90;
+            radial =  -atan((x/y)) * 180 / M_PI - 90;
 
         }
 
@@ -442,11 +465,11 @@ void Flight_plan::setheading(std::string dir, int planet_){
 
       }else if(dir == "radial in"){
 
-        int radial =  -atan((x/y)) * 180 / 3.14 - 90;
+        int radial =  -atan((x/y)) * 180 / M_PI - 90;
 
         if((x <= 0 && y >=0) || (x >= 0 && y >= 0)){
 
-            radial =  -atan((x/y)) * 180 / 3.14 + 90;
+            radial =  -atan((x/y)) * 180 / M_PI + 90;
 
          }
 
