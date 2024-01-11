@@ -159,7 +159,9 @@ void MainWindow::Sysfactory(int sel){
 
         on_GSlider_valueChanged(50);//sets G
 
-        addParticle(25000,1425/2 ,700/2 ,0,0,1);
+        int sol = 10000+rand()%15000;
+
+        addParticle(sol,1425/2 ,700/2 ,0,0,1);
 
         double ang = (rand()%360)*180/3.14;
 
@@ -167,9 +169,11 @@ void MainWindow::Sysfactory(int sel){
 
         double r_h = rand()%25 + 75;
 
-        addParticle(500, 1425/2 + p_h * sin(ang) , 700/2 + p_h * cos(ang) , sqrt(g*25000/p_h) * cos(ang), -sqrt(g*25000/p_h) * sin(ang), 0);
+        int mass = 400 + rand()%400;
 
-        addRocket(200,1425/2 + r_h ,700/2 , 0, -sqrt(g*25000/r_h) , 1);
+        addParticle(mass, 1425/2 + p_h * sin(ang) , 700/2 + p_h * cos(ang) , sqrt(g*sol/p_h) * cos(ang), -sqrt(g*sol/p_h) * sin(ang), 0);
+
+        addRocket(200,1425/2 + r_h ,700/2 , 0, -sqrt(g*sol/r_h) , 1);
 
     }
 
