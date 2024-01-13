@@ -1,12 +1,14 @@
 #ifndef SYSTEM_H
 #define SYSTEM_H
 #include <vector>
+#include "flight_plan.h"
 #include "Particle.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <mutex>
 #include "rocket.h"
 #include <thread>
+#include "flight_plan.h"
 
 struct cords{
     long double x;
@@ -41,7 +43,7 @@ public:
 
     static Particle* addParticle(int Mass, long double _x, long double _y , long double _vx, long double _vy, bool fixed);
 
-    static Rocket* System::addRocket(int Mass, long double _x, long double _y , long double _vx, long double _vy, bool fixed);
+    static Rocket* addRocket(int Mass, long double _x, long double _y , long double _vx, long double _vy, bool fixed);
 
     static void Remove(int id);
 
@@ -67,7 +69,16 @@ public:
 
     void setC(int C_){C = C_;};
 
+    void add_flight(Rocket * _cur, int program, std::vector <Particle *> references_ , int stage_);
+    void add_flight(Flight_plan * flight){ flights->push_back(flight) ;}
+
+    std::vector <Flight_plan*>* get_flights(){return flights;};
+
 private:
+
+    static std::vector <Flight_plan*> flights_;
+
+    static std::vector <Flight_plan*>* flights;
 
     static bool collisionEnabled;
 

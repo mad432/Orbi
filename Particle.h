@@ -1,5 +1,5 @@
-#ifndef PARTICAL_H
-#define PARTICAL_H
+#ifndef Particle_H
+#define Particle_H
 #include <QObject>
 #include <QColor>
 #include <QGraphicsItem>
@@ -13,7 +13,7 @@ class Particle: public QObject, public QGraphicsItem{
 
 public:
 
-    virtual std::string object(){return "Partical";};
+    virtual std::string object(){return "Particle";};
 
     ~Particle() override;
 
@@ -21,7 +21,7 @@ public:
 
     Particle(int Mass,long double _x,long double _y ,long double _vx,long double _vy, bool fixed, int _id);
 
-    virtual void DrawPartical(long double _x,long double _y,QGraphicsScene* scene);
+    virtual void DrawParticle(long double _x,long double _y,QGraphicsScene* scene);
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWidget *widget) override;
 
@@ -104,4 +104,4 @@ protected:
     bool col = false;
 };
 
-#endif // PARTICAL_H
+#endif // Particle_H

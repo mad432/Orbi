@@ -21,15 +21,20 @@ void Rocket::paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWid
 
     painter->drawRect(x - size /** ((2 * fuel)/(mass * 3/4))*/, y + size , size * (2 * fuel)/(mass * 3/4),3);
 
-    if(thrusting){// keeps the plue displayed while thrusting
+    if(thrusting){// keeps the plume displayed while thrusting
 
-        painter->drawPixmap(x - size/2 - sin(heading*(3.14/180))*size/3 , y - size/2 + cos(heading*(3.14/180))*size/3 , size , size, plume);
+        painter->drawPixmap(x - size/2 - sin(heading*(3.14/180))*size/3 , y - size/2 + cos(heading*(3.14/180)) * size/3 , size , size, plume);
 
         if(cycle == 100){
+
             thrusting = false;
+
             cycle = 0;
+
         }else{
+
             cycle++;
+
         }
     }
 }
@@ -82,7 +87,7 @@ void Rocket::changeaV(double i){
 };
 
 void Rocket::thrust(double EV){
-    //fires the engines in the heading
+    //fires the engines
 
     if(fuel > 0){
 
@@ -111,7 +116,7 @@ void Rocket::thrust(double EV){
 };
 
 
-void Rocket::DrawPartical(long double _x, long double _y, QGraphicsScene *scene){
+void Rocket::DrawParticle(long double _x, long double _y, QGraphicsScene *scene){
 
 }
 
@@ -119,5 +124,3 @@ Rocket::~Rocket(){
 
 
 }
-
-void Rocket::print(){std::cout<<"why"<<std::endl;}

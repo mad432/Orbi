@@ -14,7 +14,7 @@ public:
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWidget *widget) override;
 
-    void DrawPartical(long double _x, long double _y, QGraphicsScene *scene) override;
+    void DrawParticle(long double _x, long double _y, QGraphicsScene *scene) override;
 
     void changeheading(double change) override;
 
@@ -27,10 +27,6 @@ public:
     double getaV() override{return aV;};
 
     void changeaV(double i) override;
-
-    void print();
-
-    int o = 10;
 
 protected:
 

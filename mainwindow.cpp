@@ -11,6 +11,7 @@
 #include <vector>
 #include <QMouseEvent>
 #include "flight_plan.h"
+#include "filesave.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -41,15 +42,29 @@ MainWindow::MainWindow(QWidget *parent)
 
     on_TimeSlider_valueChanged(10);
 
-    //on_horizontalSlider_2_valueChanged(0);
-
     C_slider w;
 
     QObject::connect(timer1, SIGNAL(timeout()), this, SLOT(timetick()));
 
     timer1->start(0);
 
+    Filesave * saves = new Filesave;
+
     Sysfactory(-1);
+
+    saves->Write_system("test");
+
+    on_pushButton_clicked();
+
+////    //_sleep(10000);
+////    on_GSlider_valueChanged(50);
+
+
+    for(auto par: saves->Read_system("test")){
+
+        scene->addItem(par);
+
+    };
 
 
 
@@ -92,7 +107,6 @@ void MainWindow::pause(){// stops the signal from the timer
 
 void MainWindow::timetick(){
 
-
     timer->stop();
 
     if (system->process()){// calculates the particle movements
@@ -129,24 +143,27 @@ void MainWindow::timetick(){
 
 void MainWindow::addParticle(int Mass, long double _x, long double _y , long double _vx, long double _vy, bool fixed){
 
-    scene->addItem(system->addParticle(Mass, _x,_y , _vx, _vy, fixed));
+    scene->addItem(system->addParticle(Mass, _x, _y , _vx, _vy, fixed));
 
 }
 
 void MainWindow::addRocket(int Mass, long double _x, long double _y , long double _vx, long double _vy, int plan){
 
-    Rocket *rock = system->addRocket(Mass, _x,_y , _vx, _vy, 0);
+    Rocket *rock = system->addRocket(Mass, _x, _y , _vx, _vy, 0);
 
     scene->addItem(rock);
 
     player = rock;
 
-    if(plan!=0){
+    if(plan != 0){
 
         std::vector <Particle *> references = system->Getparticles();
 
-        Flight_plan(rock , system , plan , references);
+        int stage = 0;
 
+        system->add_flight(rock, plan , references, stage);
+
+        //system->add_flight(y);
     }
 }
 
@@ -154,6 +171,19 @@ void MainWindow::addRocket(int Mass, long double _x, long double _y , long doubl
 void MainWindow::Sysfactory(int sel){
 
     on_pushButton_clicked();
+
+    if(sel == -2){
+
+        on_GSlider_valueChanged(50);//sets G
+
+        int sol = 10000 + rand()%15000;
+
+        addParticle(sol,1425/2 ,700/2 ,0,-10,0);
+
+        double r_h = 200;
+
+        addRocket(200,1425/2 + r_h ,700/2 , 0, -sqrt(g*sol/r_h)*0.8 , 2);
+    }
 
     if(sel == -1){
 
@@ -470,19 +500,8 @@ void MainWindow::on_TimeSlider_valueChanged(int value)
 void MainWindow::on_pushButton_clicked()//clear
 {
     pause();
-
-
-    for (Particle *par : system->Getparticles()){
-
-        system->Remove(par->getid());
-
-        player = nullptr;
-
-        delete par;
-
-        //qApp->processEvents();
-
-    }
+    player = nullptr;
+    system->clear();
     pause();
     scene->update();
     //scene->setSceneRect(0, 0, scene->width(), scene->height());

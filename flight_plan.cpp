@@ -8,7 +8,7 @@
 
 //Rocket * Flight_plan::current() = nullptr;
 
-System * Flight_plan::Sys = nullptr;
+double  Flight_plan::G = 0;
 
 int Flight_plan::rocket = 0;
 
@@ -16,18 +16,32 @@ std::thread * Flight_plan::worker = nullptr;
 
 std::vector <Particle *> Flight_plan::references = {};
 
-Flight_plan::Flight_plan(Rocket * _cur , System * _sys , int program, std::vector <Particle *> references_)
+int Flight_plan::stage = 0;
+
+bool Flight_plan::terminated = false;
+
+void Flight_plan::terminate(){terminated = true; std::cout<<terminated<<std::endl;}
+
+Flight_plan::Flight_plan(Rocket * _cur , double G_ , int program_, std::vector <Particle *> references_, int stage_)
 {
+    wait(50);
+
+    program = program_;
+
+    terminated = false;
 
     rocket = _cur->getid();
 
-    Sys = _sys;
+    G = G_;
 
     references = references_;
+
+    stage = stage_;
 
     worker = new std::thread(program_sel,program);
 
     worker->detach();
+
 
 }
 
@@ -37,7 +51,7 @@ Particle * Flight_plan::planet(int pla){
 
     void * here = references[pla];
 
-    if (here != nullptr){
+    if (here != nullptr && !terminated){
 
         return references[pla];
 
@@ -56,13 +70,11 @@ Particle * Flight_plan::planet(int pla){
 Rocket * Flight_plan::current(){
     //fetches the attaced rocket
 
-    if(Sys->Getparticles().size()>rocket){
-
         Particle * here = planet(rocket);
 
         Rocket * ret_rock =  dynamic_cast<Rocket*>(here);
 
-        if (ret_rock != nullptr){
+        if (ret_rock != nullptr && !terminated){
 
             return ret_rock;
 
@@ -73,18 +85,17 @@ Rocket * Flight_plan::current(){
             return nullptr;
 
         }
-    }else{
-
-        throw 1;
-
-    }
 }
 
 void Flight_plan::wait(int time){
+
     std::this_thread::sleep_for(std::chrono::milliseconds(time));
+
 }
 
 Flight_plan::~Flight_plan(){
+
+    terminated = true;
 
 }
 
@@ -105,21 +116,19 @@ double Flight_plan::off_set(int planet_){
     double vy = current()->getvy() - planet(planet_)->getvy();
     double r  = sqrt(pow(x , 2)+pow(y , 2));
     double rdot = vx * (x / r) + vy * (y / r);
-    //double theta = acos(y/r);
-    double thetadot = sqrt((pow(vx,2)+pow(vy,2))-(pow(rdot,2)))/r;
-    double L = thetadot*pow(r,2);
+    //double theta = acos(x/r);
+    double thetadot = sqrt((pow(vx , 2)+pow(vy , 2))-(pow(rdot , 2))) / r;
+    double L = thetadot * pow(r , 2);
 
-    double GM = Sys->getG() * planet(planet_)->Getmass();
+    double GM = G * planet(planet_)->Getmass();
 
-    double c = .5 * ( pow(rdot , 2) + pow(r * thetadot, 2)) - GM / r;
+    double a = .5 * ( pow(rdot , 2) + pow(r * thetadot, 2)) - GM / r;
 
-    double solved = (GM - sqrt(pow(GM, 2) + 4 * c * pow(L, 2) / 2))/(-2 * c);
+    double solved = (GM - sqrt(pow(GM, 2) + 4 * a * pow(L, 2) / 2))/(-2 * a);
 
-//    double correction = (step_1/abs(step_1) * ((Sys->getG() * planet(planet_)->Getmass() *current()->Getmass() / pow(distance(rocket , 1) , 2)) / current()->Getmass()) * sqrt(pow(x, 2) + pow(y, 2))/sqrt(pow(vx, 2) + pow(vy, 2)));
+//    double correction = (step_1/abs(step_1) * ((G * planet(planet_)->Getmass() *current()->Getmass() / pow(distance(rocket , 1) , 2)) / current()->Getmass()) * sqrt(pow(x, 2) + pow(y, 2))/sqrt(pow(vx, 2) + pow(vy, 2)));
 
     std::cout<<"solved : "<<solved<<std::endl;
-
-    std::cout<<r<<std::endl;
 
     return (solved);
 
@@ -135,130 +144,7 @@ void Flight_plan::program_sel(int program){
         if(program == 1){//transfer from planet 0 to planet 1
 
 
-           double h_0 = 0;
-
-           if(planet(0) != nullptr){
-
-               h_0 = distance(rocket, 0);
-
-           }
-
-           double h_p = 0;
-
-           if(planet(1) != nullptr && planet(0) != nullptr){
-
-               h_p = distance(0,1);
-
-           }
-
-           double dv = 0;
-
-           if(planet(0) != nullptr){
-               dv = sqrt((planet(0)->Getmass()*Sys->getG() /h_0)) * (sqrt(((2.0 * h_p)/(h_p + h_0))) - 1.0) - 3.0 ;
-           }
-
-
-           int trans_angle = 180 * (1 - ( 1 / (sqrt(8)) * sqrt( pow(h_0/h_p + 1 , 3))));
-
-           std::cout<<"transfer angle : "<<trans_angle<<std::endl<<"Dv required : "<<dv<<std::endl;
-
-
-           while((trans_angle - 1 > angle(1,0,2) || angle(1,0,2) > trans_angle + 1 || current()->getvx() * (planet(1)->getx()-planet(0)->getx()) + current()->getvy() * (planet(1)->gety()-planet(0)->gety()) < 0)){
-
-
-               setheading("prograde" , 0);
-
-               wait(10);
-
-           }
-
-
-           double off = 50;
-
-
-           burn(dv);
-
-           bool heading = true;
-
-           while(distance(1,rocket) > 75){
-
-               off = off_set(1);
-
-               if((off < 20 )||(off > -20)){
-
-                  setheading("radial in" , 1);
-                  heading = true;
-
-               }else{
-
-                  setheading("radial out" , 1);
-                  heading = false;
-
-               }
-
-               wait(10);
-           }
-
-           while(distance(1,rocket) > 50){
-               if (heading){
-
-                   setheading("radial out" , 1);
-
-               }else{
-
-                   setheading("radial in" , 1);
-
-               }
-
-               wait(10);
-           }
-           //int F_alt = 0;
-
-           while((off < 15 || off > 25)){
-
-               off = off_set(1);
-
-               //off = (off - Sys->getG() * planet(1)->Getmass() * current()->Getmass())/ pow(off,2);
-               if (heading){
-
-                              setheading("radial out" , 1);
-
-                          }else{
-
-                              setheading("radial in" , 1);
-
-                          }
-
-
-               burn(0.1,1);
-
-               //wait(5);
-
-           }
-
-           std::cout<<"Final alt calc: "<<abs(off_set(1))<<std::endl;
-
-
-
-
-           double d_i = distance(rocket,1);
-
-           while( d_i >= distance(rocket,1)){// wait for periapsis
-
-               d_i = distance(rocket,1);
-
-               wait(10);
-
-               setheading("retrograde" , 1);
-           }
-
-           dv = sqrt(pow(current()->getvx() - planet(1)->getvx(),2) + pow(current()->getvy() - planet(1)->getvy(),2)) - sqrt((Sys->getG() * planet(1)->Getmass()/distance(rocket , 1))) - 3 ;
-
-           std::cout<<"incertion dv : "<<dv<<std::endl;
-
-           burn(dv, 1);
-
-           std::cout<<"Final alt : "<<distance(rocket,1)<<std::endl;
+          hohmann_transfer(0);
 
         }
 
@@ -273,7 +159,151 @@ void Flight_plan::program_sel(int program){
     //worker->~thread();
     std::cout<<"flight plan finished"<<std::endl;
 
+
 };
+
+void Flight_plan::hohmann_transfer(int planet_){
+
+    if(stage == 1){
+
+        goto stage1;
+
+    }else if(stage == 2){
+
+        goto stage2;
+
+    }
+    double h_0 = 0;
+
+    if(planet(0) != nullptr){
+
+        h_0 = distance(rocket, 0);
+
+    }
+
+    double h_p = 0;
+
+    if(planet(1) != nullptr && planet(0) != nullptr){
+
+        h_p = distance(0,1);
+
+    }
+
+    double dv = 0;
+
+    if(planet(0) != nullptr){
+        dv = sqrt((planet(0)->Getmass()*G /h_0)) * (sqrt(((2.0 * h_p)/(h_p + h_0))) - 1.0) - 3.0 ;
+    }
+
+
+    int trans_angle = 180 * (1 - ( 1 / (sqrt(8)) * sqrt( pow(h_0/h_p + 1 , 3))));
+
+    std::cout<<"transfer angle : "<<trans_angle<<std::endl<<"Dv required : "<<dv<<std::endl;
+
+
+    while((trans_angle - 1 > angle(1,0,2) || angle(1,0,2) > trans_angle + 1 || current()->getvx() * (planet(1)->getx()-planet(0)->getx()) + current()->getvy() * (planet(1)->gety()-planet(0)->gety()) < 0)){
+
+
+        setheading("prograde" , 0);
+
+        wait(10);
+
+    }
+
+
+    double off = 50;
+
+
+    burn(dv);
+
+    stage = 1;
+
+    stage1:
+
+    bool heading = true;
+
+    while(distance(1,rocket) > 75){
+
+        off = off_set(1);
+
+        if((off < 20 )||(off > -20)){
+
+           setheading("radial in" , 1);
+           heading = true;
+
+        }else{
+
+           setheading("radial out" , 1);
+           heading = false;
+
+        }
+
+        wait(10);
+    }
+
+    while(distance(1,rocket) > 50){
+        if (heading){
+
+            setheading("radial out" , 1);
+
+        }else{
+
+            setheading("radial in" , 1);
+
+        }
+
+        wait(10);
+    }
+    //int F_alt = 0;
+
+    while((off < 15 || off > 25)){
+
+        off = off_set(1);
+
+        //off = (off - G * planet(1)->Getmass() * current()->Getmass())/ pow(off,2);
+        if (heading){
+
+            setheading("radial out" , 1);
+
+        }else{
+
+            setheading("radial in" , 1);
+
+        }
+
+
+        burn(0.1,1);
+
+        wait(5);
+
+    }
+
+    std::cout<<"Final alt calc: "<<off_set(1)<<std::endl;
+
+    stage = 2;
+
+    stage2:
+
+    double d_i = distance(rocket,1);
+
+    while( d_i >= distance(rocket,1)){// wait for periapsis
+
+        d_i = distance(rocket,1);
+
+        wait(10);
+
+        setheading("retrograde" , 1);
+    }
+
+    dv = sqrt(pow(current()->getvx() - planet(1)->getvx(),2) + pow(current()->getvy() - planet(1)->getvy(),2)) - sqrt((G * planet(1)->Getmass()/distance(rocket , 1))) - 3 ;
+
+    std::cout<<"incertion dv : "<<dv<<std::endl;
+
+    burn(dv, 1);
+
+    std::cout<<"Final alt : "<<distance(rocket,1)<<std::endl;
+
+}
 
 double Flight_plan::angle(int a, int b, int c){
     //returns the angle at b from a,c

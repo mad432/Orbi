@@ -8,6 +8,7 @@
 
 
 
+
 System* System::Instance = NULL;
 
 double System::step_ = .0005;
@@ -49,6 +50,10 @@ double System::C = 1000;
 bool System::collisionEnabled = true;
 
 bool System::DebrisEnabled = true;
+
+std::vector <Flight_plan*> System::flights_;
+
+std::vector <Flight_plan*>* System::flights = &flights_;
 
 
 
@@ -147,6 +152,29 @@ Rocket* System::addRocket(int Mass, long double _x, long double _y , long double
     *size += 1;
 
     return par;
+};
+
+void System::add_flight(Rocket * _cur ,int program, std::vector <Particle *> references_ , int stage_){
+    //adds a flight plan to a rocket
+
+    int j = 0;
+
+    for(auto plan : *flights){
+        if(plan->get_rocket() == _cur->getid()){
+
+            flights->erase(flights->begin()+j);
+
+            delete plan;
+
+        }
+
+        j++;
+    }
+
+    Flight_plan * here = new Flight_plan(_cur , *g *2 , program , references_, stage_);
+
+    flights->push_back(here);
+
 };
 
 void System::collision(Particle* par, Particle* par1){
@@ -259,7 +287,45 @@ void System::collision(Particle* par, Particle* par1){
             fix = true;
         }
 
-        addParticle(par->Getmass()+par1->Getmass() - breakmass, posx , posy , vx , vy , fix);
+        Particle * result = addParticle(par->Getmass()+par1->Getmass() - breakmass, posx , posy , vx , vy , fix);
+
+        int j = 0;
+
+        for(auto plan: *flights){
+
+            if(plan->get_rocket() == par->getid() || plan->get_rocket() == par1->getid()){
+
+                flights->erase(flights->begin()+j);
+
+                delete plan;
+
+            }else{
+
+                for(auto planet:plan->get_references()){
+
+                    int i = 0;
+
+                    //std::cout<<"id"<<par->getid()<<" : "<<result->getid();
+
+                    if(par == planet || par1 == planet){
+
+                        std::vector <Particle *> nref = plan->get_references();
+
+                        nref[i] = result;
+
+                        plan->setrefernces(nref);
+
+                        std::cout<<"id : "<<plan->get_references()[i]->getid()<<" : "<<result->getid()<<std::endl;
+
+                    }
+
+                    i++;
+                }
+
+            }
+            j++;
+
+        }
 
 
         //Idreset();
@@ -268,7 +334,20 @@ void System::collision(Particle* par, Particle* par1){
 }
 void System::clear(){
 
+    for(auto par : *particles){
+        delete par;
+    }
+
     particles->clear();
+    for(auto flight : *flights){
+
+        flight->terminate();
+
+        delete flight;
+
+    }
+    flights->clear();
+
     *size = 0;
 
 }
@@ -404,9 +483,7 @@ bool System::update(int start, int end){
 
         if (par->object() == "Rocket"){
 
-            par->getheading();
-
-            par->changeheading(par->getaV());
+            par->changeheading(par->getaV() * *step * 2000);
         }
 
         if(par->getfix() == false){

@@ -82,7 +82,7 @@ void Particle::paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QW
 
 }
 
-void Particle::DrawPartical(long double _x, long double _y, QGraphicsScene *scene){
+void Particle::DrawParticle(long double _x, long double _y, QGraphicsScene *scene){
 
 }
 
