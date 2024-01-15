@@ -4,7 +4,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <stdio.h>
-
+#include <windows.h>
+#include <GL/gl.h>
 
 
 
@@ -51,7 +52,7 @@ bool System::collisionEnabled = true;
 
 bool System::DebrisEnabled = true;
 
-std::vector <Flight_plan*> System::flights_;
+std::vector <Flight_plan*> System::flights_ = {};
 
 std::vector <Flight_plan*>* System::flights = &flights_;
 
@@ -160,18 +161,20 @@ void System::add_flight(Rocket * _cur ,int program, std::vector <Particle *> ref
     int j = 0;
 
     for(auto plan : *flights){
-        if(plan->get_rocket() == _cur->getid()){
+        if(plan->get_rocket()->getid() == _cur->getid()){
+
+            plan->terminate();
 
             flights->erase(flights->begin()+j);
 
-            delete plan;
+            j--;
 
         }
 
         j++;
     }
 
-    Flight_plan * here = new Flight_plan(_cur , *g *2 , program , references_, stage_);
+    Flight_plan * here = new Flight_plan(2 , *g *2 , program , references_, stage_);
 
     flights->push_back(here);
 
@@ -291,45 +294,55 @@ void System::collision(Particle* par, Particle* par1){
 
         int j = 0;
 
-        for(auto plan: *flights){
+        //std::vector<Flight_plan*> hold = *flights;
 
-            if(plan->get_rocket() == par->getid() || plan->get_rocket() == par1->getid()){
+        for(Flight_plan* plan: *flights){
 
-                flights->erase(flights->begin()+j);
+                if(plan->get_rocket()->getid() == par->getid() || plan->get_rocket()->getid() == par1->getid()){
 
-                delete plan;
+                   flights->erase(flights->begin()+j);
 
-            }else{
+                    plan->terminate();
 
-                for(auto planet:plan->get_references()){
+                    j--;
 
-                    int i = 0;
+                }else{
 
-                    //std::cout<<"id"<<par->getid()<<" : "<<result->getid();
+                    for(auto planet:plan->get_references()){
 
-                    if(par == planet || par1 == planet){
+                        int i = 0;
 
-                        std::vector <Particle *> nref = plan->get_references();
+                        //std::cout<<"id"<<par->getid()<<" : "<<result->getid();
 
-                        nref[i] = result;
+                        if(par == planet || par1 == planet){
 
-                        plan->setrefernces(nref);
+                            std::vector <Particle *> nref = plan->get_references();
 
-                        std::cout<<"id : "<<plan->get_references()[i]->getid()<<" : "<<result->getid()<<std::endl;
+                            nref[i] = result;
 
+                            std::cout<<result->getid()<<std::endl;
+
+                            plan->setrefernces(nref);
+
+                            //std::cout<<"id : "<<plan->get_references()[i]->getid()<<" : "<<result->getid()<<std::endl;
+
+                            }
+
+                            i++;
                     }
 
-                    i++;
                 }
 
-            }
             j++;
-
+            }
         }
+    std::cout<<"size : "<<flights->size()<<std::endl;
+
+
 
 
         //Idreset();
-    }
+
 
 }
 void System::clear(){
@@ -343,7 +356,7 @@ void System::clear(){
 
         flight->terminate();
 
-        delete flight;
+        //delete flight;
 
     }
     flights->clear();
@@ -486,6 +499,10 @@ bool System::update(int start, int end){
             par->changeheading(par->getaV() * *step * 2000);
         }
 
+        if(par->getcol()==true){
+            *beencol = true;
+        }
+
         if(par->getfix() == false){
 
             double rel_step = *step;
@@ -589,6 +606,27 @@ bool System::update(int start, int end){
                 }
             }
 
+        }else{
+
+            for(auto &par1 : hold){
+
+                if(par1->getid() != par->getid() && par1->getcolnum() == -1){
+
+
+                        if((par->getsize() + par1->getsize()) / 2 > sqrt(pow(par->getx() - par1->getx() , 2) + pow(par->gety() - par1->gety() , 2))){//check for collision
+
+                            if(!par->getcol() && !par1->getcol()){//check to see if a particle has already collided
+
+                                par->setcol(par1->getid());
+
+                                par1->setcol(par->getid());
+
+                            }
+                            *beencol = true;
+                        }
+
+                  }
+             }
         }
 
 

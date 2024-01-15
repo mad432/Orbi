@@ -10,7 +10,7 @@ class Flight_plan
 public:
     ~Flight_plan();
 
-    Flight_plan(Rocket * _cur , double G , int program, std::vector <Particle *> references_ , int stage_);
+    Flight_plan(int _cur , double G , int program, std::vector <Particle *> references_ , int stage_);
 
     void inctime(int T){time += T;};
 
@@ -22,7 +22,7 @@ public:
 
     int get_plan(){return program;}
 
-    int get_rocket(){return current()->getid();}
+    Rocket * get_rocket(){return current(&references,&terminated);}
 
     int get_stage(){return stage;}
 
@@ -30,47 +30,49 @@ private:
 
     int program;
 
-    static bool terminated;
+    bool terminated;
 
-    static void hohmann_transfer(int planet_);
+    static void hohmann_transfer(int planet_, std::vector<Particle*>* , int rocket , bool *ter);
 
     static int stage;
 
-    static Particle * planet(int pla);
+    static Particle * planet(int pla, std::vector<Particle*>* ref , bool *ter);
 
-    static int rockangle();
+    static int rockangle(std::vector<Particle*>* ref, bool *ter);
 
-    static void spin(double amount);
+    static void spin(double amount,std::vector<Particle*>* ref, bool *ter);
 
-    static void program_sel(int program);
+    static void program_sel(int program ,std::vector<Particle*>* ref, int rocket, bool *ter, Flight_plan* here);
 
-    static void burn(double dv);
-    static void burn(double dv,int planet);
+    static void burn(double dv,std::vector<Particle*>* ref, bool *ter);
+    static void burn(double dv,int planet,std::vector<Particle*>* ref, bool *ter);
 
     static int abs_ang(int angle);
 
-    static Rocket * current();
+    static Rocket * current(std::vector<Particle*>* ref,bool *ter);
 
-    static int rocket;
+    //static int rocket;
 
     static double G;
 
-    static double angle(int a, int b, int c);
+    static double angle(int a, int b, int c,std::vector<Particle*>* ref, bool *ter);
 
     int time;
 
     static void wait(int time);
-    
-    static std::thread * worker;
 
-    static void setheading(int angle);
-    static void setheading(std::string dir, int planet);
+    std::thread * worker;
 
-    static double distance(int planet_1 , int planet_2);
+    static void setheading(int angle,std::vector<Particle*>* ref, bool *ter);
+    static void setheading(std::string dir, int planet,std::vector<Particle*>* ref, bool *ter);
 
-    static std::vector <Particle *> references;
+    static double distance(int planet_1 , int planet_2, std::vector<Particle*>* ref, bool *ter);
 
-    static double off_set(int planet_);
+    std::vector <Particle *> references;
+
+    static double off_set(int planet_, std::vector<Particle*>* ref, bool *ter);
+
+    static double Apoapsis(int planet_, std::vector<Particle*>* ref, bool *ter);
 
 
 //    void burn(int dv);

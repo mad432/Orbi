@@ -42,29 +42,29 @@ MainWindow::MainWindow(QWidget *parent)
 
     on_TimeSlider_valueChanged(10);
 
-    C_slider w;
-
     QObject::connect(timer1, SIGNAL(timeout()), this, SLOT(timetick()));
 
     timer1->start(0);
 
     Filesave * saves = new Filesave;
 
-    Sysfactory(-1);
-
-    saves->Write_system("test");
-
     on_pushButton_clicked();
 
-////    //_sleep(10000);
-////    on_GSlider_valueChanged(50);
+    Sysfactory(-1);
+
+    //saves->Write_system("test");
+
+    //on_pushButton_clicked();
+
+//////    //_sleep(10000);
+//////    on_GSlider_valueChanged(50);
 
 
-    for(auto par: saves->Read_system("test")){
+//    for(auto par: saves->Read_system("test")){
 
-        scene->addItem(par);
+//        scene->addItem(par);
 
-    };
+//    };
 
 
 
@@ -147,7 +147,7 @@ void MainWindow::addParticle(int Mass, long double _x, long double _y , long dou
 
 }
 
-void MainWindow::addRocket(int Mass, long double _x, long double _y , long double _vx, long double _vy, int plan){
+void MainWindow::addRocket(int Mass, long double _x, long double _y , long double _vx, long double _vy, int plan ,int ref){
 
     Rocket *rock = system->addRocket(Mass, _x, _y , _vx, _vy, 0);
 
@@ -157,7 +157,13 @@ void MainWindow::addRocket(int Mass, long double _x, long double _y , long doubl
 
     if(plan != 0){
 
-        std::vector <Particle *> references = system->Getparticles();
+        std::vector <Particle *> references = {};
+
+        references.push_back(system->Getparticles()[0]);
+
+        references.push_back(system->Getparticles()[ref]);
+
+        references.push_back(rock);
 
         int stage = 0;
 
@@ -182,7 +188,7 @@ void MainWindow::Sysfactory(int sel){
 
         double r_h = 200;
 
-        addRocket(200,1425/2 + r_h ,700/2 , 0, -sqrt(g*sol/r_h)*0.8 , 2);
+        addRocket(200,1425/2 + r_h ,700/2 , 0, -sqrt(g*sol/r_h) , 2 , 1);
     }
 
     if(sel == -1){
@@ -195,7 +201,7 @@ void MainWindow::Sysfactory(int sel){
 
         double ang = (rand()%360)*180/3.14;
 
-        double p_h = rand()%100 + 200;
+        double p_h = rand()%200 + 200;
 
         double r_h = rand()%25 + 75;
 
@@ -203,8 +209,11 @@ void MainWindow::Sysfactory(int sel){
 
         addParticle(mass, 1425/2 + p_h * sin(ang) , 700/2 + p_h * cos(ang) , sqrt(g*sol/p_h) * cos(ang), -sqrt(g*sol/p_h) * sin(ang), 0);
 
-        addRocket(200,1425/2 + r_h ,700/2 , 0, -sqrt(g*sol/r_h) , 1);
+        addParticle(mass, 1425/2 - p_h/1.2 * sin(ang) , 700/2 - p_h/1.2 * cos(ang) , -sqrt(g*sol/(p_h/1.2)) * cos(ang), +sqrt(g*sol/(p_h/1.2)) * sin(ang), 0);
 
+        addRocket(200,1425/2 - r_h ,700/2 , 0, +sqrt((g*sol+200)/r_h) , 1 , 1);
+
+        addRocket(200,1425/2 + r_h ,700/2 , 0, -sqrt((g*sol+200)/r_h) , 1 , 2);
     }
 
     if(sel == 0){//Earth-Moon
@@ -222,7 +231,7 @@ void MainWindow::Sysfactory(int sel){
 
         on_GSlider_valueChanged(60);
 
-        addRocket(200, 1425/2+400 , 700/2+70, -25, 20, 0);
+        addRocket(200, 1425/2 + 400 , 700/2 + 70, -25, 20, 0,0);
 
         addParticle(4000, 1425/2 , 700/2+70, 25, 0, 0);
 
@@ -459,7 +468,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event){
 
             if(rocket){
 
-                addRocket(200,x,y,(gx - x),(gy - y),0);
+                addRocket(200,x,y,(gx - x),(gy - y),0,0);
 
                 rocket = false;
 

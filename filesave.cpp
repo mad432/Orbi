@@ -54,45 +54,56 @@ std::vector<Particle *> Filesave::Read_system(std::string name){
 
     std::vector<Particle *> ret;
 
-    std::string line;
+    try{
 
-    std::ifstream myfile (dir + name + ".txt");
+        std::string line;
 
-    if (myfile.is_open()){
+        std::ifstream myfile (dir + name + ".txt");
 
-        getline(myfile,line,'\n');
+        if (myfile.is_open()){
 
-        system->setG(stold(line) / 2);
+            getline(myfile,line,'\n');
 
-        while (getline(myfile,line, '\n') ){
+            system->setG(stold(line) / 2);
 
-            if(line.find("Particle") == 0){
+            while (getline(myfile,line, '\n') ){
 
-                line = line.substr(9, line.find("Particle") - 9 );
+                if(line.find("Particle") == 0){
 
-                //ret.push_back(system->addParticle(read_particle(line)));
-                std::cout<<line<<std::endl;
+                    line = line.substr(9, line.find("Particle") - 9 );
 
-                ret.push_back(read_particle(line));
+                    //ret.push_back(system->addParticle(read_particle(line)));
+                    std::cout<<line<<std::endl;
 
-            }else if(line.find("Rocket") == 0){
+                    ret.push_back(read_particle(line));
 
-                line = line.substr(7, line.find("Rocket") - 7 );
+                }else if(line.find("Rocket") == 0){
 
-                ret.push_back(read_rocket(line));
+                    line = line.substr(7, line.find("Rocket") - 7 );
 
-            }else if(line.find("Flight") == 0){
+                    ret.push_back(read_rocket(line));
 
-                line = line.substr(7, line.find("Flight") - 7);
+                }else if(line.find("Flight") == 0){
 
-                read_flightplan(line);
+                    line = line.substr(7, line.find("Flight") - 7);
 
+                    read_flightplan(line);
+
+
+                }
 
             }
 
-        }
+            myfile.close();
 
-        myfile.close();
+        }else{
+
+            std::cout<<"file not found";
+
+        }
+    }catch(...){
+
+        std::cout<<"file corrupted"<<std::endl;
 
     }
 
@@ -125,13 +136,6 @@ long double Filesave::F_string(std::string val){
 
     std::cout<<val<<std::endl;
 
-    if(val.find("sqrt(") == 0){
-
-        val = val.substr( 5 , val.find(")") - 5);
-
-        return sqrt(F_string(val));
-
-    }
     if(val.find("*") != val.npos){
 
         std::string val1 = val.substr( 0 , val.find("*"));
@@ -149,18 +153,23 @@ long double Filesave::F_string(std::string val){
 
         return F_string(val1) / F_string(val2);
     }
-
     if(val.find("+") != val.npos){
 
         std::string val1 = val.substr( 0 , val.find("+"));
 
         std::cout<<"first val : "<<val1<<std::endl;
 
-        std::string val2 = val.substr( val.find("+"), val.back());
+        std::string val2 = val.substr( val.find("+") + 1, val.back());
 
-        return (F_string(val1) + F_string(val2));
+        return F_string(val1) + F_string(val2);
     }
+    if(val.find("sqrt(") == 0){
 
+        val = val.substr( 5 , val.find(")") - 5);
+
+        return sqrt(F_string(val));
+
+    }
     if(val.find("sin(") == 0){
 
         val = val.substr( 4 , val.find(")") - 4);
@@ -196,7 +205,7 @@ Particle * Filesave::read_particle(std::string par_str){
 
     std::string token = par_str.substr(pos, par_str.find(','));
 
-    int mass = stoi(token);
+    int mass = F_string(token);
 
     token.erase();
 
@@ -319,7 +328,7 @@ std::string Filesave::write_rocket(Particle * par){
 
 std::string Filesave::write_flight_plan(Flight_plan flight){
 
-    std::string rock = std::to_string(flight.get_rocket());
+    std::string rock = std::to_string(flight.get_rocket()->getid());
 
     std::string program = std::to_string(flight.get_plan());
 

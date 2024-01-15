@@ -88,7 +88,7 @@ private:
     bool rocket;
 
     void addParticle(int Mass, long double _x, long double _y , long double _vx, long double _vy, bool fixed);
-    void addRocket(int Mass, long double _x, long double _y , long double _vx, long double _vy, int plan);
+    void addRocket(int Mass, long double _x, long double _y , long double _vx, long double _vy, int plan , int ref);
 
     cords gravity(double par1x , double par1y , double par2x , double par2y , double m1, double m2);
 
