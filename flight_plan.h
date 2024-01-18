@@ -70,9 +70,13 @@ private:
 
     std::vector <Particle *> references;
 
-    static double off_set(int planet_, std::vector<Particle*>* ref, bool *ter);
+    static double periapsis(int planet_, std::vector<Particle*>* ref, bool *ter);
 
     static double Apoapsis(int planet_, std::vector<Particle*>* ref, bool *ter);
+
+    static double true_anomaly(int planet_, std::vector<Particle*>* ref, bool *ter);
+
+    static double eccentricity(int planet_, std::vector<Particle*>* ref, bool *ter);
 
 
 //    void burn(int dv);

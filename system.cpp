@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <windows.h>
 #include <GL/gl.h>
+#include <GLES3/gl3.h>
 
 
 
@@ -336,7 +337,7 @@ void System::collision(Particle* par, Particle* par1){
             j++;
             }
         }
-    std::cout<<"size : "<<flights->size()<<std::endl;
+    //std::cout<<"size : "<<flights->size()<<std::endl;
 
 
 
@@ -517,9 +518,9 @@ bool System::update(int start, int end){
 
             }
 
-            par->setx(par->getx() + (par->getvx() * rel_step));//move particle
+            par->setx(par->getx() + (par->getvx() * *step));//move particle
 
-            par->sety(par->gety() + (par->getvy() * rel_step));
+            par->sety(par->gety() + (par->getvy() * *step));
 
             for(auto &par1 : hold){
 

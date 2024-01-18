@@ -106,7 +106,7 @@ double Flight_plan::distance(int planet_1 , int planet_2 ,std::vector<Particle*>
 
 }
 
-double Flight_plan::off_set(int planet_, std::vector<Particle*>* ref, bool *ter){
+double Flight_plan::periapsis(int planet_, std::vector<Particle*>* ref, bool *ter){
     //calculates parihapsis height assuming minimal external interferance
 
     double x = current(ref, ter)->getx() - planet(planet_ , ref, ter)->getx();
@@ -125,16 +125,14 @@ double Flight_plan::off_set(int planet_, std::vector<Particle*>* ref, bool *ter)
 
     double solved = (GM - sqrt(pow(GM, 2) + 4 * a * pow(L, 2) / 2))/(-2 * a);
 
-//    double correction = (step_1/abs(step_1) * ((G * planet(planet_ , ref)->Getmass() *current(ref)->Getmass() / pow(distance(rocket , 1) , 2)) / current(ref)->Getmass()) * sqrt(pow(x, 2) + pow(y, 2))/sqrt(pow(vx, 2) + pow(vy, 2)));
-
-    //std::cout<<"solved : "<<solved<<std::endl;
+    std::cout<<"solved : "<<r<<std::endl;
 
     return (solved);
 
 }
 
 double Flight_plan::Apoapsis(int planet_, std::vector<Particle*>* ref, bool *ter){
-    //calculates parihapsis height assuming minimal external interferance
+    //calculates Apoapsis height assuming minimal external interferance
 
     double x = current(ref, ter)->getx() - planet(planet_ , ref, ter)->getx();
     double y = current(ref, ter)->gety() - planet(planet_ , ref, ter)->gety();
@@ -152,14 +150,34 @@ double Flight_plan::Apoapsis(int planet_, std::vector<Particle*>* ref, bool *ter
 
     double solved = (GM + sqrt(pow(GM, 2) + 4 * a * pow(L, 2) / 2))/(-2 * a);
 
-//    double correction = (step_1/abs(step_1) * ((G * planet(planet_ , ref)->Getmass() *current(ref)->Getmass() / pow(distance(rocket , 1) , 2)) / current(ref)->Getmass()) * sqrt(pow(x, 2) + pow(y, 2))/sqrt(pow(vx, 2) + pow(vy, 2)));
-
-    //std::cout<<"solved : "<<solved<<std::endl;
-
     return (solved);
 
 }
 
+double Flight_plan::true_anomaly(int planet_, std::vector<Particle*>* ref, bool *ter){
+    //calculates the true anomaly
+
+    double x = current(ref, ter)->getx() - planet(planet_ , ref, ter)->getx();
+    double y = current(ref, ter)->gety() - planet(planet_ , ref, ter)->gety();
+    double vx = current(ref, ter)->getvx() - planet(planet_ , ref, ter)->getvx();
+    double vy = current(ref, ter)->getvy() - planet(planet_ , ref, ter)->getvy();
+    double r  = sqrt(pow(x , 2) + pow(y , 2));
+    double rdot = vx * (x / r) + vy * (y / r);
+
+    double per = periapsis(planet_,ref,ter);
+    double app = Apoapsis(planet_,ref,ter);
+
+    return abs_ang(180 - rdot/abs(rdot) * 180/M_PI * acos((pow(r,2) + pow(app-per,2)-pow(per+app-r,2))/(2*r*(app-per))));
+}
+
+double Flight_plan::eccentricity(int planet_, std::vector<Particle*>* ref, bool *ter){
+    //calculates eccentricity
+
+    double per = periapsis(planet_,ref,ter);
+    double app = Apoapsis(planet_,ref,ter);
+
+    return(app-per)/(app+per);
+}
 
 
 void Flight_plan::program_sel(int program ,std::vector<Particle*>* ref,int rocket, bool *ter, Flight_plan* here){
@@ -167,6 +185,15 @@ void Flight_plan::program_sel(int program ,std::vector<Particle*>* ref,int rocke
     wait(30);
 
     try{
+
+        if(program == 2){
+            while(true){
+                wait(10);
+
+                std::cout<<true_anomaly(0,ref,ter)<<std::endl;
+            }
+
+        }
 
         if(program == 1){//transfer from planet 0 to planet 1
 
@@ -390,7 +417,24 @@ void Flight_plan::setheading(std::string dir, int planet_ , std::vector<Particle
 
          setheading(radial,ref,ter);
 
-      }
+      }else if(dir == "toward"){
+
+        double x = current(ref, ter)->getx() - planet(planet_ , ref, ter)->getx();
+
+        double y = current(ref, ter)->gety() - planet(planet_ , ref, ter)->gety();
+
+        int toward = - atan(x/y) * 180 / M_PI + 180;
+
+        if((x <= 0 && y >=0) || (x >= 0 && y >= 0)){
+
+             toward  =  atan((x/y)) * 180 / M_PI;
+
+         }
+
+
+        setheading(toward,ref,ter);
+
+    }
 }
 
 void Flight_plan::burn(double dv,std::vector<Particle*>* ref, bool *ter){
@@ -459,13 +503,14 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
 
     if(stage == 1){
 
-        goto stage1;
+        goto stage1;//transfer
 
     }else if(stage == 2){
 
         goto stage2;
 
     }
+    //inital burn
     double h_0 = 0;
 
     if(planet(0 , ref, ter) != nullptr){
@@ -485,7 +530,9 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
     double dv = 0;
 
     if(planet(0 , ref, ter) != nullptr){
+
         dv = sqrt((planet(0 , ref, ter)->Getmass()*G /h_0)) * (sqrt(((2.0 * h_p)/(h_p + h_0))) - 1.0) - 3.0 ;
+
     }
 
 
@@ -511,21 +558,13 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
 
     stage = 1;
 
-    stage1:
+    stage1://transfer
 
     bool heading = true;
 
     while(distance(1,rocket,ref,ter) > 75){
 
-        if(Apoapsis(0,ref,ter) < distance(0,1,ref,ter)-30){
-
-            setheading("prograde",0,ref,ter);
-
-            burn(0.1,1,ref,ter);
-
-        }else{
-
-            off = off_set(1,ref,ter);
+            off = periapsis(1,ref,ter);
 
             if(off > 22.5){
 
@@ -540,14 +579,14 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
             }
 
             wait(10);
-        }
+
     }
 
     while(distance(1,rocket,ref,ter) > 50){
 
-        if (off_set(1,ref,ter)<20||off_set(1,ref,ter)>25){
-            burn(0.1,0,ref,ter);
-        }
+//        if (periapsis(1,ref,ter)<20||periapsis(1,ref,ter)>25){
+//            burn(0.1,0,ref,ter);
+//        }
         if (heading){
 
             setheading("radial out" , 1,ref,ter);
@@ -564,7 +603,7 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
 
     while((off < 20 || off > 25)){
 
-        off = off_set(1,ref,ter);
+        off = periapsis(1,ref,ter);
 
         //off = (off - G * planet(1, ref)->Getmass() * current(ref)->Getmass())/ pow(off,2);
         if (heading){
@@ -584,11 +623,11 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
 
     }
 
-    std::cout<<"Final alt calc: "<<off_set(1,ref,ter)<<std::endl;
+    std::cout<<"Final alt calc: "<<periapsis(1,ref,ter)<<std::endl;
 
     stage = 2;
 
-    stage2:
+    stage2://capture
 
     double d_i = distance(rocket,1,ref,ter);
 

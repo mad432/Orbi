@@ -50,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     on_pushButton_clicked();
 
-    Sysfactory(-1);
+    Sysfactory(-2);
 
     //saves->Write_system("test");
 
@@ -184,11 +184,11 @@ void MainWindow::Sysfactory(int sel){
 
         int sol = 10000 + rand()%15000;
 
-        addParticle(sol,1425/2 ,700/2 ,0,-10,0);
+        addParticle(sol,1425/2 ,700/2 ,0,0,1);
 
         double r_h = 200;
 
-        addRocket(200,1425/2 + r_h ,700/2 , 0, -sqrt(g*sol/r_h) , 2 , 1);
+        addRocket(200,1425/2 + r_h ,700/2 , -10, -40 * 1.2, 2 , 1);
     }
 
     if(sel == -1){
