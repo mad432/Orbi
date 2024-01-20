@@ -10,10 +10,6 @@
 #include <thread>
 #include "flight_plan.h"
 
-struct cords{
-    long double x;
-    long double y;
-};
 
 class System
 {
@@ -75,6 +71,11 @@ public:
     std::vector <Flight_plan*>* get_flights(){return flights;};
 
 private:
+    struct cords{
+        long double x;
+        long double y;
+    };
+
 
     static std::vector <Flight_plan*> flights_;
 
