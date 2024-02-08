@@ -50,7 +50,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     on_pushButton_clicked();
 
-    Sysfactory(-2);
+    Sysfactory(-1);
 
     //saves->Write_system("test");
 
