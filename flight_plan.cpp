@@ -113,10 +113,10 @@ double Flight_plan::periapsis(int planet_, std::vector<Particle*>* ref, bool *te
     double y = current(ref, ter)->gety() - planet(planet_ , ref, ter)->gety();
     double vx = current(ref, ter)->getvx() - planet(planet_ , ref, ter)->getvx();
     double vy = current(ref, ter)->getvy() - planet(planet_ , ref, ter)->getvy();
-    double r  = sqrt(pow(x , 2)+pow(y , 2));
+    double r  = sqrt(pow(x , 2) + pow(y , 2));
     double rdot = vx * (x / r) + vy * (y / r);
     //double theta = acos(x/r);
-    double thetadot = sqrt((pow(vx , 2)+pow(vy , 2))-(pow(rdot , 2))) / r;
+    double thetadot = sqrt((pow(vx , 2) + pow(vy , 2)) - (pow(rdot , 2))) / r;
     double L = thetadot * pow(r , 2);
 
     double GM = G * planet(planet_ , ref, ter)->Getmass();
@@ -138,10 +138,10 @@ double Flight_plan::Apoapsis(int planet_, std::vector<Particle*>* ref, bool *ter
     double y = current(ref, ter)->gety() - planet(planet_ , ref, ter)->gety();
     double vx = current(ref, ter)->getvx() - planet(planet_ , ref, ter)->getvx();
     double vy = current(ref, ter)->getvy() - planet(planet_ , ref, ter)->getvy();
-    double r  = sqrt(pow(x , 2)+pow(y , 2));
+    double r  = sqrt(pow(x , 2) + pow(y , 2));
     double rdot = vx * (x / r) + vy * (y / r);
     //double theta = acos(x/r);
-    double thetadot = sqrt((pow(vx , 2)+pow(vy , 2))-(pow(rdot , 2))) / r;
+    double thetadot = sqrt((pow(vx , 2) + pow(vy , 2)) - (pow(rdot , 2))) / r;
     double L = thetadot * pow(r , 2);
 
     double GM = G * planet(planet_ , ref, ter)->Getmass();
