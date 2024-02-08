@@ -113,17 +113,19 @@ double Flight_plan::periapsis(int planet_, std::vector<Particle*>* ref, bool *te
     double y = current(ref, ter)->gety() - planet(planet_ , ref, ter)->gety();
     double vx = current(ref, ter)->getvx() - planet(planet_ , ref, ter)->getvx();
     double vy = current(ref, ter)->getvy() - planet(planet_ , ref, ter)->getvy();
-    double r  = sqrt(pow(x , 2) + pow(y , 2));
+
+    double r  = sqrt(pow(x , 2)+pow(y , 2));//convert to polar cordinates
     double rdot = vx * (x / r) + vy * (y / r);
     //double theta = acos(x/r);
     double thetadot = sqrt((pow(vx , 2) + pow(vy , 2)) - (pow(rdot , 2))) / r;
-    double L = thetadot * pow(r , 2);
+
+    double L = thetadot * pow(r , 2);//constant term from angular momentum
 
     double GM = G * planet(planet_ , ref, ter)->Getmass();
 
-    double a = .5 * ( pow(rdot , 2) + pow(r * thetadot, 2)) - GM / r;
+    double a = .5 * ( pow(rdot , 2) + pow(r * thetadot, 2)) - GM / r;//total energy
 
-    double solved = (GM - sqrt(pow(GM, 2) + 4 * a * pow(L, 2) / 2))/(-2 * a);
+    double solved = (GM - sqrt(pow(GM, 2) + 4 * a * pow(L, 2) / 2))/(-2 * a);//quadratic equation solve for when rdot = 0 lower value from energy
 
     std::cout<<"solved : "<<r<<std::endl;
 
@@ -138,17 +140,19 @@ double Flight_plan::Apoapsis(int planet_, std::vector<Particle*>* ref, bool *ter
     double y = current(ref, ter)->gety() - planet(planet_ , ref, ter)->gety();
     double vx = current(ref, ter)->getvx() - planet(planet_ , ref, ter)->getvx();
     double vy = current(ref, ter)->getvy() - planet(planet_ , ref, ter)->getvy();
-    double r  = sqrt(pow(x , 2) + pow(y , 2));
+
+    double r  = sqrt(pow(x , 2)+pow(y , 2));//convert to polar cordinates
     double rdot = vx * (x / r) + vy * (y / r);
     //double theta = acos(x/r);
     double thetadot = sqrt((pow(vx , 2) + pow(vy , 2)) - (pow(rdot , 2))) / r;
-    double L = thetadot * pow(r , 2);
+
+    double L = thetadot * pow(r , 2);//constant term from angular momentum
 
     double GM = G * planet(planet_ , ref, ter)->Getmass();
 
-    double a = .5 * ( pow(rdot , 2) + pow(r * thetadot, 2)) - GM / r;
+    double a = .5 * ( pow(rdot , 2) + pow(r * thetadot, 2)) - GM / r;//total energy
 
-    double solved = (GM + sqrt(pow(GM, 2) + 4 * a * pow(L, 2) / 2))/(-2 * a);
+    double solved = (GM + sqrt(pow(GM, 2) + 4 * a * pow(L, 2) / 2))/(-2 * a);//quadratic equation solve for when rdot = 0 higher value from energy
 
     return (solved);
 
@@ -161,13 +165,13 @@ double Flight_plan::true_anomaly(int planet_, std::vector<Particle*>* ref, bool 
     double y = current(ref, ter)->gety() - planet(planet_ , ref, ter)->gety();
     double vx = current(ref, ter)->getvx() - planet(planet_ , ref, ter)->getvx();
     double vy = current(ref, ter)->getvy() - planet(planet_ , ref, ter)->getvy();
-    double r  = sqrt(pow(x , 2) + pow(y , 2));
+    double r  = sqrt(pow(x , 2) + pow(y , 2));//convert to polar
     double rdot = vx * (x / r) + vy * (y / r);
 
     double per = periapsis(planet_,ref,ter);
     double app = Apoapsis(planet_,ref,ter);
 
-    return abs_ang(180 - rdot/abs(rdot) * 180/M_PI * acos((pow(r,2) + pow(app-per,2)-pow(per+app-r,2))/(2*r*(app-per))));
+    return abs_ang(180 - rdot/abs(rdot) * 180/M_PI * acos((pow(r, 2) + pow(app-per, 2) - pow(per+app-r, 2))/(2 * r * (app - per))));//properties of ellipse
 }
 
 double Flight_plan::eccentricity(int planet_, std::vector<Particle*>* ref, bool *ter){
@@ -207,7 +211,7 @@ void Flight_plan::program_sel(int program ,std::vector<Particle*>* ref,int rocke
                 std::cout<<"Flight plan terminated with error code : "<<cat<<std::endl;
 
     }catch(...){
-
+                std::cout<<"Flight plan terminated with error code :-101"<<std::endl;
     }
 
     //worker->~thread();
@@ -277,7 +281,7 @@ void Flight_plan::spin(double amount,std::vector<Particle*>* ref, bool *ter){
 }
 
 void Flight_plan::setheading(int angle,std::vector<Particle*>* ref, bool *ter){
-        //sets the rockets heading to an angle between 0 and 359 +- 1 degrees
+        //sets the rockets heading to an angle between 0 and 359 +- 2 degrees
         angle = abs_ang(angle);
 
         if(angle != rockangle(ref,ter)){
@@ -324,7 +328,7 @@ void Flight_plan::setheading(int angle,std::vector<Particle*>* ref, bool *ter){
 
              //std::cout<< abs_ang(rockangle(ref,ter)) - angle%180<<std::endl;
 
-             if ((quad == 1 && tar_quad == 4) || (quad == 4 && tar_quad == 3) || (quad == 3 && tar_quad == 2) || (quad == 2 && tar_quad == 1) ||//selects which way the rocket should spin
+             if ((quad == 1 && tar_quad == 4) || (quad == 4 && tar_quad == 3) || (quad == 3 && tar_quad == 2) || (quad == 2 && tar_quad == 1) ||//selects which way the rocket should spin and initiates spin
                  (quad == 1 && tar_quad == 3 && abs_ang(rockangle(ref,ter)) - angle % 180 < 0) || (quad == 4 && tar_quad == 2 && abs_ang(rockangle(ref,ter)) % 270 - angle % 90 < 0) ||
                  (quad == 3 && tar_quad == 1 && abs_ang(rockangle(ref,ter)) % 180 - angle < 0) || (quad == 2 && tar_quad == 4 && abs_ang(rockangle(ref,ter)) % 90 - angle % 270 < 0) ||
                  (quad == tar_quad && angle <= abs_ang(rockangle(ref,ter)))){
@@ -344,12 +348,12 @@ void Flight_plan::setheading(int angle,std::vector<Particle*>* ref, bool *ter){
 
             }
 
-            while((angle - 2 >= abs_ang(rockangle(ref,ter)) || abs_ang(rockangle(ref,ter)) >= angle + 2) && current(ref,ter) != nullptr){
-                wait(10);
+            while((angle - 2 >= abs_ang(rockangle(ref,ter)) || abs_ang(rockangle(ref,ter)) >= angle + 2) && current(ref,ter) != nullptr){//wait intell within 2 degrees from target
+                wait(1);
                 //std::cout<<rockangle(ref,ter)%360<<" : "<<angle<<std::endl;
             }
 
-            if(side){
+            if(side){//de-spins the rocket
 
                 spin(0.1,ref,ter);
 
@@ -484,7 +488,7 @@ void Flight_plan::burn(double dv,int planet_,std::vector<Particle*>* ref,bool *t
 
 
     while(sqrt(pow(vx_0,2) + pow(vy_0,2)) > sqrt((pow(current(ref, ter)->getvx() - planet(planet_ , ref, ter)->getvx(),2) + pow(current(ref, ter)->getvy() - planet(planet_ , ref, ter)->getvy(),2))) - sqrt(dv*dv) &&
-          sqrt(pow(vx_0,2) + pow(vy_0,2)) < sqrt((pow(current(ref, ter)->getvx() - planet(planet_ , ref, ter)->getvx(),2) + pow(current(ref, ter)->getvy() - planet(planet_ , ref, ter)->getvy(),2))) + sqrt(dv*dv) ){
+          sqrt(pow(vx_0,2) + pow(vy_0,2)) < sqrt((pow(current(ref, ter)->getvx() - planet(planet_ , ref, ter)->getvx(),2) + pow(current(ref, ter)->getvy() - planet(planet_ , ref, ter)->getvy(),2))) + sqrt(dv*dv) ){//while our dv is less then tarket dv
 
         current(ref, ter)->thrust(50);
 
@@ -499,15 +503,25 @@ void Flight_plan::burn(double dv,int planet_,std::vector<Particle*>* ref,bool *t
 
 }
 
+float period(int planet ,std::vector<Particle*>* ref , int rocket, bool *ter ,int altitude){
+    return 0;
+}
+
+void Flight_plan::circularize(int planet_, std::vector<Particle*>* ref, int rocket, bool *ter ,int altitude){
+
+
+
+}
+
 void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int rocket, bool *ter){
 
-    if(stage == 1){
+    if(stage == 1){//lets the program jump to a certain stage
 
         goto stage1;//transfer
 
     }else if(stage == 2){
 
-        goto stage2;
+        goto stage2;//capture
 
     }
     //inital burn
@@ -531,7 +545,7 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
 
     if(planet(0 , ref, ter) != nullptr){
 
-        dv = sqrt((planet(0 , ref, ter)->Getmass()*G /h_0)) * (sqrt(((2.0 * h_p)/(h_p + h_0))) - 1.0) - 3.0 ;
+        dv = sqrt((planet(0 , ref, ter)->Getmass()*G /h_0)) * (sqrt(((2.0 * h_p)/(h_p + h_0))) - 1.0);
 
     }
 
@@ -566,7 +580,7 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
 
             off = periapsis(1,ref,ter);
 
-            if(off > 22.5){
+            if(off > 22.5){//if the perhiapse is to low point out else point in
 
                setheading("radial in" , 1, ref,ter);
                heading = true;
@@ -582,7 +596,7 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
 
     }
 
-    while(distance(1,rocket,ref,ter) > 50){
+    while(distance(1,rocket,ref,ter) > 50){//stops the rocket from tring to correct heading at last minute
 
 //        if (periapsis(1,ref,ter)<20||periapsis(1,ref,ter)>25){
 //            burn(0.1,0,ref,ter);
@@ -601,7 +615,7 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
     }
     //int F_alt = 0;
 
-    while((off < 20 || off > 25)){
+    while((off < 20 || off > 25)){//burn to raise or lower the periapsis to the desired height
 
         off = periapsis(1,ref,ter);
 
@@ -639,14 +653,13 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
 
         setheading("retrograde" , 1,ref,ter);
     }
+    std::cout<<"Final alt : "<<distance(rocket,1,ref,ter)<<std::endl;
 
-    dv = sqrt(pow(current(ref, ter)->getvx() - planet(1, ref, ter)->getvx(),2) + pow(current(ref, ter)->getvy() - planet(1, ref, ter)->getvy(),2)) - sqrt((G * planet(1, ref, ter)->Getmass()/distance(rocket , 1,ref,ter))) ;
+    dv = sqrt(pow(current(ref, ter)->getvx() - planet(1, ref, ter)->getvx(),2) + pow(current(ref, ter)->getvy() - planet(1, ref, ter)->getvy(),2)) - sqrt((G * planet(1, ref, ter)->Getmass()/distance(rocket , 1,ref,ter))) ;// calculates the burn to achive a circular orbit
 
     std::cout<<"incertion dv : "<<dv<<std::endl;
 
     burn(dv, 1,ref,ter);
-
-    std::cout<<"Final alt : "<<distance(rocket,1,ref,ter)<<std::endl;
 
 
 }
