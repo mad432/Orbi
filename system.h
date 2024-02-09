@@ -10,11 +10,11 @@
 #include <thread>
 #include "flight_plan.h"
 
-struct cords{
-    long double x;
-    long double y;
-};
 
+struct cords{
+    float x;
+    float y;
+};
 
 class System
 {
@@ -34,7 +34,7 @@ public:
           return Instance;
         }
       }
-    //System();
+    ~System();
 
     void setcollision(bool checked){collisionEnabled = checked;}
 
@@ -67,8 +67,10 @@ public:
     static int *num_col_particles;
 
     void setSpecial_rel(bool checked){Special_rel = checked;};
+    bool getSpecial_rel(){return Special_rel;};
 
     void setC(int C_){C = C_;};
+    int GetC(){return C;};
 
     void add_flight(Rocket * _cur, int program, std::vector <Particle *> references_ , int stage_);
     void add_flight(Flight_plan * flight){ flights->push_back(flight) ;}
@@ -76,6 +78,7 @@ public:
     std::vector <Flight_plan*>* get_flights(){return flights;};
 
 private:
+
     static std::vector <Flight_plan*> flights_;
 
     static std::vector <Flight_plan*>* flights;

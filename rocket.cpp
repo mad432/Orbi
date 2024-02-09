@@ -1,6 +1,6 @@
 #include "rocket.h"
 #include <iostream>
-
+#include <system.h>
 
 void Rocket::paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWidget *widget){
 
@@ -95,15 +95,24 @@ void Rocket::thrust(double EV){
 
         double masseval = mass; // makes mass a double for dv calculation
 
-        double dv = EV *log((masseval) / (masseval - 5));//dv rocket equation
+        System * sys = System::getInstance();
+        double dv;
+        if(sys->getSpecial_rel() == false){
 
+            dv = EV *log((masseval) / (masseval - 1));//dv rocket equation
+
+        }else{
+
+            dv = sys->GetC() * tanh((EV/sys->GetC())*log((masseval) / (masseval - 5)));
+
+        }
         vy -= cos(heading * (3.14 / 180)) * dv;
 
         vx += sin(heading * (3.14 / 180)) * dv;
 
-        fuel -=5;
+        fuel -=1;
 
-        mass -=5;
+        mass -=1;
 
         thrusting = true;
 

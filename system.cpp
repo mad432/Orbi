@@ -4,11 +4,16 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <stdio.h>
-#include <windows.h>
-#include <GL/gl.h>
-#include <GLES3/gl3.h>
 
 
+#include <glad.c>
+#include <glm/glm.hpp>
+#include <GLFW/glfw3.h>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <GravShader/GravShader.h>
+#include <GravShader/compute.h>
+#include <GravShader/batch_renderer.h>
 
 
 System* System::Instance = NULL;
@@ -57,12 +62,96 @@ std::vector <Flight_plan*> System::flights_ = {};
 
 std::vector <Flight_plan*>* System::flights = &flights_;
 
-
+void framebuffer_size_callback( GLFWwindow* window, int width, int height ) {
+    glViewport( 0, 0, width, height );
+}
+void process_input( GLFWwindow* window ) {
+     //close window on pressing esc
+    if ( glfwGetKey( window, GLFW_KEY_ESCAPE ) == GLFW_PRESS ) {
+        glfwSetWindowShouldClose( window, true );
+    }
+}
 
 System::System()
 {
+    std::cout<<"System Created"<<std::endl;
+
+//    #define WINDOW_WIDTH 500
+//    #define WINDOW_HEIGHT 500
+
+//    // init glfw and some settings
+//    glfwInit();
+//    glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 4 );
+//    glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
+//    glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
+
+//    // create window object
+//    GLFWwindow* window = glfwCreateWindow(
+//        WINDOW_WIDTH,
+//        WINDOW_HEIGHT,
+//        "compute shader test",
+//        NULL,
+//        NULL );
+
+//    // ensure creation was successful
+//    if ( window == NULL ) {
+//        std::cerr << "failed to create glfw window" << std::endl;
+//        glfwTerminate();
+
+//    }
+
+//    //glfwHideWindow(window);
+//    // set context
+//    glfwMakeContextCurrent( window );
+
+//    // load glad before we make any opengl calls
+//    if ( !gladLoadGLLoader( (GLADloadproc) glfwGetProcAddress ) ) {
+//        std::cerr << "failed to initialise glad" << std::endl;
+//    }
+
+//    // set gl viewport size, and set glfw callback for window resize
+//    glViewport( 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT );
+//    glfwSetFramebufferSizeCallback( window, framebuffer_size_callback );
+
+//    Compute compute_shader( "GravShader/GravShader.comp", glm::uvec2( 10, 1 ) );
+
+//    compute_shader.use();
+//    float values[ 10 ] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+//    compute_shader.set_values( values );
+
+//    GravShader visual_shader( "GravShader/GravShader.vert", "GravShader/GravShader.frag" );
+//    //BatchRenderer renderer;
+
+//    while ( !glfwWindowShouldClose( window ) ) {
+//        // input
+//        process_input( window );
+
+//        // update
+//        compute_shader.use();
+//        compute_shader.dispatch();
+//        compute_shader.wait();
+
+//        auto data = compute_shader.get_values();
+//        for ( auto d : data ) {
+//            std::cout << d << " ";
+//        }
+//        std::cout << std::endl;
+
+//        //renderer.render( &visual_shader );
+
+//        // poll glfw events and swap buffers
+//        glfwPollEvents();
+//        glfwSwapBuffers( window );
+//    }
+}
+
+System::~System(){
+
+    glfwTerminate();
 
 }
+
+
 void System::Idreset(){
 
     //resets the particles index in the system
@@ -113,7 +202,7 @@ Particle* System::addParticle(int Mass, long double _x, long double _y , long do
     //adds a particle to system
 
     if(Special_rel){// must not travel faster then C
-        if(pow(_vx , 2) + pow(_vy , 2) + 10 > pow(C , 2)){
+        if(pow(_vx , 2) + pow(_vy , 2) > pow(C , 2)){
 
             double unitvec = 1 / sqrt(pow(_vx , 2) + pow(_vy , 2));
 
@@ -136,7 +225,7 @@ Particle* System::addParticle(int Mass, long double _x, long double _y , long do
 Rocket* System::addRocket(int Mass, long double _x, long double _y , long double _vx, long double _vy, bool fixed){
 
     if(Special_rel){// must not travel faster then C
-        if(pow(_vx , 2) + pow(_vy , 2) + 10 > pow(C , 2)){
+        if(pow(_vx , 2) + pow(_vy , 2) > pow(C , 2)){
 
             double unitvec = 1 / sqrt(pow(_vx , 2) + pow(_vy , 2));
 
@@ -236,7 +325,7 @@ void System::collision(Particle* par, Particle* par1){
         double break_mom_x = 0;//break away particles momentum
         double break_mom_y = 0;
 
-        if((100 * pow(rel_speed,2)) / (collision_angle+20) * (0.3 + relmass ) > *col_threshold && rel_speed > 10 && DebrisEnabled && !Special_rel){//determines if any debris will be created from collision
+        if((100 * pow(rel_speed,2)) / (collision_angle+20) * (0.3 + relmass) > *col_threshold && rel_speed > 10 && DebrisEnabled && !Special_rel){//determines if any debris will be created from collision
 
             double breaksize;
             double breakvelx;
@@ -297,7 +386,7 @@ void System::collision(Particle* par, Particle* par1){
 
         //std::vector<Flight_plan*> hold = *flights;
 
-        for(Flight_plan* plan: *flights){
+        for(Flight_plan* plan: *flights){//don't break flight plans
 
                 if(plan->get_rocket()->getid() == par->getid() || plan->get_rocket()->getid() == par1->getid()){
 
@@ -315,21 +404,25 @@ void System::collision(Particle* par, Particle* par1){
 
                         //std::cout<<"id"<<par->getid()<<" : "<<result->getid();
 
-                        if(par == planet || par1 == planet){
+                        if(par->getid() == planet->getid() || par1->getid() == planet->getid()){
 
                             std::vector <Particle *> nref = plan->get_references();
 
+                            //nref.erase(nref.begin() + i);
+
                             nref[i] = result;
 
-                            std::cout<<result->getid()<<std::endl;
+                            //std::cout<<result->getid()<<std::endl;
 
                             plan->setrefernces(nref);
 
-                            //std::cout<<"id : "<<plan->get_references()[i]->getid()<<" : "<<result->getid()<<std::endl;
+                            std::cout<<"id : "<<par->getid()<<" : "<<plan->get_references()[i]->getid()<<" : "<<result->getid()<<std::endl;
+
+                            i++;
 
                             }
 
-                            i++;
+                        i++;
                     }
 
                 }
@@ -569,14 +662,22 @@ bool System::update(int start, int end){
                             if((pow(par->getvx(),2) + pow(par->getvy(),2)) >= pow(C,2)){//make sure we didn't overshoot C
 
                                 std::cout<<"warning exceeded C"<<std::endl;
+
                                 if(par->getvx()>0){
+
                                     par->setvx(par->getvx() - 1);
+
                                 }else{
+
                                     par->setvx(par->getvx() + 1);
                                 }
+
                                 if(par->getvy()>0){
+
                                     par->setvy(par->getvy() - 1);
+
                                 }else{
+
                                     par->setvy(par->getvy() + 1);
                                 }
                             }

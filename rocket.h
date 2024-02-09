@@ -24,7 +24,7 @@ public:
 
     int getheading() override {return heading;};
 
-    double getaV() override{return aV;};
+    float getaV() override{return aV;};
 
     void changeaV(double i) override;
 
