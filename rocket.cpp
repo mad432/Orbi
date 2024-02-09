@@ -103,7 +103,7 @@ void Rocket::thrust(double EV){
 
         }else{
 
-            dv = sys->GetC() * tanh((EV/sys->GetC())*log((masseval) / (masseval - 5)));
+            dv = sys->GetC() * tanh((EV/sys->GetC())*log((masseval) / (masseval - 5)));//relativistic rocket equation
 
         }
         vy -= cos(heading * (3.14 / 180)) * dv;
