@@ -47,6 +47,7 @@ private:
 
     static void burn(double dv,std::vector<Particle*>* ref, bool *ter);
     static void burn(double dv,int planet,std::vector<Particle*>* ref, bool *ter);
+    static void burn(double dv,int planet_,std::vector<Particle*>* ref,bool *ter , std::string heading);
 
     static int abs_ang(int angle);
 

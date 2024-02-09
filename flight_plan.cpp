@@ -194,7 +194,7 @@ void Flight_plan::program_sel(int program ,std::vector<Particle*>* ref,int rocke
             while(true){
                 wait(10);
 
-                std::cout<<true_anomaly(0,ref,ter)<<std::endl;
+                setheading("radial in",0,ref,ter);
             }
 
         }
@@ -403,7 +403,7 @@ void Flight_plan::setheading(std::string dir, int planet_ , std::vector<Particle
 
         if((x <= 0 && y >=0) || (x >= 0 && y >= 0)){
 
-            radial =  -atan((x/y)) * 180 / M_PI - 90;
+            radial = - atan((x/y)) * 180 / M_PI - 90;
 
         }
 
@@ -415,9 +415,9 @@ void Flight_plan::setheading(std::string dir, int planet_ , std::vector<Particle
 
         if((x <= 0 && y >=0) || (x >= 0 && y >= 0)){
 
-            radial =  -atan((x/y)) * 180 / M_PI + 90;
+            radial = - atan((x/y)) * 180 / M_PI + 90;
 
-         }
+        }
 
          setheading(radial,ref,ter);
 
@@ -503,6 +503,37 @@ void Flight_plan::burn(double dv,int planet_,std::vector<Particle*>* ref,bool *t
 
 }
 
+void Flight_plan::burn(double dv,int planet_,std::vector<Particle*>* ref,bool *ter , std::string heading){
+    //changes the rockets velocity relative to planet_ by dv
+    std::cout<<current(ref, ter)->getvy()<<std::endl;
+
+    double vx_0 = current(ref, ter)->getvx() - planet(planet_ , ref, ter)->getvx();
+
+    double vy_0 = current(ref, ter)->getvy() - planet(planet_ , ref, ter)->getvy();
+
+    std::cout<<"Burning"<<std::endl;
+
+    std::cout<<"Target dv : current dv"<<std::endl;
+
+
+    while(sqrt(pow(vx_0,2) + pow(vy_0,2)) > sqrt((pow(current(ref, ter)->getvx() - planet(planet_ , ref, ter)->getvx(),2) + pow(current(ref, ter)->getvy() - planet(planet_ , ref, ter)->getvy(),2))) - sqrt(dv*dv) &&
+          sqrt(pow(vx_0,2) + pow(vy_0,2)) < sqrt((pow(current(ref, ter)->getvx() - planet(planet_ , ref, ter)->getvx(),2) + pow(current(ref, ter)->getvy() - planet(planet_ , ref, ter)->getvy(),2))) + sqrt(dv*dv) ){//while our dv is less then tarket dv
+
+        current(ref, ter)->thrust(50);
+
+        std::cout<<dv<<" : "<<sqrt((pow(current(ref, ter)->getvx() - planet(planet_ , ref, ter)->getvx(),2) + pow(current(ref, ter)->getvy() - planet(planet_ , ref, ter)->getvy(),2)))-sqrt(pow(vx_0,2) + pow(vy_0,2))<<std::endl;
+
+        setheading(heading,planet_,ref,ter);
+
+        wait(10);
+
+    }
+
+    std::cout<<"burn finished  Starting vel:"<<sqrt(pow(vx_0,2) + pow(vy_0,2))<<" : Ending vel:"<<sqrt((pow(current(ref, ter)->getvx() - planet(planet_ , ref, ter)->getvx(),2) + pow(current(ref, ter)->getvy() - planet(planet_ , ref, ter)->getvy(),2)))<<std::endl;
+
+
+}
+
 float period(int planet ,std::vector<Particle*>* ref , int rocket, bool *ter ,int altitude){
     return 0;
 }
@@ -537,7 +568,7 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
 
     if(planet(1, ref, ter) != nullptr && planet(0 , ref, ter) != nullptr){
 
-        h_p = distance(0 , 1, ref,ter);
+        h_p = distance(0 , 1, ref,ter) - (20 + planet(1,ref,ter)->getsize());
 
     }
 
@@ -565,10 +596,13 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
     }
 
 
-    double off = 50;
+    double off = 0;
 
 
-    burn(dv,ref,ter);
+    while(Apoapsis(0,ref,ter) < h_p){
+
+        burn(0.1,ref,ter);
+    }
 
     stage = 1;
 
@@ -576,11 +610,11 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
 
     bool heading = true;
 
-    while(distance(1,rocket,ref,ter) > 75){
+    while(distance(1,rocket,ref,ter) > 100){
 
             off = periapsis(1,ref,ter);
 
-            if(off > 22.5){//if the perhiapse is to low point out else point in
+            if(off < 22.5){//if the perhiapse is to low point out else point in
 
                setheading("radial in" , 1, ref,ter);
                heading = true;
@@ -596,7 +630,7 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
 
     }
 
-    while(distance(1,rocket,ref,ter) > 50){//stops the rocket from tring to correct heading at last minute
+    while(distance(1,rocket,ref,ter) > 75){//stops the rocket from tring to correct heading at last minute
 
 //        if (periapsis(1,ref,ter)<20||periapsis(1,ref,ter)>25){
 //            burn(0.1,0,ref,ter);

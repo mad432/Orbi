@@ -50,21 +50,21 @@ MainWindow::MainWindow(QWidget *parent)
 
     on_pushButton_clicked();
 
-    Sysfactory(-1);
+    //Sysfactory(-1);
 
     //saves->Write_system("test");
 
     //on_pushButton_clicked();
 
-//////    //_sleep(10000);
-//////    on_GSlider_valueChanged(50);
+    _sleep(100);
+////////    on_GSlider_valueChanged(50);
 
 
-//    for(auto par: saves->Read_system("test")){
+    for(auto par: saves->Read_system("test")){
 
-//        scene->addItem(par);
+        scene->addItem(par);
 
-//    };
+    };
 
 
 
@@ -148,6 +148,7 @@ void MainWindow::addParticle(int Mass, long double _x, long double _y , long dou
 }
 
 void MainWindow::addRocket(int Mass, long double _x, long double _y , long double _vx, long double _vy, int plan ,int ref){
+    //adds a rocket to the system with flightplan plan
 
     Rocket *rock = system->addRocket(Mass, _x, _y , _vx, _vy, 0);
 
@@ -155,7 +156,7 @@ void MainWindow::addRocket(int Mass, long double _x, long double _y , long doubl
 
     player = rock;
 
-    if(plan != 0){
+    if(plan == 1){
 
         std::vector <Particle *> references = {};
 
@@ -170,6 +171,8 @@ void MainWindow::addRocket(int Mass, long double _x, long double _y , long doubl
         system->add_flight(rock, plan , references, stage);
 
         //system->add_flight(y);
+    }else if(plan == 2){
+
     }
 }
 
@@ -180,18 +183,22 @@ void MainWindow::Sysfactory(int sel){
 
     if(sel == -2){
 
-        on_GSlider_valueChanged(50);//sets G
+        on_GSlider_valueChanged(30);//sets G
 
-        int sol = 10000 + rand()%15000;
+        int sol = 19000 + rand()%2000;
 
-        addParticle(sol,1425/2 ,700/2 ,0,0,1);
+        addParticle(2*sol,1425/2  ,700/2  ,sqrt(g*sol/160),0,1);
 
-        double r_h = 200;
+        //addParticle(sol,1425/2  ,700/2 - 40 ,-sqrt(g*sol/160),0,0);
 
-        addRocket(200,1425/2 + r_h ,700/2 , -10, -40 * 1.2, 2 , 1);
+        addParticle(600, 1425/2 + 200, 700/2 ,0,sqrt(g*2*sol/200),0);
+
+        addParticle(600, 1425/2 - 400, 700/2 ,0,-sqrt(g*2*sol/400),0);
+
+        addRocket(200,1425/2 + 200 ,700/2 + 20 , sqrt(g * 400/ 10), sqrt(g*2*sol/200) , 1 , 2);
     }
 
-    if(sel == -1){
+    if(sel == -1){//transfer
 
         on_GSlider_valueChanged(50);//sets G
 
