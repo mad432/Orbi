@@ -9,6 +9,8 @@
 #include "system.h"
 #include "rocket.h"
 #include "c_slider.h"
+#include "filesave.h"
+#include "saveload.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -80,7 +82,15 @@ private slots:
 
     void on_actionPrecession_triggered();
 
+    void on_actionLoad_Save_triggered();
+
 private:
+
+    Filesave * saves = new Filesave;
+
+    void Save(std::string name);
+
+    void Load(std::string name);
 
     bool traced = false;
 
@@ -89,6 +99,8 @@ private:
     int tick = 0;
 
     C_slider w;
+
+    SaveLoad savewindow;
 
     void keyPressEvent(QKeyEvent *event) override;
 

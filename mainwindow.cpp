@@ -11,7 +11,6 @@
 #include <vector>
 #include <QMouseEvent>
 #include "flight_plan.h"
-#include "filesave.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -46,11 +45,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     timer1->start(0);
 
-    Filesave * saves = new Filesave;
-
     on_pushButton_clicked();
 
-    //Sysfactory(9);
+//    Sysfactory(-2);
 
 //    saves->Write_system("test");
 
@@ -59,7 +56,7 @@ MainWindow::MainWindow(QWidget *parent)
     //_sleep(100);
 ////////    on_GSlider_valueChanged(50);
 ///
-    on_Traced_toggled(true);
+//    on_Traced_toggled(true);
 
     for(auto par: saves->Read_system("test")){
 
@@ -138,7 +135,7 @@ void MainWindow::timetick(){
     }
     if(traced && tick % 150 == 0){//traces the paths
         for(Particle * par:system->Getparticles()){
-            QPen pen;//determine how the line
+            QPen pen;
 
             int c = par->getid() % 5;
 
@@ -164,7 +161,7 @@ void MainWindow::timetick(){
 
             }
 
-            QGraphicsEllipseItem* el = scene->addEllipse(par->getx(),par->gety(),1,1,pen);
+            QGraphicsEllipseItem* el = scene->addEllipse(int(par->getx()),int(par->gety()),1,1,pen);
 
             el->setOpacity(.5);
 
@@ -673,6 +670,32 @@ void MainWindow::on_actionset_Speed_of_Light_triggered()
 
 }
 
+void MainWindow::on_actionLoad_Save_triggered()
+{
+    savewindow.show();
+
+    QObject::connect(&savewindow,&SaveLoad::Save_sig,this,&MainWindow::Save);
+
+    QObject::connect(&savewindow,&SaveLoad::Load_sig,this,&MainWindow::Load);
+}
+
+void MainWindow::Save(std::string name){
+
+    saves->Write_system(name);
+
+}
+
+void MainWindow::Load(std::string name){
+
+    on_pushButton_clicked();
+
+    for(auto par: saves->Read_system(name)){
+
+        scene->addItem(par);
+
+    };
+    rocket = false;
+}
 
 void MainWindow::on_Specialrel_toggled(bool arg1)
 {
