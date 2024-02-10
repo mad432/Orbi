@@ -17,8 +17,6 @@ public:
 
 private slots:
 
-    void on_Text_objectNameChanged(const QString &objectName);
-
     void on_Save_clicked();
 
     void on_Load_clicked();
@@ -33,8 +31,6 @@ signals:
 private:
 
     Ui::SaveLoad *ui;
-
-    std::string F_name = "";
 };
 
 #endif // SAVELOAD_H
