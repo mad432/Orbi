@@ -76,8 +76,17 @@ private slots:
     void on_Specialrel_toggled(bool arg1);
 
     void on_actionTransfer_triggered();
+    void on_Traced_toggled(bool checked);
+
+    void on_actionPrecession_triggered();
 
 private:
+
+    bool traced = false;
+
+    std::vector<QGraphicsEllipseItem*> trace;
+
+    int tick = 0;
 
     C_slider w;
 

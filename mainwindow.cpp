@@ -50,21 +50,23 @@ MainWindow::MainWindow(QWidget *parent)
 
     on_pushButton_clicked();
 
-    //Sysfactory(-1);
+    //Sysfactory(9);
 
-    //saves->Write_system("test");
+//    saves->Write_system("test");
 
     //on_pushButton_clicked();
 
-    _sleep(100);
+    //_sleep(100);
 ////////    on_GSlider_valueChanged(50);
-
+///
+    on_Traced_toggled(true);
 
     for(auto par: saves->Read_system("test")){
 
         scene->addItem(par);
 
     };
+    rocket = false;
 
 
 
@@ -134,6 +136,42 @@ void MainWindow::timetick(){
         }
 
     }
+    if(traced && tick % 150 == 0){//traces the paths
+        for(Particle * par:system->Getparticles()){
+            QPen pen;//determine how the line
+
+            int c = par->getid() % 5;
+
+            if (c == 0){
+
+                pen.setColor(Qt::darkCyan);
+
+            }else if(c == 1 ){
+
+                pen.setColor(Qt::darkGreen);
+
+            }else if (c == 2){
+
+                pen.setColor(Qt::darkYellow);
+
+            }else if (c == 3){
+
+                pen.setColor(Qt::blue);
+
+            }else{
+
+                pen.setColor(Qt::darkMagenta);
+
+            }
+
+            QGraphicsEllipseItem* el = scene->addEllipse(par->getx(),par->gety(),1,1,pen);
+
+            el->setOpacity(.5);
+
+            trace.push_back(el);
+        }
+    }
+    tick++;
 
     this->scene->update();
 
@@ -156,7 +194,7 @@ void MainWindow::addRocket(int Mass, long double _x, long double _y , long doubl
 
     player = rock;
 
-    if(plan == 1){
+    if(plan != 0){
 
         std::vector <Particle *> references = {};
 
@@ -238,8 +276,6 @@ void MainWindow::Sysfactory(int sel){
 
         on_GSlider_valueChanged(60);
 
-        addRocket(200, 1425/2 + 400 , 700/2 + 70, -25, 20, 0,0);
-
         addParticle(4000, 1425/2 , 700/2+70, 25, 0, 0);
 
         addParticle(5000, 1425/2, 700/2-70 , -20, 0, 0);
@@ -254,7 +290,7 @@ void MainWindow::Sysfactory(int sel){
 
     }else if(sel == 2){//binary-binary
 
-        on_GSlider_valueChanged(90);
+        on_GSlider_valueChanged(100);
 
         addParticle(3000, 2 * 1425/6, 700/2 + 45, 30, 22, 0);
 
@@ -284,11 +320,11 @@ void MainWindow::Sysfactory(int sel){
 
             double riny = cos(i/20 * acos(0));
 
-            addParticle(4, 1425/2 + rinx*270 + rand()%20 - 10  , 700/2+riny*270+rand()%20 - 10 ,-riny*17.8+rand()%1,rinx*17.8+rand()%1,0);
+            addParticle(4, 1425/2 + rinx*270 + rand()%20 - 10  , 700/2+riny*270+rand()%20 - 10 ,-riny*16.8+rand()%1,rinx*16.8+rand()%1,0);
 
-            addParticle(4, 1425/2 + rinx*250 + rand()%20 - 10 , 700/2+riny*250+rand()%20 - 10 ,-riny*18+rand()%1,rinx*18+rand()%1,0);
+            addParticle(4, 1425/2 + rinx*250 + rand()%20 - 10 , 700/2+riny*250+rand()%20 - 10 ,-riny*17+rand()%1,rinx*17+rand()%1,0);
 
-            addParticle(4, 1425/2 + rinx*230 + rand()%20 - 10 , 700/2+riny*230+rand()%20 - 10 ,-riny*18.2+rand()%1,rinx*18.2+rand()%1,0);
+            addParticle(4, 1425/2 + rinx*230 + rand()%20 - 10 , 700/2+riny*230+rand()%20 - 10 ,-riny*17.2+rand()%1,rinx*17.2+rand()%1,0);
 
         }
     }else if(sel == 4){//Moonception
@@ -400,8 +436,20 @@ void MainWindow::Sysfactory(int sel){
          }
 
 
-    }
+    }else if(sel == 9){// precession
 
+        on_GSlider_valueChanged(80);
+
+        on_Specialrel_toggled(true);
+
+        SetC(0);
+
+        addParticle(9000,1425/2 ,700/2 ,0,0,1);
+
+        addParticle(100,1425/2 ,700/2 + 50 ,100,0,0);
+
+
+    }
 
 
 }
@@ -518,6 +566,10 @@ void MainWindow::on_pushButton_clicked()//clear
     pause();
     player = nullptr;
     system->clear();
+    for(auto dot:trace){
+        delete dot;
+    }
+    trace.clear();
     pause();
     scene->update();
     //scene->setSceneRect(0, 0, scene->width(), scene->height());
@@ -580,9 +632,15 @@ void MainWindow::on_actionSmash_triggered()
     Sysfactory(8);
 }
 
+void MainWindow::on_actionPrecession_triggered()
+{
+    Sysfactory(9);
+
+}
+
 void MainWindow::SetC(int value)//C
 {
-    system->setC(value*30 + 150);
+    system->setC(value*10 + 150);
 }
 
 void MainWindow::on_Collision_triggered(bool checked)
@@ -619,6 +677,8 @@ void MainWindow::on_actionset_Speed_of_Light_triggered()
 void MainWindow::on_Specialrel_toggled(bool arg1)
 {
     system->setSpecial_rel(arg1);
+
+    this->ui->Specialrel->setChecked(arg1);
 }
 
 
@@ -626,4 +686,13 @@ void MainWindow::on_actionTransfer_triggered()
 {
     Sysfactory(-1);
 }
+
+void MainWindow::on_Traced_toggled(bool checked)
+{
+    traced = checked;
+
+    this->ui->Traced->setChecked(checked);
+
+}
+
 

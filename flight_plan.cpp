@@ -191,10 +191,11 @@ void Flight_plan::program_sel(int program ,std::vector<Particle*>* ref,int rocke
     try{
 
         if(program == 2){
+
             while(true){
                 wait(10);
 
-                setheading("radial in",0,ref,ter);
+                setheading("toward",1,ref,ter);
             }
 
         }
@@ -403,7 +404,7 @@ void Flight_plan::setheading(std::string dir, int planet_ , std::vector<Particle
 
         if((x <= 0 && y >=0) || (x >= 0 && y >= 0)){
 
-            radial = - atan((x/y)) * 180 / M_PI - 90;
+            radial =   -atan((x/y)) * 180 / M_PI - 90;
 
         }
 
@@ -415,7 +416,7 @@ void Flight_plan::setheading(std::string dir, int planet_ , std::vector<Particle
 
         if((x <= 0 && y >=0) || (x >= 0 && y >= 0)){
 
-            radial = - atan((x/y)) * 180 / M_PI + 90;
+            radial = -atan((x/y)) * 180 / M_PI + 90;
 
         }
 
@@ -431,7 +432,7 @@ void Flight_plan::setheading(std::string dir, int planet_ , std::vector<Particle
 
         if((x <= 0 && y >=0) || (x >= 0 && y >= 0)){
 
-             toward  =  atan((x/y)) * 180 / M_PI;
+             toward  =  -atan((x/y)) * 180 / M_PI;
 
          }
 
@@ -568,7 +569,7 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
 
     if(planet(1, ref, ter) != nullptr && planet(0 , ref, ter) != nullptr){
 
-        h_p = distance(0 , 1, ref,ter) - (20 + planet(1,ref,ter)->getsize());
+        h_p = distance(0 , 1, ref,ter) - (20);
 
     }
 
@@ -598,10 +599,8 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
 
     double off = 0;
 
-
     while(Apoapsis(0,ref,ter) < h_p){
-
-        burn(0.1,ref,ter);
+        burn(0.1,0,ref,ter);
     }
 
     stage = 1;
@@ -614,7 +613,7 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
 
             off = periapsis(1,ref,ter);
 
-            if(off < 22.5){//if the perhiapse is to low point out else point in
+            if(off > 22.5){//if the perhiapse is to low point out else point in
 
                setheading("radial in" , 1, ref,ter);
                heading = true;
@@ -635,13 +634,24 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
 //        if (periapsis(1,ref,ter)<20||periapsis(1,ref,ter)>25){
 //            burn(0.1,0,ref,ter);
 //        }
-        if (heading){
+        off = periapsis(1,ref,ter);
 
-            setheading("radial out" , 1,ref,ter);
+        if (off > 22.5){
+
+
+                setheading("radial in" , 1,ref,ter);
+
+                heading = true;
+
 
         }else{
 
-            setheading("radial in" , 1,ref,ter);
+
+                setheading("radial out" , 1,ref,ter);
+
+                heading = false;
+
+
 
         }
 
@@ -649,18 +659,25 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
     }
     //int F_alt = 0;
 
-    while((off < 20 || off > 25)){//burn to raise or lower the periapsis to the desired height
+    while((off < 20 || off > 25) && distance(1,rocket,ref,ter) > 25 ){//burn to raise or lower the periapsis to the desired height
 
-        off = periapsis(1,ref,ter);
+        //int off1 = off;
+
 
         //off = (off - G * planet(1, ref)->Getmass() * current(ref)->Getmass())/ pow(off,2);
-        if (heading){
+        off = periapsis(1,ref,ter);
 
-            setheading("radial out" , 1,ref,ter);
+        if (true_anomaly(1,ref,ter) > 90){
+
+            setheading("towards" , 1 , ref,ter);
+
+        }else if (heading){
+
+            setheading("radial in" , 1,ref,ter);
 
         }else{
 
-            setheading("radial in" , 1,ref,ter);
+            setheading("radial out" , 1,ref,ter);
 
         }
 
@@ -683,9 +700,16 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
 
         d_i = distance(rocket,1,ref,ter);
 
+        if(periapsis(1,ref,ter)<planet(1,ref,ter)->getsize()){
+            setheading("radial out" , 1,ref,ter);
+            burn(0.1, 1, ref,ter);
+        }else{
+            setheading("retrograde" , 1,ref,ter);
+        }
+
         wait(10);
 
-        setheading("retrograde" , 1,ref,ter);
+        //setheading("retrograde" , 1,ref,ter);
     }
     std::cout<<"Final alt : "<<distance(rocket,1,ref,ter)<<std::endl;
 

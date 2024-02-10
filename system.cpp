@@ -6,7 +6,6 @@
 #include <stdio.h>
 
 
-
 System* System::Instance = NULL;
 
 double System::step_ = .0005;
@@ -53,13 +52,13 @@ std::vector <Flight_plan*> System::flights_ = {};
 
 std::vector <Flight_plan*>* System::flights = &flights_;
 
+
 System::System()
 {
-    std::cout<<"System Created"<<std::endl;
+
 }
 
 System::~System(){
-
 
 }
 
