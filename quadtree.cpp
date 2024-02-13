@@ -11,7 +11,8 @@ QuadTree::QuadTree()
     mass = 0;
     radius = 0;
     here = new Particle(0,0,0,0,0,0,9999999);
-    //here->setcol(-4);
+    //here->setcol(-10);
+    pars = new std::vector <Particle*>;
     min_dist = 100;
 
 }

@@ -6,6 +6,14 @@
 #include <math.h>
 #include <stdio.h>
 #include <cstdio>
+//#include <glad.c>
+//#include <glm/glm.hpp>
+//#include <GLFW/glfw3.h>
+//#include <glm/gtc/matrix_transform.hpp>
+//#include <glm/gtc/type_ptr.hpp>
+//#include <GravShader/GravShader.h>
+//#include <GravShader/compute.h>
+//#include <GravShader/batch_renderer.h>
 
 
 System* System::Instance = NULL;
@@ -60,11 +68,98 @@ std::vector <Flight_plan*> System::flights_ = {};
 
 std::vector <Flight_plan*>* System::flights = &flights_;
 
+//void framebuffer_size_callback( GLFWwindow* window, int width, int height ) {
+//    glViewport( 0, 0, width, height );
+//}
+//void process_input( GLFWwindow* window ) {
+//    // close window on pressing esc
+//    if ( glfwGetKey( window, GLFW_KEY_ESCAPE ) == GLFW_PRESS ) {
+//        glfwSetWindowShouldClose( window, true );
+//    }
+//}
+
 System::System()
 {
+//    #define WINDOW_WIDTH 500
+//    #define WINDOW_HEIGHT 500
+//    #define DEBUG_ACTIVE false
+//    // init glfw and some settings
+//    glfwInit();
+//    glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 4 );
+//    glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
+//    glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
+
+//    // create window object
+//    GLFWwindow* window = glfwCreateWindow(
+//        WINDOW_WIDTH,
+//        WINDOW_HEIGHT,
+//        "compute shader test",
+//        NULL,
+//        NULL );
+
+//    // ensure creation was successful
+//    if ( window == NULL ) {
+//        std::cerr << "failed to create glfw window" << std::endl;
+//        glfwTerminate();
+//    }
+
+//    // set context
+//    glfwMakeContextCurrent( window );
+
+//    // load glad before we make any opengl calls
+//    if ( !gladLoadGLLoader( (GLADloadproc) glfwGetProcAddress ) ) {
+//        std::cerr << "failed to initialise glad" << std::endl;
+//    }
+
+
+//    glViewport( 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT );
+//    glfwSetFramebufferSizeCallback( window, framebuffer_size_callback );
+
+
+
+
+//    GravShader visual_shader( "Libs/GravShader/GravShader.vert", "Libs/GravShader/GravShader.frag" );
+//    BatchRenderer renderer;
+
+//    #pragma endregion
+//    float values[10000] = {0};
+
+//    int c = 0;
+//    while ( c < 100 ) {
+//        // input
+//        c++;
+//        Compute compute_shader( "Libs/GravShader/GravShader.comp", glm::uvec2( c, 1 ));
+
+//        compute_shader.use();
+
+//        values[c] = c;
+//        compute_shader.set_values( values );
+
+//        // input
+//        process_input( window );
+
+//        // update
+//        compute_shader.use();
+//        compute_shader.dispatch();
+//        compute_shader.wait();
+
+//        auto data = compute_shader.get_values();
+//        for ( auto d : data ) {
+//            std::cout << d << " ";
+//        }
+//        std::cout << std::endl;
+
+//        glfwPollEvents();
+//        glfwSwapBuffers( window );
+//    }
+
+//    #pragma endregion
+
+
 }
 
 System::~System(){
+     //glfwTerminate();
 }
 
 
@@ -419,7 +514,7 @@ double System::lorentz(double vx, double vy){
 }
 
 void System::constree(int start, int end){
-     //constructs the tree for barnes-hut
+    //constructs the tree for barnes-hut
 
     std::vector <Particle *> hold = *particles;
     for (int i = start ; i < end ; i++){
@@ -605,25 +700,23 @@ bool System::update(int start, int end){
 
             for(auto &par1 : *actors){
 
-                if(par1->getid() != par->getid() && par1->getcolnum() == -1){
+                if(par1->getid() != par->getid() && par1->getcolnum() == -1 ){
 
                     //myMutex.lock();
-                    if(!par->getcol() && !par1->getcol()){//check to see if a particle has already collided
+                    if(par1->getid()!= 9999999 && (par->getsize() + par1->getsize()) / 2 > sqrt(pow(par->getx() - par1->getx() , 2) + pow(par->gety() - par1->gety() , 2))){//check for collision
 
-                        if((par->getsize() + par1->getsize()) / 2 > sqrt(pow(par->getx() - par1->getx() , 2) + pow(par->gety() - par1->gety() , 2))){//check for collision
-
-
+                        if(!par->getcol() && !par1->getcol()){//check to see if a particle has already collided
 
                             par->setcol(par1->getid());
 
                             par1->setcol(par->getid());
 
-
-                            *beencol = true;
-
-
                         }
-                    }
+                        *beencol = true;
+
+
+                    }else{
+
 
                         double par1lorentz = 1;
 
@@ -704,7 +797,7 @@ bool System::update(int start, int end){
                             }
 
                         }
-
+                    }
 
 
                 }

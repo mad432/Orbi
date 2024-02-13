@@ -394,22 +394,22 @@ void MainWindow::Sysfactory(int sel){
 
             addParticle(rmass,rxp,ryp,rxv,ryv,0);
          }
-    }else if (sel == 8) {//performance test
-            on_GSlider_valueChanged(20);
+    }else if (sel == 7) {//performance test
+            on_GSlider_valueChanged(40);
 
-            int num = 7000+rand()%400;
+            int num = 10000;
 
             for(int i = 0 ; i < num; i++){
 
                 int rmass = rand()%20+5;
 
-                int rxp = rand()%2000;
+                int rxp = rand()%4000;
 
-                int ryp = rand()%1400;
+                int ryp = rand()%4000;
 
                 int rxv = rand()%20-10;
 
-                int ryv = rand()%20-10+(700/2-rxp*.5)*.08;
+                int ryv = rand()%20-10;
 
                 addParticle(rmass,rxp,ryp,rxv,ryv,0);
             }
@@ -758,5 +758,11 @@ void MainWindow::on_actionBarnes_Hut_triggered(bool checked)
     system->barnes_hut = checked;
 
     this->ui->actionBarnes_Hut->setChecked(checked);
+}
+
+
+void MainWindow::on_actionPerformance_Test_triggered()
+{
+    Sysfactory(7);
 }
 
