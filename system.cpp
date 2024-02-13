@@ -514,6 +514,8 @@ double System::lorentz(double vx, double vy){
 }
 
 void System::constree(int start, int end){
+     //constructs the tree for barnes-hut
+
     std::vector <Particle *> hold = *particles;
     for (int i = start ; i < end ; i++){
         root->constructnode(hold[i]);
