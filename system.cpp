@@ -651,6 +651,7 @@ bool System::update(int start, int end){
         }
     }
 
+
     for (int i = start ; i < end ; i++){
 
         Particle* par = hold[i];
@@ -668,6 +669,8 @@ bool System::update(int start, int end){
         if(barnes_hut){//use barnes hut-algorithem
 
             root->get_actors(par,actors);
+
+            //lorentztable[-1] = 1;
 
         }else{//direct calculation
 
@@ -719,7 +722,19 @@ bool System::update(int start, int end){
 
                         if (Special_rel){
 
-                            par1lorentz = lorentztable[par1->getid()];
+                            if(barnes_hut){
+
+                                if(par1->getid() != 9999999){
+
+                                    par1lorentz = lorentztable[par1->getid()];
+
+                                }
+
+                            }else{
+
+                                par1lorentz = lorentztable[par1->getid()];
+
+                            }
 
                         }
 

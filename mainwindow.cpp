@@ -49,13 +49,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     on_pushButton_clicked();
 
-    Sysfactory(-1);
+    //Sysfactory(-1);
 
-    saves->Write_system("test");
+    //saves->Write_system("test");
 
     on_pushButton_clicked();
 
-    _sleep(100);
+//    _sleep(100);
 //////    on_GSlider_valueChanged(50);
 
     on_Traced_toggled(true);
@@ -397,7 +397,7 @@ void MainWindow::Sysfactory(int sel){
     }else if (sel == 8) {//performance test
             on_GSlider_valueChanged(20);
 
-            int num = 3000+rand()%400;
+            int num = 7000+rand()%400;
 
             for(int i = 0 ; i < num; i++){
 
@@ -716,6 +716,9 @@ void MainWindow::Load(std::string name){
 
 void MainWindow::on_Specialrel_toggled(bool arg1)
 {
+//    if(arg1 == true){
+//        on_actionBarnes_Hut_triggered(false);
+//    }
     system->setSpecial_rel(arg1);
 
     this->ui->Specialrel->setChecked(arg1);
@@ -749,6 +752,11 @@ void MainWindow::on_actionEnable_toggled(bool arg1)
 
 void MainWindow::on_actionBarnes_Hut_triggered(bool checked)
 {
+//    if(checked == true){
+//        on_Specialrel_toggled(false);
+//    }
     system->barnes_hut = checked;
+
+    this->ui->actionBarnes_Hut->setChecked(checked);
 }
 
