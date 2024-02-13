@@ -70,6 +70,7 @@ double QuadTree::dist(double _x, double _y){
 }
 
 void QuadTree::get_actors(Particle * par, std::vector <Particle*>* ret){
+    //gets what actors should be acting on each particle and appends it to ret
     //std::cout<<dist(par->getx(),par->gety())<<" : "<<radius<<std::endl;
 
     if(pars->size() == 1){
