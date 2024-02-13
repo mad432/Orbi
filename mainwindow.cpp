@@ -11,6 +11,8 @@
 #include <vector>
 #include <QMouseEvent>
 #include "flight_plan.h"
+#include <QMediaPlaylist>
+#include <QMediaPlayer>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -47,22 +49,34 @@ MainWindow::MainWindow(QWidget *parent)
 
     on_pushButton_clicked();
 
-//    Sysfactory(-2);
+    Sysfactory(-1);
 
-//    saves->Write_system("test");
+    saves->Write_system("test");
 
-    //on_pushButton_clicked();
+    on_pushButton_clicked();
 
-    //_sleep(100);
-////////    on_GSlider_valueChanged(50);
-///
-//    on_Traced_toggled(true);
+    _sleep(100);
+//////    on_GSlider_valueChanged(50);
 
-    for(auto par: saves->Read_system("test")){
+    on_Traced_toggled(true);
 
-        scene->addItem(par);
+    Load("test");
+    playlist->addMedia(QUrl("qrc:/Transfer.mp3"));
+    playlist->addMedia(QUrl("qrc:/Drifting.mp3"));
+    music->setPlaylist(playlist);
+    music->setVolume(20);
+    music->play();
+    music->playlist()->shuffle();
+    connect(music, &QMediaPlayer::stateChanged, [this](QMediaPlayer::State state) {
+            music->setVolume(20);
 
-    };
+            if (state == QMediaPlayer::State::StoppedState)
+            {
+                music->play();
+            }
+    });
+
+
     rocket = false;
 
 
@@ -169,6 +183,8 @@ void MainWindow::timetick(){
         }
     }
     tick++;
+
+    //std::cout<<tick<<std::endl;
 
     this->scene->update();
 
@@ -378,10 +394,10 @@ void MainWindow::Sysfactory(int sel){
 
             addParticle(rmass,rxp,ryp,rxv,ryv,0);
          }
-    }else if (sel == 7) {//performance test
-            on_GSlider_valueChanged(90);
+    }else if (sel == 8) {//performance test
+            on_GSlider_valueChanged(20);
 
-            int num = 10000+rand()%400;
+            int num = 3000+rand()%400;
 
             for(int i = 0 ; i < num; i++){
 
@@ -569,6 +585,7 @@ void MainWindow::on_pushButton_clicked()//clear
     trace.clear();
     pause();
     scene->update();
+    tick = 0;
     //scene->setSceneRect(0, 0, scene->width(), scene->height());
 }
 
@@ -718,4 +735,20 @@ void MainWindow::on_Traced_toggled(bool checked)
 
 }
 
+
+
+void MainWindow::on_actionEnable_toggled(bool arg1)
+{
+    if(arg1 == false){
+        music->pause();
+    }else{
+        music->play();
+    }
+}
+
+
+void MainWindow::on_actionBarnes_Hut_triggered(bool checked)
+{
+    system->barnes_hut = checked;
+}
 

@@ -1,9 +1,19 @@
+
 #include "system.h"
 #include <iostream>
 #include <thread>
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <stdio.h>
+#include <cstdio>
+//#include <glad.c>
+//#include <glm/glm.hpp>
+//#include <GLFW/glfw3.h>
+//#include <glm/gtc/matrix_transform.hpp>
+//#include <glm/gtc/type_ptr.hpp>
+//#include <GravShader/GravShader.h>
+//#include <GravShader/compute.h>
+//#include <GravShader/batch_renderer.h>
 
 
 System* System::Instance = NULL;
@@ -48,18 +58,108 @@ bool System::collisionEnabled = true;
 
 bool System::DebrisEnabled = true;
 
+bool System::barnes_hut = true;
+
+QuadTree System::_root;
+
+QuadTree* System::root = new QuadTree();
+
 std::vector <Flight_plan*> System::flights_ = {};
 
 std::vector <Flight_plan*>* System::flights = &flights_;
 
+//void framebuffer_size_callback( GLFWwindow* window, int width, int height ) {
+//    glViewport( 0, 0, width, height );
+//}
+//void process_input( GLFWwindow* window ) {
+//    // close window on pressing esc
+//    if ( glfwGetKey( window, GLFW_KEY_ESCAPE ) == GLFW_PRESS ) {
+//        glfwSetWindowShouldClose( window, true );
+//    }
+//}
 
 System::System()
 {
+//    #define WINDOW_WIDTH 500
+//    #define WINDOW_HEIGHT 500
+//    #define DEBUG_ACTIVE false
+//    // init glfw and some settings
+//    glfwInit();
+//    glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 4 );
+//    glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
+//    glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
+
+//    // create window object
+//    GLFWwindow* window = glfwCreateWindow(
+//        WINDOW_WIDTH,
+//        WINDOW_HEIGHT,
+//        "compute shader test",
+//        NULL,
+//        NULL );
+
+//    // ensure creation was successful
+//    if ( window == NULL ) {
+//        std::cerr << "failed to create glfw window" << std::endl;
+//        glfwTerminate();
+//    }
+
+//    // set context
+//    glfwMakeContextCurrent( window );
+
+//    // load glad before we make any opengl calls
+//    if ( !gladLoadGLLoader( (GLADloadproc) glfwGetProcAddress ) ) {
+//        std::cerr << "failed to initialise glad" << std::endl;
+//    }
+
+
+//    glViewport( 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT );
+//    glfwSetFramebufferSizeCallback( window, framebuffer_size_callback );
+
+
+
+
+//    GravShader visual_shader( "Libs/GravShader/GravShader.vert", "Libs/GravShader/GravShader.frag" );
+//    BatchRenderer renderer;
+
+//    #pragma endregion
+//    float values[10000] = {0};
+
+//    int c = 0;
+//    while ( c < 100 ) {
+//        // input
+//        c++;
+//        Compute compute_shader( "Libs/GravShader/GravShader.comp", glm::uvec2( c, 1 ));
+
+//        compute_shader.use();
+
+//        values[c] = c;
+//        compute_shader.set_values( values );
+
+//        // input
+//        process_input( window );
+
+//        // update
+//        compute_shader.use();
+//        compute_shader.dispatch();
+//        compute_shader.wait();
+
+//        auto data = compute_shader.get_values();
+//        for ( auto d : data ) {
+//            std::cout << d << " ";
+//        }
+//        std::cout << std::endl;
+
+//        glfwPollEvents();
+//        glfwSwapBuffers( window );
+//    }
+
+//    #pragma endregion
+
 
 }
 
 System::~System(){
-
+     //glfwTerminate();
 }
 
 
@@ -299,7 +399,14 @@ void System::collision(Particle* par, Particle* par1){
 
         for(Flight_plan* plan: *flights){//don't break flight plans
 
-                if(plan->get_rocket()->getid() == par->getid() || plan->get_rocket()->getid() == par1->getid()){
+                if(plan->get_ter()){
+
+                    flights->erase(flights->begin()+j);
+
+                     j--;
+
+
+                }else if(plan->get_rocket()->getid() == par->getid() || plan->get_rocket()->getid() == par1->getid()){
 
                    flights->erase(flights->begin()+j);
 
@@ -351,6 +458,8 @@ void System::collision(Particle* par, Particle* par1){
 
 }
 void System::clear(){
+    root->clear();
+
 
     for(auto par : *particles){
         delete par;
@@ -370,7 +479,7 @@ void System::clear(){
 
 }
 
-cords System::gravity(double par1x , double par1y , double par2x , double par2y , double m1, double m2, double step_size){
+System::cords System::gravity(double par1x , double par1y , double par2x , double par2y , double m1, double m2, double step_size){
     //input x and y cordiantes and mass of 2 particles
     //returns gravitational attraction
     long double dist = sqrt(pow(par1x - par2x , 2) + pow(par1y - par2y , 2));
@@ -404,7 +513,13 @@ double System::lorentz(double vx, double vy){
     return 1 / sqrt(1 - (speed2 / pow(C , 2)));
 }
 
+void System::constree(int start, int end){
+    std::vector <Particle *> hold = *particles;
+    for (int i = start ; i < end ; i++){
+        root->constructnode(hold[i]);
+    }
 
+}
 
 
 bool System::process(){
@@ -425,6 +540,39 @@ bool System::process(){
     *beencol = false;
 
     std::vector <Particle *> hold = *particles;
+
+    if(barnes_hut){
+
+        root->clear();
+//        for(int i = 0; i < threads ; i++ ){
+//            //std::lock_guard<std::mutex> guard(myMutex);
+//            if(start < length - parper){
+
+//                Mythreads[i] = std::thread(constree, start, start + parper);
+
+//                //std::cout<<"thread : "<<i<<" from :"<<start<<" to :"<<start+parper<<std::endl;
+
+//            }else{
+
+//                Mythreads[i] = std::thread(constree, start, length);
+
+//                //std::cout<<"thread : "<<i<<" from :"<<start<<" to :"<<*size<<std::endl;
+
+//            }
+//            start = start + parper;
+//        }
+
+        constree(0,length);
+
+        //root->print();
+        //std::cout<<std::endl;
+
+//        for(int i = 0; i < threads ; i++ ){
+//            Mythreads[i].join();
+//        }
+        start =  parper;
+
+    }
 
     for(int i = 0; i < threads ; i++ ){
         //std::lock_guard<std::mutex> guard(myMutex);
@@ -464,17 +612,24 @@ bool System::process(){
                     }
                 }
             }
+            //constructnode(root,root, par);
         //std::cout<<par->getcolnum()<<std::endl;
         }
+
     }
 //    tickcount++;
 //    std::cout<<tickcount<<std::endl;
+    //if(root != nullptr){
+        //root->print();
+        //root->clear();
+        //root = nullptr;
+    //}
+    //std::cout<<"here"<<std::endl;
 
     return *beencol;
 
 };
 
-//std::mutex myMutex;
 
 
 bool System::update(int start, int end){
@@ -483,7 +638,7 @@ bool System::update(int start, int end){
 
     bool col = false; //if collision
 
-    const std::vector <Particle *> hold = *particles;
+    std::vector <Particle *> hold = *particles;
 
     double *lorentztable =new double[*size];//tabulation
 
@@ -491,6 +646,7 @@ bool System::update(int start, int end){
         if(Special_rel){
             lorentztable[i] = lorentz(hold[i]->getvx() , hold[i]->getvy());
         }else{
+            *lorentztable = {1};
             break;
         }
     }
@@ -506,6 +662,17 @@ bool System::update(int start, int end){
 
         if(par->getcol()==true){
             *beencol = true;
+        }
+        std::vector <Particle*>* actors = new std::vector <Particle*>;
+
+        if(barnes_hut){//use barnes hut-algorithem
+
+            root->get_actors(par,actors);
+
+        }else{//direct calculation
+
+            actors = &hold;
+
         }
 
         if(par->getfix() == false){
@@ -526,25 +693,27 @@ bool System::update(int start, int end){
 
             par->sety(par->gety() + (par->getvy() * *step));
 
-            for(auto &par1 : hold){
+            for(auto &par1 : *actors){
 
                 if(par1->getid() != par->getid() && par1->getcolnum() == -1){
 
                     //myMutex.lock();
+                    if(!par->getcol() && !par1->getcol()){//check to see if a particle has already collided
 
-                    if((par->getsize() + par1->getsize()) / 2 > sqrt(pow(par->getx() - par1->getx() , 2) + pow(par->gety() - par1->gety() , 2))){//check for collision
+                        if((par->getsize() + par1->getsize()) / 2 > sqrt(pow(par->getx() - par1->getx() , 2) + pow(par->gety() - par1->gety() , 2))){//check for collision
 
-                        if(!par->getcol() && !par1->getcol()){//check to see if a particle has already collided
+
 
                             par->setcol(par1->getid());
 
                             par1->setcol(par->getid());
 
+
+                            *beencol = true;
+
+
                         }
-                        *beencol = true;
-
-
-                    }else{
+                    }
 
                         double par1lorentz = 1;
 
@@ -564,13 +733,13 @@ bool System::update(int start, int end){
                         cords k4 = gravity(par->getx() + (k3.x / (par->Getmass() * parlorentz) * rel_step) , par->gety() + (k3.y/ (par->Getmass()* parlorentz) * rel_step) ,  par1->getx() - (k3.x/(par1->Getmass() * par1lorentz) * rel_step)  , par1->gety() - (k3.y/ (par1->Getmass() * par1lorentz) * rel_step)  , par->Getmass(), par1->Getmass(), rel_step);
 
 
-                        if (Special_rel){
+                        if (Special_rel || barnes_hut){
 
                             par->setvx( par->getvx() + 2 * (k1.x + 2*k2.x + 2*k3.x + k4.x)/6 / (par->Getmass() * parlorentz));
 
                             par->setvy( par->getvy() + 2 * (k1.y + 2*k2.y + 2*k3.y + k4.y)/6 / (par->Getmass() * parlorentz));
 
-                            if((pow(par->getvx(),2) + pow(par->getvy(),2)) >= pow(C,2)){//make sure we didn't overshoot C
+                            if(Special_rel && (pow(par->getvx(),2) + pow(par->getvy(),2)) >= pow(C,2)){//make sure we didn't overshoot C
 
                                 std::cout<<"warning exceeded C"<<std::endl;
 
@@ -615,7 +784,7 @@ bool System::update(int start, int end){
                         }
 
 
-                    }
+
                 }
             }
 
@@ -642,8 +811,11 @@ bool System::update(int start, int end){
              }
         }
 
+        //delete actors;
+
 
     }
+
 
     delete[] lorentztable;
 

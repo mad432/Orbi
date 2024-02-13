@@ -11,6 +11,8 @@
 #include "c_slider.h"
 #include "filesave.h"
 #include "saveload.h"
+#include <QMediaPlaylist>
+#include <QMediaPlayer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -84,7 +86,15 @@ private slots:
 
     void on_actionLoad_Save_triggered();
 
+    void on_actionEnable_toggled(bool arg1);
+
+    void on_actionBarnes_Hut_triggered(bool checked);
+
 private:
+
+    QMediaPlaylist *playlist = new QMediaPlaylist();
+    QMediaPlayer *music = new QMediaPlayer();
+
 
     Filesave * saves = new Filesave;
 
@@ -111,7 +121,7 @@ private:
     void addParticle(int Mass, long double _x, long double _y , long double _vx, long double _vy, bool fixed);
     void addRocket(int Mass, long double _x, long double _y , long double _vx, long double _vy, int plan , int ref);
 
-    cords gravity(double par1x , double par1y , double par2x , double par2y , double m1, double m2);
+    System::cords gravity(double par1x , double par1y , double par2x , double par2y , double m1, double m2);
 
     double step = .00004;
 
@@ -129,7 +139,7 @@ private:
 
     float g = 1; //gravitational const
 
-    System * system;
+    System * system = System::getInstance();
 
     QTimer * timer = new QTimer(this);
 

@@ -9,16 +9,17 @@
 #include "rocket.h"
 #include <thread>
 #include "flight_plan.h"
+#include "quadtree.h"
 
-
-struct cords{
-    float x;
-    float y;
-};
 
 class System
 {
 public:
+
+    struct cords{
+        float x;
+        float y;
+    };
 
     System(const System& obj) = delete;
 
@@ -77,7 +78,16 @@ public:
 
     std::vector <Flight_plan*>* get_flights(){return flights;};
 
+    static bool barnes_hut;
+
+
 private:
+    static void constree(int start, int end);
+
+    void constructnode(QuadTree * parent,QuadTree * node ,Particle * par);
+
+    static QuadTree _root;
+    static QuadTree * root;
 
     static std::vector <Flight_plan*> flights_;
 
