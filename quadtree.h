@@ -3,8 +3,8 @@
 #include <iostream>
 #include "Particle.h"
 #include <vector>
-#include <atomic>
-
+//#include <atomic>
+//used for barnes-hut algorithm
 class QuadTree
 {
     public:
