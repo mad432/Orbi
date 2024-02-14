@@ -6,14 +6,14 @@ QuadTree::QuadTree()
     upright = nullptr;
     downleft = nullptr;
     downright = nullptr;
-    x = 0;
-    y = 0;
-    mass = 0;
+    x = 99999;
+    y = 99999;
+    mass = 6666;
     radius = 0;
-    here = new Particle(0,0,0,0,0,0,9999999);
+    here = new Particle(0,0,0,0,0,1,9999999);
     //here->setcol(-10);
     pars = new std::vector <Particle*>;
-    min_dist = 100;
+    min_dist = 9;
 
 }
 void QuadTree::clear() {
@@ -39,34 +39,44 @@ void QuadTree::clear() {
         upleft = nullptr;
     }
     mass = 0;
+    here = new Particle(0,0,0,0,0,1,9999999);
     pars->clear();
 }
 
 void QuadTree::print(){
     //prints the tree
-    std::cout<<radius<<","<<radius + min_dist<<"  size :"<<pars->size()<<" :: ";
+    bool down = false;
 
     if(downright != nullptr){
         downright->print();
+        down=true;
     }
 
     if(upright != nullptr){
         upright->print();
+        down=true;
     }
 
     if(downleft != nullptr){
         downleft->print();
+        down=true;
     }
 
     if(upleft != nullptr){
         upleft->print();
+        down=true;
     }
+    std::cout<<" size :"<<pars->size()<<" cords:"<<x<<","<<y<<" radius:"<<radius<<" :: ";
+    if(!down){
+        std::cout<<std::endl;
+    }
+
 
     //std::cout<<std::endl;
 }
 double QuadTree::dist(double _x, double _y){
 
-    return sqrt(pow(_x - here->getx() ,2) + pow(_y - here->gety() ,2)) - radius;
+    return sqrt(pow(_x - here->getx() ,2) + pow(_y - here->gety() ,2)) / radius;
 
 }
 
@@ -84,7 +94,7 @@ void QuadTree::get_actors(Particle * par, std::vector <Particle*>* ret){
 
         ret->push_back(here);
 
-        std::cout<<"here"<<std::endl;
+        //std::cout<<"here"<<std::endl;
 
     }else{
 
@@ -132,7 +142,7 @@ void QuadTree::constructnode(Particle * par){
 
         y = (par->gety() * par->Getmass() + y * mass)/(par->Getmass() + mass);
 
-        mass = mass + par->Getmass();
+        mass += par->Getmass();
 
         pars->push_back(par);
         //Particle * par1 = par;
@@ -141,7 +151,7 @@ void QuadTree::constructnode(Particle * par){
 
             if(x < par1->getx()){
 
-                if(y > par1->gety()){
+                if(y < par1->gety()){
 
                     if(downleft == nullptr){
                         downleft = new QuadTree();
@@ -159,7 +169,7 @@ void QuadTree::constructnode(Particle * par){
 
             }else{
 
-                if(y > par1->gety()){
+                if(y < par1->gety()){
 
                     if(downright == nullptr){
                         downright = new QuadTree();
@@ -191,7 +201,7 @@ void QuadTree::constructnode(Particle * par){
 
         //for(Particle * par1 : *pars){
 
-            if(x > par->getx()){
+            if(x < par->getx()){
 
                 if(y > par->gety()){
 
@@ -233,18 +243,23 @@ void QuadTree::constructnode(Particle * par){
             }
 
     }
-    here->setvx((par->getvx() * par->Getmass() + here->getvx() * mass)/(par->Getmass() + mass));
-    here->setvy((par->getvy() * par->Getmass() + here->getvy() * mass)/(par->Getmass() + mass));
+    //here->setvx((par->getvx() * par->Getmass() + here->getvx() * mass)/(par->Getmass() + mass));
+   //here->setvy((par->getvy() * par->Getmass() + here->getvy() * mass)/(par->Getmass() + mass));
 
     here->setx(x);
     here->sety(y);
     here->setmass(mass);
     //std::cout<<here->getx() - par->getx()<<std::endl;
 
-    double _radius = abs(sqrt(pow(par->getx() - x, 2) + pow(par->gety() - y, 2)));
+    double _radius = (sqrt(pow(par->getx() - x, 2) + pow(par->gety() - y, 2)));
 
     if (radius < _radius){
-        radius = _radius;
-        //std::cout<<dist(par->getx(),par->gety())<<std::endl;
+        //radius = _radius;
+        for(Particle * par3: *pars){
+            if((sqrt(pow(par3->getx() - x, 2) + pow(par3->gety() - y, 2) - radius>0))){
+                radius = sqrt(pow(par3->getx() - x, 2) + pow(par3->gety() - y, 2));
+            }
+
+        }
     }
 }

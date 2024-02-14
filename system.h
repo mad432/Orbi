@@ -80,6 +80,8 @@ public:
 
     static bool barnes_hut;
 
+    double get_step(){return *step;}
+
 
 private:
     static void constree(int start, int end);

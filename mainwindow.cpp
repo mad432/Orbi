@@ -397,15 +397,26 @@ void MainWindow::Sysfactory(int sel){
     }else if (sel == 7) {//performance test
             on_GSlider_valueChanged(40);
 
-            int num = 10000;
+            int num = 5000;
+
+            int x = 0;
+
+            int y = 0;
 
             for(int i = 0 ; i < num; i++){
 
                 int rmass = rand()%20+5;
 
-                int rxp = rand()%4000;
+                x += 50;
 
-                int ryp = rand()%4000;
+                if(x % 2100 == 0){
+                    y += 50;
+                    x = 0;
+                }
+
+                int rxp = x+rand()%49;
+
+                int ryp = y+rand()%49;
 
                 int rxv = rand()%20-10;
 

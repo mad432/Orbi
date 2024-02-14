@@ -3,6 +3,7 @@
 #include <chrono>
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include "system.h"
 
 
 
@@ -88,7 +89,7 @@ Rocket * Flight_plan::current(std::vector<Particle*>* ref, bool *ter){
 
 void Flight_plan::wait(int time){
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(time));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1 + time / (1+int(System::getInstance()->get_step() * 1000))));
 
 }
 
