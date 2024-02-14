@@ -80,7 +80,13 @@ void QuadTree::get_actors(Particle * par, std::vector <Particle*>* ret){
         ret->push_back(part);
 
 
-    }else if(dist(par->getx(),par->gety()) < min_dist){
+    }else if(dist(par->getx(),par->gety()) > min_dist){
+
+        ret->push_back(here);
+
+        std::cout<<"here"<<std::endl;
+
+    }else{
 
         if(downright != nullptr){
 
@@ -105,11 +111,6 @@ void QuadTree::get_actors(Particle * par, std::vector <Particle*>* ret){
             upleft->get_actors(par,ret);
 
         }
-
-    }else{
-
-        ret->push_back(here);
-        //std::cout<<"this is a test"<<std::endl;
 
     }
 }
@@ -232,6 +233,8 @@ void QuadTree::constructnode(Particle * par){
             }
 
     }
+    here->setvx((par->getvx() * par->Getmass() + here->getvx() * mass)/(par->Getmass() + mass));
+    here->setvy((par->getvy() * par->Getmass() + here->getvy() * mass)/(par->Getmass() + mass));
 
     here->setx(x);
     here->sety(y);
