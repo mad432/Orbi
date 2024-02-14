@@ -741,11 +741,11 @@ bool System::update(int start, int end){
 
                         cords k1 = gravity(par->getx() , par->gety() , par1->getx(), par1->gety(), par->Getmass() , par1->Getmass() , rel_step);// Runge - Kutta calculates force on the particles
 
-                        cords k2 = gravity(par->getx() - par->getvx() * rel_step/2 + ((k1.x/2 / (par->Getmass() * parlorentz)) * rel_step) , par->gety() + par->getvy() * rel_step/2  + ((k1.y/2 / (par->Getmass()* parlorentz)) * rel_step) , par1->getx() - ((k1.x/2 / (par1->Getmass() * par1lorentz)) * rel_step)  , par1->gety() - ((k1.y/2 / (par1->Getmass() * par1lorentz)) * rel_step) , par->Getmass() , par1->Getmass() , rel_step);
+                        cords k2 = gravity(par->getx() + par->getvx() * rel_step/2 + ((k1.x/2 / (par->Getmass() * parlorentz)) * rel_step) , par->gety() + par->getvy() * rel_step/2  + ((k1.y/2 / (par->Getmass()* parlorentz)) * rel_step) , par1->getx() - ((k1.x/2 / (par1->Getmass() * par1lorentz)) * rel_step)  , par1->gety() - ((k1.y/2 / (par1->Getmass() * par1lorentz)) * rel_step) , par->Getmass() , par1->Getmass() , rel_step);
 
-                        cords k3 = gravity(par->getx() - par->getvx() * rel_step/2  + ((k2.x/2 / (par->Getmass() * parlorentz)) * rel_step) , par->gety() + par->getvy() * rel_step/2  + ((k2.y/2 / (par->Getmass()* parlorentz)) * rel_step) , par1->getx() - ((k2.x/2 / (par1->Getmass() * par1lorentz)) * rel_step)  , par1->gety() - ((k2.y/2 / (par1->Getmass() * par1lorentz)) * rel_step)  , par->Getmass() , par1->Getmass() , rel_step);
+                        cords k3 = gravity(par->getx() + par->getvx() * rel_step/2  + ((k2.x/2 / (par->Getmass() * parlorentz)) * rel_step) , par->gety() + par->getvy() * rel_step/2  + ((k2.y/2 / (par->Getmass()* parlorentz)) * rel_step) , par1->getx() - ((k2.x/2 / (par1->Getmass() * par1lorentz)) * rel_step)  , par1->gety() - ((k2.y/2 / (par1->Getmass() * par1lorentz)) * rel_step)  , par->Getmass() , par1->Getmass() , rel_step);
 
-                        cords k4 = gravity(par->getx() - par->getvx() * rel_step + ((k3.x / (par->Getmass() * parlorentz)) * rel_step) , par->gety() + par->getvy() * rel_step  + ((k3.y/ (par->Getmass()* parlorentz)) * rel_step) ,  par1->getx() - ((k3.x/(par1->Getmass() * par1lorentz)) * rel_step)  , par1->gety() - ((k3.y/ (par1->Getmass() * par1lorentz)) * rel_step)  , par->Getmass(), par1->Getmass(), rel_step);
+                        cords k4 = gravity(par->getx() + par->getvx() * rel_step + ((k3.x / (par->Getmass() * parlorentz)) * rel_step) , par->gety() + par->getvy() * rel_step  + ((k3.y/ (par->Getmass()* parlorentz)) * rel_step) ,  par1->getx() - ((k3.x/(par1->Getmass() * par1lorentz)) * rel_step)  , par1->gety() - ((k3.y/ (par1->Getmass() * par1lorentz)) * rel_step)  , par->Getmass(), par1->Getmass(), rel_step);
 
 
                         if (Special_rel || barnes_hut){
