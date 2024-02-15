@@ -90,11 +90,18 @@ private slots:
 
     void on_actionBarnes_Hut_triggered(bool checked);
 
+    void on_actionPerformance_Test_triggered();
+
+    void on_actionShow_Visualization_triggered(bool checked);
+
+    void on_Barnes_Hut_triggered(bool checked);
+
 private:
 
     QMediaPlaylist *playlist = new QMediaPlaylist();
     QMediaPlayer *music = new QMediaPlayer();
 
+    bool hut_visual = false;
 
     Filesave * saves = new Filesave;
 

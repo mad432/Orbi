@@ -10,6 +10,10 @@ QuadTree::QuadTree()
     y = 99999;
     mass = 6666;
     radius = 0;
+    x0 = 999999;
+    y0 = 999999;
+    y1 = -999999;
+    x1 = -999999;
     here = new Particle(0,0,0,0,0,1,9999999);
     pars = new std::vector <Particle*>;
     min_dist = 0.5;
@@ -76,7 +80,7 @@ void QuadTree::print(){
 }
 double QuadTree::dist(double _x, double _y){
 
-    return (radius+10)/sqrt(pow(_x - here->getx() ,2) + pow(_y - here->gety() ,2));
+    return (radius)/(sqrt(pow(_x - here->getx() ,2) + pow(_y - here->gety() ,2)));
 
 }
 
@@ -133,9 +137,13 @@ void QuadTree::constructnode(Particle * par){
 
         x = par->getx();
         y = par->gety();
+        x0 = x;
+        y0 = y;
+        x1 = x;
+        y1 = y;
         mass = par->Getmass();
         pars->push_back(par);
-        //radius = 50;
+        //radius = 10;
         return;
 
     }else if(pars->size() == 1){//if there is only one particle we need to create 2 new nodes to make sure each particle has its own leaf
@@ -190,12 +198,12 @@ void QuadTree::constructnode(Particle * par){
                 }
             }
         }
-        for(Particle* par3: *pars){
-            if((sqrt(pow(par3->getx() - x, 2) + pow(par3->gety() - y , 2)) > radius)){
-                radius = sqrt(pow(par3->getx() - x, 2) + pow(par3->gety() - y , 2));
-            }
+//        for(Particle* par3: *pars){
+//            if((sqrt(pow(par3->getx() - x, 2) + pow(par3->gety() - y , 2)) > radius)){
+//                radius = sqrt(pow(par3->getx() - x, 2) + pow(par3->gety() - y , 2));
+//            }
 
-        }
+//        }
 
     }else{//
 
@@ -258,25 +266,38 @@ void QuadTree::constructnode(Particle * par){
         }
 
 
-    here->setvx((par->getvx() * par->Getmass() + here->getvx() * mass)/(par->Getmass() + mass));
-    here->setvy((par->getvy() * par->Getmass() + here->getvy() * mass)/(par->Getmass() + mass));
+    //here->setvx((par->getvx() * par->Getmass() + here->getvx() * mass)/(par->Getmass() + mass));
+    //here->setvy((par->getvy() * par->Getmass() + here->getvy() * mass)/(par->Getmass() + mass));
+    if(par->getx() > x1){
+        x1 = par->getx();
 
+    }else if(par->getx() < x0){
+        x0 = par->getx();
+    }
+
+    if(par->gety() > y1){
+        y1 = par->gety();
+
+    }else if(par->gety() < y0){
+        y0 = par->gety();
+    }
+    radius = sqrt(pow(x-y0,2)+pow(y-x0,2));
     here->setx(x);
     here->sety(y);
     here->setmass(mass);
     //std::cout<<here->getx() - par->getx()<<std::endl;
 
-    double _radius = 2*(sqrt(pow(par->getx() - x, 2) + pow(par->gety() - y, 2)));
+    //double _radius = 2*(sqrt(pow(par->getx() - x, 2) + pow(par->gety() - y, 2)));
 
     //if (radius < _radius){
         //radius = _radius;
-        for(Particle* par3: *pars){
-            if((sqrt(pow(par3->getx() - x, 2) + pow(par3->gety() - y , 2)) > radius)){
-                radius = sqrt(pow(par3->getx() - x, 2) + pow(par3->gety() - y , 2));
-            }
+//        for(Particle* par3: *pars){
+//            if((sqrt(pow(par3->getx() - x, 2) + pow(par3->gety() - y , 2)) > radius)){
+//                radius = sqrt(pow(par3->getx() - x, 2) + pow(par3->gety() - y , 2));
+//            }
 
-        }
-
+//        }
+    //}
 }
 
 
@@ -284,7 +305,7 @@ void QuadTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QW
 
     painter->setBrush(QBrush(Qt::gray));
     painter->setOpacity(0.1);
-    painter->drawEllipse(x - radius  , y - radius ,2*radius, 2*radius);
+    painter->drawRect(x0  , y0 ,x1 -x0, y1-y0);
     if(downright != nullptr){
         //painter->setBrush(QBrush(Qt::blue));
         downright->paint(painter,item,widget);
@@ -314,4 +335,3 @@ QRectF QuadTree::boundingRect() const
     return QRectF(x, y, radius, radius);
 
 }
-

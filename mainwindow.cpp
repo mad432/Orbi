@@ -60,7 +60,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     on_Traced_toggled(true);
 
-    Load("test");
+    //Load("test");
     playlist->addMedia(QUrl("qrc:/Transfer.mp3"));
     playlist->addMedia(QUrl("qrc:/Drifting.mp3"));
     music->setPlaylist(playlist);
@@ -122,9 +122,6 @@ void MainWindow::timetick(){
 
     timer->stop();
 
-//    if(system->root->scene()==nullptr){
-//        scene->addItem(system->root);
-//    }
     if (system->process()){// calculates the particle movements
 
         for (Particle *par : system->Getparticles()){
@@ -768,14 +765,29 @@ void MainWindow::on_actionBarnes_Hut_triggered(bool checked)
 //    if(checked == true){
 //        on_Specialrel_toggled(false);
 //    }
-    system->barnes_hut = checked;
 
-    this->ui->actionBarnes_Hut->setChecked(checked);
+    //this->ui->actionBarnes_Hut->setChecked(checked);
 }
 
 
 void MainWindow::on_actionPerformance_Test_triggered()
 {
     Sysfactory(7);
+}
+
+
+void MainWindow::on_actionShow_Visualization_triggered(bool checked)
+{
+    if(system->root->scene()==nullptr && checked){
+        scene->addItem(system->root);
+    }else{
+        scene->removeItem(system->root);
+    }
+}
+
+
+void MainWindow::on_Barnes_Hut_triggered(bool checked)
+{
+        system->barnes_hut = checked;
 }
 

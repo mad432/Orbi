@@ -39,6 +39,10 @@ class QuadTree: public QObject, public QGraphicsItem
         void constructnode(Particle * par);
 
         double radius;
+        double x0;
+        double y0;
+        double x1;
+        double y1;
 
         double dist(double _x, double _y);
 };
