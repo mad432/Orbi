@@ -3,11 +3,18 @@
 #include <iostream>
 #include "Particle.h"
 #include <vector>
+
 //#include <atomic>
 //used for barnes-hut algorithm
-class QuadTree
+class QuadTree: public QObject, public QGraphicsItem
 {
     public:
+
+    void QuadTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWidget *widget);
+    void QuadTree::DrawQuadTree(long double _x, long double _y, QGraphicsScene *scene);
+
+    QRectF QuadTree::boundingRect() const;
+
 
         double min_dist;
 

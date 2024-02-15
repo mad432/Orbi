@@ -14,6 +14,7 @@ void Rocket::paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWid
     tr.rotate(heading);
     img = img.transformed(tr);
     plume = plume.transformed(tr);
+    //size =10;
 
     painter->drawPixmap(x - size/2 , y - size/2 , size , size, img);
 

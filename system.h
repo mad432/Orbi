@@ -81,6 +81,8 @@ public:
     static bool barnes_hut;
 
     double get_step(){return *step;}
+    static QuadTree * root;
+
 
 
 private:
@@ -89,7 +91,7 @@ private:
     void constructnode(QuadTree * parent,QuadTree * node ,Particle * par);
 
     static QuadTree _root;
-    static QuadTree * root;
+    //static QuadTree * root;
 
     static std::vector <Flight_plan*> flights_;
 

@@ -122,6 +122,9 @@ void MainWindow::timetick(){
 
     timer->stop();
 
+//    if(system->root->scene()==nullptr){
+//        scene->addItem(system->root);
+//    }
     if (system->process()){// calculates the particle movements
 
         for (Particle *par : system->Getparticles()){
@@ -145,7 +148,6 @@ void MainWindow::timetick(){
             }
 
         }
-
     }
     if(traced && tick % 150 == 0){//traces the paths
         for(Particle * par:system->Getparticles()){
