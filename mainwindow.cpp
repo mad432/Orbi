@@ -60,7 +60,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     on_Traced_toggled(true);
 
-    //Load("test");
+    Load("test");
     playlist->addMedia(QUrl("qrc:/Transfer.mp3"));
     playlist->addMedia(QUrl("qrc:/Drifting.mp3"));
     music->setPlaylist(playlist);
