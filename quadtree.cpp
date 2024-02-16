@@ -268,6 +268,7 @@ void QuadTree::constructnode(Particle * par){
 
     //here->setvx((par->getvx() * par->Getmass() + here->getvx() * mass)/(par->Getmass() + mass));
     //here->setvy((par->getvy() * par->Getmass() + here->getvy() * mass)/(par->Getmass() + mass));
+
     if(par->getx() > x1){
         x1 = par->getx();
 
@@ -281,7 +282,7 @@ void QuadTree::constructnode(Particle * par){
     }else if(par->gety() < y0){
         y0 = par->gety();
     }
-    radius = sqrt(pow(x-y0,2)+pow(y-x0,2));
+    radius = sqrt(pow(x1-x0,2)+pow(y1-y0,2));
     here->setx(x);
     here->sety(y);
     here->setmass(mass);
@@ -306,6 +307,8 @@ void QuadTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QW
     painter->setBrush(QBrush(Qt::gray));
     painter->setOpacity(0.1);
     painter->drawRect(x0  , y0 ,x1 -x0, y1-y0);
+    painter->setBrush(QBrush(Qt::darkCyan));
+    painter->drawEllipse(x-here->getsize()/2,y-here->getsize()/2,here->getsize(),here->getsize());
     if(downright != nullptr){
         //painter->setBrush(QBrush(Qt::blue));
         downright->paint(painter,item,widget);
