@@ -762,7 +762,7 @@ bool System::update(int start, int end){
 
             auto pos = [](double x,double vx ,double ax,double t)
               {
-                //std::cout<<abs(vx*t) - abs(ax)<<std::endl;
+                //returns future position
 
                  return x + (vx*t + ax*t) * *step;
 
