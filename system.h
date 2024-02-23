@@ -17,9 +17,19 @@ class System
 public:
 
     struct cords{
-        float x;
-        float y;
+        double x = 0;
+        double y = 0;
+
+        inline const cords& operator +=(const cords& other)  {
+
+            //cords res ;
+            x = x+other.x;
+            y = y+other.y;
+
+            return *this;
+        }
     };
+
 
     System(const System& obj) = delete;
 
