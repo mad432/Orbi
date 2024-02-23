@@ -77,6 +77,7 @@ MainWindow::MainWindow(QWidget *parent)
     });
 
 
+
     rocket = false;
 
 
@@ -691,6 +692,7 @@ void MainWindow::on_Spawn_rocket_triggered()
 
 void MainWindow::on_actionset_Speed_of_Light_triggered()
 {
+    w.move(QWidget::mapToGlobal(QPoint(100,0)));
     w.show();
 
     QObject::connect(&w,&C_slider::valueChanged,this,&MainWindow::SetC);
@@ -699,6 +701,8 @@ void MainWindow::on_actionset_Speed_of_Light_triggered()
 
 void MainWindow::on_actionLoad_Save_triggered()
 {
+
+    savewindow.move(QWidget::mapToGlobal(QPoint(10,20)));
     savewindow.show();
 
     QObject::connect(&savewindow,&SaveLoad::Save_sig,this,&MainWindow::Save);

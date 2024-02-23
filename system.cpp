@@ -6,14 +6,14 @@
 #include <math.h>
 #include <stdio.h>
 #include <cstdio>
-//#include <glad.c>
-//#include <glm/glm.hpp>
-//#include <GLFW/glfw3.h>
-//#include <glm/gtc/matrix_transform.hpp>
-//#include <glm/gtc/type_ptr.hpp>
-//#include <GravShader/GravShader.h>
-//#include <GravShader/compute.h>
-//#include <GravShader/batch_renderer.h>
+#include <glad.c>
+#include <glm/glm.hpp>
+#include <GLFW/glfw3.h>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <GravShader/GravShader.h>
+#include <GravShader/compute.h>
+#include <GravShader/batch_renderer.h>
 
 
 System* System::Instance = NULL;
@@ -77,6 +77,7 @@ std::vector <Flight_plan*>* System::flights = &flights_;
 //        glfwSetWindowShouldClose( window, true );
 //    }
 //}
+
 
 System::System()
 {
@@ -288,7 +289,7 @@ void System::collision(Particle* par, Particle* par1){
     double posy = (par1->gety() * par1->Getmass() + par->gety() * par->Getmass()) / (par->Getmass() + par1->Getmass());
 
 
-    if(!par->getcol() && !par1->getcol() && abs(posx - par->getx()) < par->getsize() + par1->getsize() && abs(posy - par->gety()) < par->getsize() + par1->getsize()){//determine if the collision has been processed already
+    if(par->getid() != 9999999 && par1->getid()!= 9999999 && !par->getcol() && !par1->getcol() && abs(posx - par->getx()) < par->getsize() + par1->getsize() && abs(posy - par->gety()) < par->getsize() + par1->getsize()){//determine if the collision has been processed already
         par->hascol();
         par1->hascol();
 
@@ -482,14 +483,14 @@ void System::clear(){
 System::cords System::gravity(double par1x , double par1y , double par2x , double par2y , double m1, double m2, double step_size){
     //input x and y cordiantes and mass of 2 particles
     //returns gravitational attraction
-    long double dist = sqrt(pow(par1x - par2x , 2) + pow(par1y - par2y , 2));
+    double dist = sqrt(pow(par1x - par2x , 2) + pow(par1y - par2y , 2));
 
-    long double grav = -(*g * m1 * m2) / pow(dist , 2);
+    double grav = -(*g * m1 * m2) / pow(dist , 2);
 
     cords ret;
 
-    ret.x = step_size * grav * (par1x - par2x) / dist;// calculates x component of force due to gravity
-    ret.y = step_size * grav * (par1y - par2y) / dist;// y component of gravity
+    ret.x = /*step_size **/ grav * (par1x - par2x) / dist;// calculates x component of force due to gravity
+    ret.y = /*step_size **/ grav * (par1y - par2y) / dist;// y component of gravity
 
 
 //    std::cout<<ret.y<<":";
@@ -515,6 +516,11 @@ double System::lorentz(double vx, double vy){
 
 void System::constree(int start, int end){
     //constructs the tree for barnes-hut
+    if(start >= end){
+        start = 0;
+        end = 0;
+        return;
+    }
 
     std::vector <Particle *> hold = *particles;
     for (int i = start ; i < end ; i++){
@@ -546,33 +552,40 @@ bool System::process(){
     if(barnes_hut){
 
         root->clear();
-//        for(int i = 0; i < threads ; i++ ){
-//            //std::lock_guard<std::mutex> guard(myMutex);
-//            if(start < length - parper){
+        if(false){
+            for(int i = 0; i < threads ; i++ ){
+                //std::lock_guard<std::mutex> guard(myMutex);
+                if(start < length - parper){
 
-//                Mythreads[i] = std::thread(constree, start, start + parper);
+                    Mythreads[i] = std::thread(constree, start, start + parper);
 
-//                //std::cout<<"thread : "<<i<<" from :"<<start<<" to :"<<start+parper<<std::endl;
+                    std::cout<<"thread : "<<i<<" from :"<<start<<" to :"<<start+parper<<std::endl;
 
-//            }else{
+                }else{
 
-//                Mythreads[i] = std::thread(constree, start, length);
+                    Mythreads[i] = std::thread(constree, start, length);
 
-//                //std::cout<<"thread : "<<i<<" from :"<<start<<" to :"<<*size<<std::endl;
+                    std::cout<<"thread : "<<i<<" from :"<<start<<" to :"<<*size<<std::endl;
 
-//            }
-//            start = start + parper;
-//        }
+                }
+                start = start + parper;
+            }
 
-        constree(0,length);
+            constree(0,parper);
 
-        //root->print();
-        //std::cout<<std::endl;
+            //root->print();
+            //std::cout<<std::endl;
 
-//        for(int i = 0; i < threads ; i++ ){
-//            Mythreads[i].join();
-//        }
-        start =  parper;
+            for(int i = 0; i < threads ; i++ ){
+                Mythreads[i].join();
+            }
+            start =  parper;
+            Mythreads = new std::thread[threads];
+
+        }else{
+            constree(0,length);
+
+        }
 
     }
 
@@ -603,6 +616,10 @@ bool System::process(){
     if(*beencol && collisionEnabled){//checks to see if any paricles have collided
 
         for(auto &par : *particles){
+
+            if (par->getcolnum() == 9999999){
+                par->setcol(-1);
+            }
 
             if(par->getcolnum() != -1 && !par->getcol()){
 
@@ -694,7 +711,7 @@ bool System::update(int start, int end){
 
             }
 
-            double step2 = rel_step * rel_step;
+            //double step2 = rel_step * rel_step;
 
             par->setx(par->getx() + (par->getvx() * *step));//move particle
 
@@ -702,10 +719,10 @@ bool System::update(int start, int end){
 
             for(auto &par1 : *actors){
 
-                if(par1->getid() != par->getid() && par1->getcolnum() == -1 ){
+                if(par1->getid()!= 9999999 && par1->getid() != par->getid() && par1->getcolnum() == -1 &&par->getcolnum() == -1){
 
                     //myMutex.lock();
-                    if(par1->getid()!= 9999999 && (par->getsize() + par1->getsize()) / 2 > sqrt(pow(par->getx() - par1->getx() , 2) + pow(par->gety() - par1->gety() , 2))){//check for collision
+                    if((par->getsize() + par1->getsize()) / 2 > sqrt(pow(par->getx() - par1->getx() , 2) + pow(par->gety() - par1->gety() , 2))){//check for collision
 
                         if(!par->getcol() && !par1->getcol()){//check to see if a particle has already collided
 
@@ -715,9 +732,11 @@ bool System::update(int start, int end){
 
                         }
                         *beencol = true;
+                    }
+                }
+            }
+            for(auto &par1 : *actors){
 
-
-                    }else{
 
 
                         double par1lorentz = 1;
@@ -739,45 +758,72 @@ bool System::update(int start, int end){
                             }
 
                         }
+            }
 
-                        cords k1 = gravity(par->getx() , par->gety() , par1->getx(), par1->gety(), par->Getmass() , par1->Getmass() , rel_step);// Runge - Kutta calculates force on the particles
+            auto pos = [](double x,double vx ,double ax,double t)
+              {
+                //std::cout<<abs(vx*t) - abs(ax)<<std::endl;
 
-                        cords k2 = gravity(par->getx() + (k1.x/2 / (par->Getmass() * parlorentz) * rel_step) , par->gety() + (k1.y/2 / (par->Getmass()* parlorentz) * rel_step) , par1->getx() - (k1.x/2 / (par1->Getmass() * par1lorentz) * rel_step)  , par1->gety() - (k1.y/2 / (par1->Getmass() * par1lorentz) * rel_step) , par->Getmass() , par1->Getmass() , rel_step);
+                 return x + (vx*t + ax*t) * *step;
 
-                        cords k3 = gravity(par->getx() + (k2.x/2 / (par->Getmass() * parlorentz) * rel_step) , par->gety() + (k2.y/2 / (par->Getmass()* parlorentz) * rel_step) , par1->getx() - (k2.x/2 / (par1->Getmass() * par1lorentz) * rel_step)  , par1->gety() - (k2.y/2 / (par1->Getmass() * par1lorentz) * rel_step)  , par->Getmass() , par1->Getmass() , rel_step);
+              };
 
-                        cords k4 = gravity(par->getx() + (k3.x / (par->Getmass() * parlorentz) * rel_step) , par->gety() + (k3.y/ (par->Getmass()* parlorentz) * rel_step) ,  par1->getx() - (k3.x/(par1->Getmass() * par1lorentz) * rel_step)  , par1->gety() - (k3.y/ (par1->Getmass() * par1lorentz) * rel_step)  , par->Getmass(), par1->Getmass(), rel_step);
+            cords k1,k2,k3,k4;
 
-                        if (Special_rel|barnes_hut){
+            for(auto &par1 : *actors){
+                if(par1->getid() != par->getid() && par1->getcolnum() == -1 ){
 
-                            par->setvx( par->getvx() + 2 * (k1.x + 2*k2.x + 2*k3.x + k4.x)/6 / (par->Getmass() * parlorentz));
+                k1 += gravity(par->getx() , par->gety() , par1->getx(), par1->gety(), par->Getmass() , par1->Getmass() , rel_step);// Runge - Kutta calculates force on the particles
+                }
+            }
+            for(auto &par1 : *actors){
+                if(par1->getid() != par->getid() && par1->getcolnum() == -1 ){
 
-                            par->setvy( par->getvy() + 2 * (k1.y + 2*k2.y + 2*k3.y + k4.y)/6 / (par->Getmass() * parlorentz));
+                k2 += gravity(pos(par->getx(),(par->getvx()+par1->getvx()),k1.x/ (par->Getmass() * parlorentz)/2,rel_step/2), pos(par->gety(),(par->getvy()+par1->getvy()),k1.y/ (par->Getmass() * parlorentz)/2,rel_step/2), par1->getx() , par1->gety() , par->Getmass() , par1->Getmass() , rel_step);
+                }
+            }
+            for(auto &par1 : *actors){
+                if(par1->getid() != par->getid() && par1->getcolnum() == -1 ){
+                k3 += gravity(pos(par->getx(),(par->getvx()+par1->getvx()),k2.x/ (par->Getmass() * parlorentz)/2,rel_step/2), pos(par->gety(),(par->getvy()+par1->getvy()),k2.y/ (par->Getmass() * parlorentz)/2,rel_step/2), par1->getx() , par1->gety() , par->Getmass() , par1->Getmass() , rel_step);
+                }
+            }
+            for(auto &par1 : *actors){
+                if(par1->getid() != par->getid() && par1->getcolnum() == -1 ){
+                k4 += gravity(pos(par->getx(),(par->getvx()+par1->getvx()),k3.x/ (par->Getmass() * parlorentz),rel_step), pos(par->gety(),(par->getvy()+par1->getvy()),k3.y/ (par->Getmass() * parlorentz) ,rel_step) , par1->getx() , par1->gety() , par->Getmass() , par1->Getmass() , rel_step);
+                }
+            }
 
-                            if(Special_rel && (pow(par->getvx(),2) + pow(par->getvy(),2)) >= pow(C,2)){//make sure we didn't overshoot C
+            if (true){
+                //std::cout<<k1.x<<std::endl;
 
-                                std::cout<<"warning exceeded C"<<std::endl;
+                par->setvx( par->getvx() + (k1.x + 2*k2.x + 2*k3.x + k4.x)/3 / (par->Getmass() * parlorentz) **step);
 
-                                if(par->getvx()>0){
+                par->setvy( par->getvy() + (k1.y + 2*k2.y + 2*k3.y + k4.y)/3 / (par->Getmass() * parlorentz) **step);
 
-                                    par->setvx(par->getvx() - 1);
+                if(Special_rel && (pow(par->getvx(),2) + pow(par->getvy(),2)) >= pow(C,2)){//make sure we didn't overshoot C
 
-                                }else{
+                    std::cout<<"warning exceeded C"<<std::endl;
 
-                                    par->setvx(par->getvx() + 1);
-                                }
+                    if(par->getvx()>0){
 
-                                if(par->getvy()>0){
+                        par->setvx(par->getvx() - 1);
 
-                                    par->setvy(par->getvy() - 1);
+                    }else{
 
-                                }else{
+                        par->setvx(par->getvx() + 1);
+                    }
 
-                                    par->setvy(par->getvy() + 1);
-                                }
-                            }
+                    if(par->getvy()>0){
 
-                        }else{
+                        par->setvy(par->getvy() - 1);
+
+                    }else{
+
+                        par->setvy(par->getvy() + 1);
+                    }
+                }
+
+            }/*else{
 
                             if(par1->getfix()){ // keeps force consistant
 
@@ -796,12 +842,12 @@ bool System::update(int start, int end){
                                 par1->setvy( par1->getvy() - (k1.y + 2*k2.y + 2*k3.y + k4.y)/6 / par1->Getmass());
                             }
 
-                        }
-                    }
+                        }*/
 
 
-                }
-            }
+
+
+
 
         }else{
 
