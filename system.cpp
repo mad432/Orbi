@@ -719,7 +719,7 @@ bool System::update(int start, int end){
 
             for(auto &par1 : *actors){
 
-                if(par1->getid()!= 9999999 && par1->getid() != par->getid() && par1->getcolnum() == -1 &&par->getcolnum() == -1){
+                if(par1->getid()!= 9999999 && par1->getid() != par->getid() /*&& par1->getcolnum() == -1 && par->getcolnum() == -1*/){
 
                     //myMutex.lock();
                     if((par->getsize() + par1->getsize()) / 2 > sqrt(pow(par->getx() - par1->getx() , 2) + pow(par->gety() - par1->gety() , 2))){//check for collision
@@ -764,7 +764,7 @@ bool System::update(int start, int end){
               {
                 //returns future position
 
-                 return x + (vx*t + ax*t) * *step;
+                 return x + (vx*t + ax*t) * *step ;
 
               };
 
@@ -779,21 +779,21 @@ bool System::update(int start, int end){
             for(auto &par1 : *actors){
                 if(par1->getid() != par->getid() && par1->getcolnum() == -1 ){
 
-                k2 += gravity(pos(par->getx(),(par->getvx()+par1->getvx()),k1.x/ (par->Getmass() * parlorentz)/2,rel_step/2), pos(par->gety(),(par->getvy()+par1->getvy()),k1.y/ (par->Getmass() * parlorentz)/2,rel_step/2), par1->getx() , par1->gety() , par->Getmass() , par1->Getmass() , rel_step);
+                k2 += gravity(pos(par->getx(),(par->getvx()+par1->getvx()),k1.x/ (par->Getmass() * parlorentz),rel_step/2), pos(par->gety(),(par->getvy()+par1->getvy()),k1.y/ (par->Getmass() * parlorentz),rel_step/2), par1->getx() , par1->gety() , par->Getmass() , par1->Getmass() , rel_step);
                 }
             }
             for(auto &par1 : *actors){
                 if(par1->getid() != par->getid() && par1->getcolnum() == -1 ){
-                k3 += gravity(pos(par->getx(),(par->getvx()+par1->getvx()),k2.x/ (par->Getmass() * parlorentz)/2,rel_step/2), pos(par->gety(),(par->getvy()+par1->getvy()),k2.y/ (par->Getmass() * parlorentz)/2,rel_step/2), par1->getx() , par1->gety() , par->Getmass() , par1->Getmass() , rel_step);
+                k3 += gravity(pos(par->getx(),(par->getvx()+par1->getvx()),k2.x/ (par->Getmass() * parlorentz),rel_step/2), pos(par->gety(),(par->getvy()+par1->getvy()),k2.y/ (par->Getmass() * parlorentz),rel_step/2), par1->getx() , par1->gety() , par->Getmass() , par1->Getmass() , rel_step);
                 }
             }
             for(auto &par1 : *actors){
                 if(par1->getid() != par->getid() && par1->getcolnum() == -1 ){
-                k4 += gravity(pos(par->getx(),(par->getvx()+par1->getvx()),k3.x/ (par->Getmass() * parlorentz),rel_step), pos(par->gety(),(par->getvy()+par1->getvy()),k3.y/ (par->Getmass() * parlorentz) ,rel_step) , par1->getx() , par1->gety() , par->Getmass() , par1->Getmass() , rel_step);
+                k4 += gravity(pos(par->getx(),(par->getvx()+par1->getvx()),2 * k3.x/ (par->Getmass() * parlorentz),rel_step), pos(par->gety(),(par->getvy()+par1->getvy()),2 * k3.y/ (par->Getmass() * parlorentz) ,rel_step) , par1->getx() , par1->gety() , par->Getmass() , par1->Getmass() , rel_step);
                 }
             }
 
-            if (true){
+            if (par->getcolnum()==-1){
                 //std::cout<<k1.x<<std::endl;
 
                 par->setvx( par->getvx() + (k1.x + 2*k2.x + 2*k3.x + k4.x)/3 / (par->Getmass() * parlorentz) **step);
