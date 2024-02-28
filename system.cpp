@@ -625,7 +625,7 @@ bool System::process(){
 
                 for(auto &par1 : *particles){
 
-                    if(par->getcolnum() == par1->getid()){
+                    if(par->getcolnum() == par1->getid() && !par1->getcol() ){
 
                         collision(par,par1);
                     }
@@ -719,7 +719,7 @@ bool System::update(int start, int end){
 
             for(auto &par1 : *actors){
 
-                if(par1->getid()!= 9999999 && par1->getid() != par->getid() /*&& par1->getcolnum() == -1 && par->getcolnum() == -1*/){
+                if(par1->getid() != 9999999 && par1->getid() != par->getid() && par1->getcolnum() == -1 && par->getcolnum() == -1){
 
                     //myMutex.lock();
                     if((par->getsize() + par1->getsize()) / 2 > sqrt(pow(par->getx() - par1->getx() , 2) + pow(par->gety() - par1->gety() , 2))){//check for collision
@@ -732,6 +732,7 @@ bool System::update(int start, int end){
 
                         }
                         *beencol = true;
+                        break;
                     }
                 }
             }
@@ -764,7 +765,7 @@ bool System::update(int start, int end){
               {
                 //returns future position
 
-                 return x + (vx*t + ax*t) * *step ;
+                 return x + (vx*t + ax*t) * *step ;//ax includes time
 
               };
 
@@ -823,37 +824,14 @@ bool System::update(int start, int end){
                     }
                 }
 
-            }/*else{
-
-                            if(par1->getfix()){ // keeps force consistant
-
-                                par->setvx( par->getvx() + 2 * (k1.x + 2*k2.x + 2*k3.x + k4.x)/6 / par->Getmass());
-
-                                par->setvy( par->getvy() + 2 * (k1.y + 2*k2.y + 2*k3.y + k4.y)/6 / par->Getmass());
-
-                            }else{
-
-                                par->setvx( par->getvx() + (k1.x + 2*k2.x + 2*k3.x + k4.x)/6 / par->Getmass());
-
-                                par->setvy( par->getvy() + (k1.y + 2*k2.y + 2*k3.y + k4.y)/6 / par->Getmass());
-
-                                par1->setvx( par1->getvx() - (k1.x + 2*k2.x + 2*k3.x + k4.x)/6 / par1->Getmass());
-
-                                par1->setvy( par1->getvy() - (k1.y + 2*k2.y + 2*k3.y + k4.y)/6 / par1->Getmass());
-                            }
-
-                        }*/
-
-
-
-
+            }
 
 
         }else{
 
             for(auto &par1 : hold){
 
-                if(par1->getid() != par->getid() && par1->getcolnum() == -1){
+                if(par1->getid() != par->getid() && par->getcolnum() == -1 && par1->getcolnum() == -1){
 
 
                         if((par->getsize() + par1->getsize()) / 2 > sqrt(pow(par->getx() - par1->getx() , 2) + pow(par->gety() - par1->gety() , 2))){//check for collision

@@ -3,20 +3,20 @@
 #include <iostream>
 #include "Particle.h"
 #include <vector>
+#include <mutex>
 
-//#include <atomic>
+#include <atomic>
 //used for barnes-hut algorithm
 class QuadTree: public QObject, public QGraphicsItem
 {
     public:
 
-    void QuadTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWidget *widget);
-    void QuadTree::DrawQuadTree(long double _x, long double _y, QGraphicsScene *scene);
+        std::mutex mymutex;
 
-    QRectF QuadTree::boundingRect() const;
+        void paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QWidget *widget);
+        void DrawQuadTree(long double _x, long double _y, QGraphicsScene *scene);
 
-
-        double min_dist;
+        QRectF boundingRect() const;
 
         void get_actors(Particle * par, std::vector <Particle*>* ret);
         //bool distance(Particle * par);
@@ -25,24 +25,31 @@ class QuadTree: public QObject, public QGraphicsItem
         void print();
         //int particles;
         QuadTree();
+        ~QuadTree();
 
-        double mass;
-        double x;//center of mass
-        double y;
+        void clear();
+        void constructnode(Particle * par);
+private:
+
+        double min_dist = 0;
+
+
+        double mass = 0;
+        double x = 0;//center of mass
+        double y = 0;
         Particle *here;
 
         QuadTree * upleft;
         QuadTree * upright;
         QuadTree * downleft;
         QuadTree * downright;
-        void clear();
-        void constructnode(Particle * par);
 
-        double radius;
-        double x0;
-        double y0;
-        double x1;
-        double y1;
+
+        std::atomic <double> radius;
+        std::atomic <double> x0;
+        std::atomic <double> y0;
+        std::atomic <double> x1;
+        std::atomic <double> y1;
 
         double dist(double _x, double _y);
 };

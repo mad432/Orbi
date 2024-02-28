@@ -49,18 +49,18 @@ MainWindow::MainWindow(QWidget *parent)
 
     on_pushButton_clicked();
 
-    //Sysfactory(-1);
+    Sysfactory(-2);
 
     //saves->Write_system("test");
 
-    on_pushButton_clicked();
+    //on_pushButton_clicked();
 
 //    _sleep(100);
 //////    on_GSlider_valueChanged(50);
 
     on_Traced_toggled(true);
 
-    Load("test");
+    //Load("test");
     playlist->addMedia(QUrl("qrc:/Transfer.mp3"));
     playlist->addMedia(QUrl("qrc:/Drifting.mp3"));
     music->setPlaylist(playlist);
@@ -207,7 +207,7 @@ void MainWindow::addRocket(int Mass, long double _x, long double _y , long doubl
 
     player = rock;
 
-    if(plan != 0){
+    if(plan == 1){
 
         std::vector <Particle *> references = {};
 
@@ -224,6 +224,19 @@ void MainWindow::addRocket(int Mass, long double _x, long double _y , long doubl
         //system->add_flight(y);
     }else if(plan == 2){
 
+        std::vector <Particle *> references = {};
+
+        references.push_back(system->Getparticles()[0]);
+
+        references.push_back(system->Getparticles()[ref]);
+
+        references.push_back(rock);
+
+        references.push_back(system->Getparticles()[1]);
+
+        int stage = 0;
+
+        system->add_flight(rock, plan , references, stage);
     }
 }
 
@@ -234,19 +247,21 @@ void MainWindow::Sysfactory(int sel){
 
     if(sel == -2){
 
-        on_GSlider_valueChanged(30);//sets G
+        on_GSlider_valueChanged(10);//sets G
 
-        int sol = 19000 + rand()%2000;
+        int sol = 59000 + rand()%2000;
 
-        addParticle(2*sol,1425/2  ,700/2  ,sqrt(g*sol/160),0,1);
+        addParticle(2*sol,1425/2  ,700/2  ,0,0,1);
 
         //addParticle(sol,1425/2  ,700/2 - 40 ,-sqrt(g*sol/160),0,0);
 
-        addParticle(600, 1425/2 + 200, 700/2 ,0,sqrt(g*2*sol/200),0);
+        addParticle(1000, 1425/2 + 300, 700/2 ,0,sqrt(g*2*sol/300),0);
 
-        addParticle(600, 1425/2 - 400, 700/2 ,0,-sqrt(g*2*sol/400),0);
+        addParticle(1000, 1425/2 - 700, 700/2 ,0,-sqrt(g*2*sol/700),0);
 
-        addRocket(200,1425/2 + 200 ,700/2 + 20 , sqrt(g * 400/ 10), sqrt(g*2*sol/200) , 1 , 2);
+        addRocket(200,1425/2 + 300 ,700/2 + 20 , sqrt(g * 600/ 10), sqrt(g*2*sol/300) , 2 , 2);
+
+        //addRocket(200,1425/2 ,700/2 + 150  , - sqrt(g*2*sol/150) , 0 , 1 , 1);
     }
 
     if(sel == -1){//transfer
@@ -746,6 +761,11 @@ void MainWindow::on_actionTransfer_triggered()
 
 void MainWindow::on_Traced_toggled(bool checked)
 {
+    for(auto dot:trace){
+        delete dot;
+    }
+    trace.clear();
+
     traced = checked;
 
     this->ui->Traced->setChecked(checked);

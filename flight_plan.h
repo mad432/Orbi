@@ -20,6 +20,8 @@ public:
 
     void terminate();
 
+    bool get_ter(){return terminated;}
+
     int get_plan(){return program;}
 
     Rocket * get_rocket(){return current(&references,&terminated);}
@@ -34,6 +36,8 @@ private:
     bool terminated;
 
     static void hohmann_transfer(int planet_, std::vector<Particle*>* , int rocket , bool *ter);
+
+    static void Inter_planet(int planet_, int planet_home, std::vector<Particle*>* , int rocket , bool *ter);
 
     static int stage;
 
@@ -79,6 +83,9 @@ private:
     static double true_anomaly(int planet_, std::vector<Particle*>* ref, bool *ter);
 
     static double eccentricity(int planet_, std::vector<Particle*>* ref, bool *ter);
+
+    static int escape_angle(int planet_,std::vector<Particle*>* ref, bool *ter ,double vel);
+
 
 
 //    void burn(int dv);
