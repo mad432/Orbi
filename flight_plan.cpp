@@ -186,8 +186,12 @@ double Flight_plan::eccentricity(int planet_, std::vector<Particle*>* ref, bool 
 
 int Flight_plan::escape_angle(int planet_,std::vector<Particle*>* ref, bool *ter,double vel){
 
-    double ve = pow(vel,2) - 2 * G * planet(planet_,ref,ter)->Getmass() /distance(2,planet_,ref,ter)/(2 * G * planet(planet_,ref,ter)->Getmass());
-    return 70;
+    double ve = vel - sqrt(2 * G * planet(planet_,ref,ter)->Getmass() /distance(2,planet_,ref,ter)) + sqrt( G * planet(planet_,ref,ter)->Getmass() / distance(2,planet_,ref,ter));
+
+    double ydot = abs(pow(ve,2)/(pow(G * planet(planet_,ref,ter)->Getmass(),2)/ve));
+
+    std::cout<<"esc_angle : "<<180/M_PI*atan(ydot)<<std::endl;
+    return 180/M_PI*atan(ydot);
 }
 
 
@@ -199,7 +203,7 @@ void Flight_plan::program_sel(int program ,std::vector<Particle*>* ref,int rocke
 
         if(program == 2){
 
-            Inter_planet(1,3,ref,rocket,ter);
+            Inter_planet( 1 , 3 , ref ,rocket,ter);
 
         }
 
@@ -544,7 +548,40 @@ float period(int planet ,std::vector<Particle*>* ref , int rocket, bool *ter ,in
 
 void Flight_plan::circularize(int planet_, std::vector<Particle*>* ref, int rocket, bool *ter ,int altitude){
 
+       if(Apoapsis(planet_,ref,ter) > altitude+2){
 
+           while(true_anomaly(planet_,ref,ter)<358){
+
+               wait(10);
+               std::cout<<true_anomaly(planet_,ref,ter)<<std::endl;
+
+               setheading("retrograde",planet_,ref,ter);
+
+           }
+           while(Apoapsis(planet_,ref,ter) > altitude+2){
+
+               burn(0.1,planet_,ref,ter,"retrograde");
+
+           }
+       }
+       if(periapsis(planet_,ref,ter) < altitude - 2){
+
+           while(true_anomaly(planet_,ref,ter)<178 || true_anomaly(planet_,ref,ter)>180){
+
+               std::cout<<true_anomaly(planet_,ref,ter)<<std::endl;
+
+               wait(10);
+
+               setheading("prograde",planet_,ref,ter);
+
+           }
+
+           while(periapsis(planet_,ref,ter)<altitude-2){
+
+               burn(0.1,planet_,ref,ter,"prograde");
+
+           }
+       }
 
 }
 
@@ -674,7 +711,7 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
     }
     //int F_alt = 0;
 
-    while((off < 20 || off > 25) && distance(planet_,rocket,ref,ter) > 25 ){//burn to raise or lower the periapsis to the desired height
+    while((off < 20 || off > 25) && (distance(planet_,rocket,ref,ter) > 25) ){//burn to raise or lower the periapsis to the desired height
 
         //int off1 = off;
 
@@ -696,8 +733,9 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
 
         }
 
-
-        burn(0.1, 1, ref,ter);
+        if((off < 20 || off > 25)){
+            burn(0.1, 1, ref,ter);
+        }
 
         wait(5);
 
@@ -741,27 +779,32 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
 }
 
 void Flight_plan::Inter_planet(int planet_Dest, int planet_home, std::vector<Particle*>* ref, int rocket , bool *ter){
+    circularize(0,ref,rocket,ter,periapsis(0,ref,ter));
+
     if(stage>=1){
 
         hohmann_transfer(planet_Dest,ref,rocket,ter);
 
     }else{
 
+        circularize(0,ref,rocket,ter,periapsis(0,ref,ter));
+
         int h_0 = distance(0,planet_home,ref,ter);//inital hieght
 
         int h_p = distance(planet_Dest,0,ref,ter);//final height
 
-        double int_vel = sqrt(planet(planet_home,ref,ter)->Getmass() / distance(rocket,planet_home,ref,ter));
+        double int_vel = sqrt(planet(planet_home,ref,ter)->Getmass()*G / distance(rocket,planet_home,ref,ter));
 
         if (h_p > h_0){
             int_vel = -int_vel;
         }
 
-        double dv = sqrt((planet(0 , ref, ter)->Getmass()*G /h_0)) * (sqrt(((2.0 * h_p)/(h_p + h_0))) - 1.0) + sqrt(2*planet(planet_home,ref,ter)->Getmass() / distance(rocket,planet_home,ref,ter)) + int_vel;
+        double dv = /*sqrt((planet(0 , ref, ter)->Getmass()*G /h_0)) * abs((sqrt(((2.0 * h_p)/(h_p + h_0))) - 1.0)) - */sqrt(2 * planet(planet_home,ref,ter)->Getmass() * G / distance(rocket,planet_home,ref,ter)) /*- int_vel*/;
 
         int trans_angle = abs_ang(180 * (1 - ( 1 / (sqrt(8)) * sqrt( pow(h_0/h_p + 1 , 3))))) % 180;//transfer angle
 
-        std::cout<<trans_angle<<std::endl;
+        std::cout<<sqrt(planet(planet_home,ref,ter)->Getmass()*G / distance(rocket,planet_home,ref,ter))<<" : "<<sqrt(pow(current(ref,ter)->getvx() -planet(planet_home,ref,ter)->getvx() ,2) +pow(current(ref,ter)->getvy() -planet(planet_home,ref,ter)->getvy() ,2)) <<std::endl;
+        waitangle:
 
         while((trans_angle - 1 > angle(planet_home,0,planet_Dest,ref,ter) || angle(planet_home,0,planet_Dest,ref,ter) > trans_angle + 1 || current(ref, ter)->getvx() * (planet(1, ref, ter)->getx()-planet(0 , ref, ter)->getx()) + current(ref, ter)->getvy() * (planet(1, ref, ter)->gety()-planet(0 , ref, ter)->gety()) < 0)){
 
@@ -772,26 +815,30 @@ void Flight_plan::Inter_planet(int planet_Dest, int planet_home, std::vector<Par
 
         }
 
-        int dept_angle = 60;
+        int dept_angle =escape_angle(planet_home,ref,ter,dv);
 
         if(h_p < h_0){
-            dept_angle = 180;
+            dept_angle = 180 - dept_angle;
         }
 
         std::cout<<dept_angle<<std::endl;
 
         //std::cout<<dept_angle<<std::endl;
 
-        while ((angle(0,planet_home,rocket,ref,ter) > dept_angle+1 || angle(0,planet_home,rocket,ref,ter) < dept_angle-1) || (distance(planet_Dest,planet_home,ref,ter)>distance(planet_Dest,rocket,ref,ter))) {
+        while ((angle(0,planet_home,rocket,ref,ter) > dept_angle+3 || angle(0,planet_home,rocket,ref,ter) < dept_angle-3) /*|| (distance(planet_Dest,planet_home,ref,ter)>distance(planet_Dest,rocket,ref,ter))*/) {
 
-            std::cout<<distance(0,planet_home,ref,ter)<<" : "<<distance(0,rocket,ref,ter)<<std::endl;
+            std::cout<<abs(trans_angle - angle(planet_home,0,planet_Dest,ref,ter))<<std::endl;
+
+            if(abs(trans_angle - angle(planet_home,0,planet_Dest,ref,ter))>40){
+                goto waitangle;
+            }
 
             setheading("prograde" , planet_home ,ref,ter);
 
             wait(10);
         }
 
-        burn(dv,planet_home,ref,ter);
+        burn(dv,0,ref,ter);
 
         stage = 1;
         wait(3000);

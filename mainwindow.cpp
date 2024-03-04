@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     setWindowIcon(QIcon(":Image/thumb.png"));
 
-    srand (time(0));
+    srand(time(0));
 
     ui->setupUi(this);
 
@@ -251,17 +251,21 @@ void MainWindow::Sysfactory(int sel){
 
         int sol = 59000 + rand()%2000;
 
+        int alt1 = 250 + rand()%100;
+
+        int alt2 = 500 +rand()%400;
+
         addParticle(2*sol,1425/2  ,700/2  ,0,0,1);
 
         //addParticle(sol,1425/2  ,700/2 - 40 ,-sqrt(g*sol/160),0,0);
 
-        addParticle(1000, 1425/2 + 300, 700/2 ,0,sqrt(g*2*sol/300),0);
+        //addParticle(700, 1425/2 + alt1, 700/2 ,0,sqrt(g*2*sol/alt1),0);
 
-        addParticle(1000, 1425/2 - 700, 700/2 ,0,-sqrt(g*2*sol/700),0);
+        addParticle(1000, 1425/2 - alt2, 700/2 ,0,-sqrt(g*2*sol/alt2),0);
 
-        addRocket(200,1425/2 + 300 ,700/2 + 20 , sqrt(g * 600/ 10), sqrt(g*2*sol/300) , 2 , 2);
+        //addRocket(200,1425/2 + alt1 ,700/2 + 20 , sqrt(g * 700/ 20), sqrt(g*2*sol/alt1) , 2 , 2);
 
-        //addRocket(200,1425/2 ,700/2 + 150  , - sqrt(g*2*sol/150) , 0 , 1 , 1);
+        addRocket(200,1425/2 ,700/2 + 150  , - sqrt(1.3*g*2*sol/150) , 0 , 2 , 1);
     }
 
     if(sel == -1){//transfer

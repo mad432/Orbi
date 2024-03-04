@@ -29,7 +29,7 @@ public:
     int get_stage(){return stage;}
 
 private:
-    void circularize(int planet_, std::vector<Particle*>* ref, int rocket, bool *ter ,int altitude);
+    static void circularize(int planet_, std::vector<Particle*>* ref, int rocket, bool *ter ,int altitude);
 
     int program;
 

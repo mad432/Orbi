@@ -489,8 +489,8 @@ System::cords System::gravity(double par1x , double par1y , double par2x , doubl
 
     cords ret;
 
-    ret.x = /*step_size **/ grav * (par1x - par2x) / dist;// calculates x component of force due to gravity
-    ret.y = /*step_size **/ grav * (par1y - par2y) / dist;// y component of gravity
+    ret.x = step_size * grav * (par1x - par2x) / dist;// calculates x component of force due to gravity
+    ret.y = step_size * grav * (par1y - par2y) / dist;// y component of gravity
 
 
 //    std::cout<<ret.y<<":";
@@ -797,9 +797,9 @@ bool System::update(int start, int end){
             if (par->getcolnum()==-1){
                 //std::cout<<k1.x<<std::endl;
 
-                par->setvx( par->getvx() + (k1.x + 2*k2.x + 2*k3.x + k4.x)/3 / (par->Getmass() * parlorentz) **step);
+                par->setvx( par->getvx() + (k1.x + 2*k2.x + 2*k3.x + k4.x)/3 / (par->Getmass() * parlorentz) /***step*/);
 
-                par->setvy( par->getvy() + (k1.y + 2*k2.y + 2*k3.y + k4.y)/3 / (par->Getmass() * parlorentz) **step);
+                par->setvy( par->getvy() + (k1.y + 2*k2.y + 2*k3.y + k4.y)/3 / (par->Getmass() * parlorentz) /***step*/);
 
                 if(Special_rel && (pow(par->getvx(),2) + pow(par->getvy(),2)) >= pow(C,2)){//make sure we didn't overshoot C
 

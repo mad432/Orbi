@@ -6,8 +6,8 @@ QuadTree::QuadTree()
     upright = nullptr;
     downleft = nullptr;
     downright = nullptr;
-    x = 99999;
-    y = 99999;
+    x = 0;
+    y = 0;
     mass = 0;
     radius = 0;
     x0 = 999999;
@@ -16,7 +16,7 @@ QuadTree::QuadTree()
     x1 = -999999;
     here = new Particle(0,0,0,0,0,1,9999999);
     pars = new std::vector <Particle*>;
-    min_dist = 0.5;
+    min_dist = .5;
 
 }
 QuadTree::~QuadTree(){
@@ -98,11 +98,10 @@ double QuadTree::dist(double _x, double _y){
 void QuadTree::get_actors(Particle * par, std::vector <Particle*>* ret){
     //gets what actors should be acting on each particle and appends it to ret
     //std::cout<<dist(par->getx(),par->gety())<<" : "<<radius<<std::endl;
-
     if(pars->size() == 1){
 
-        Particle * part = pars->front();
-        ret->push_back(part);
+        std::vector <Particle*> parts = *pars;
+        ret->push_back(parts[0]);
 
 
     }else if(dist(par->getx(),par->gety()) < min_dist){
@@ -157,7 +156,7 @@ void QuadTree::constructnode(Particle * par){
         y1 = y;
         mass = par->Getmass();
         pars->push_back(par);
-        //radius = 10;
+        //radius = par->getsize()*3.14;
         return;
 
     }else if(pars->size() == 1){//if there is only one particle we need to create 2 new nodes to make sure each particle has its own leaf
@@ -280,8 +279,8 @@ void QuadTree::constructnode(Particle * par){
         }
 
 
-    here->setvx((par->getvx() * par->Getmass() + here->getvx() * mass)/(par->Getmass() + mass));
-    here->setvy((par->getvy() * par->Getmass() + here->getvy() * mass)/(par->Getmass() + mass));
+    //here->setvx((par->getvx() * par->Getmass() + here->getvx() * mass)/(par->Getmass() + mass));
+    //here->setvy((par->getvy() * par->Getmass() + here->getvy() * mass)/(par->Getmass() + mass));
 
     if(par->getx()+par->getsize() > x1){
         x1 = par->getx()+par->getsize();
@@ -300,6 +299,9 @@ void QuadTree::constructnode(Particle * par){
     here->setx(x);
     here->sety(y);
     here->setmass(mass);
+//    if (radius < par->getsize()){
+//        std::cout<<"crash"<<std::endl;
+//    }
     //std::cout<<here->getx() - par->getx()<<std::endl;
 
     //double _radius = 2*(sqrt(pow(par->getx() - x, 2) + pow(par->gety() - y, 2)));
