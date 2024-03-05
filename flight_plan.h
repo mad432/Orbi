@@ -53,6 +53,10 @@ private:
     static void burn(double dv,int planet,std::vector<Particle*>* ref, bool *ter);
     static void burn(double dv,int planet_,std::vector<Particle*>* ref,bool *ter , std::string heading);
 
+    static void Capture(int planet_, std::vector<Particle*>* ref, int rocket, bool *ter);
+
+    static void intercept(int planet_, std::vector<Particle*>* ref, int rocket, bool *ter);
+
     static int abs_ang(int angle);
 
     static Rocket * current(std::vector<Particle*>* ref,bool *ter);

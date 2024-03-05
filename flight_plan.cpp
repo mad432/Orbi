@@ -69,7 +69,7 @@ Particle * Flight_plan::planet(int pla ,std::vector<Particle*>* ref, bool *ter){
 
 
 Rocket * Flight_plan::current(std::vector<Particle*>* ref, bool *ter){
-    //fetches the attaced rocket
+    //fetches the attached rocket
         Particle * here = planet(2, ref, ter);
 
         Rocket * ret_rock =  dynamic_cast<Rocket*>(here);
@@ -547,10 +547,11 @@ float period(int planet ,std::vector<Particle*>* ref , int rocket, bool *ter ,in
 }
 
 void Flight_plan::circularize(int planet_, std::vector<Particle*>* ref, int rocket, bool *ter ,int altitude){
+    //circularizes the orbit at altitude
 
        if(Apoapsis(planet_,ref,ter) > altitude + 2){
 
-           while(true_anomaly(planet_,ref,ter) < 358){//wait tell apoapsis
+           while(true_anomaly(planet_,ref,ter) < 358){//wait tell periapsis
 
                wait(10);
                std::cout<<true_anomaly(planet_,ref,ter)<<std::endl;
@@ -566,7 +567,7 @@ void Flight_plan::circularize(int planet_, std::vector<Particle*>* ref, int rock
        }
        if(periapsis(planet_,ref,ter) < altitude - 2){
 
-           while(true_anomaly(planet_,ref,ter) < 178 || true_anomaly(planet_,ref,ter) > 180){//wait tell periapsis
+           while(true_anomaly(planet_,ref,ter) < 178 || true_anomaly(planet_,ref,ter) > 180){//wait tell apoapsis
 
                std::cout<<true_anomaly(planet_,ref,ter)<<std::endl;
 
@@ -659,6 +660,20 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
 
     stage1://transfer
 
+    intercept(planet_,ref,rocket,ter);
+
+    stage = 2;
+
+    stage2://capture
+
+    Capture(planet_,ref,rocket,ter);
+
+}
+
+void Flight_plan::intercept(int planet_, std::vector<Particle*>* ref, int rocket, bool *ter){
+
+    double off = 0;
+
     bool heading = true;
 
     while(distance(planet_,rocket,ref,ter) > 100){
@@ -742,14 +757,15 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
     }
 
     std::cout<<"Final alt calc: "<<periapsis(planet_,ref,ter)<<std::endl;
+}
 
-    stage = 2;
+void Flight_plan::Capture(int planet_, std::vector<Particle*>* ref, int rocket, bool *ter){
 
-    stage2://capture
+    double dv = 0;
 
     double d_i = true_anomaly(planet_,ref,ter);
 
-    while((d_i < 355) || (180 > d_i)){// wait for periapsis
+    while((d_i < 355)){// wait for periapsis
 
         //d_i = distance(rocket,1,ref,ter);
 
@@ -775,6 +791,7 @@ void Flight_plan::hohmann_transfer(int planet_, std::vector<Particle*>* ref, int
 
     burn(dv, planet_,ref,ter);
 
+    circularize(planet_,ref ,rocket,ter, periapsis(planet_,ref,ter));
 
 }
 
