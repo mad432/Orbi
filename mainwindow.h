@@ -96,6 +96,8 @@ private slots:
 
     void on_Barnes_Hut_triggered(bool checked);
 
+    void on_actionInter_planetary_triggered();
+
 private:
 
     QMediaPlaylist *playlist = new QMediaPlaylist();

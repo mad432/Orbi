@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     on_pushButton_clicked();
 
-    Sysfactory(-2);
+    //Sysfactory(-2);
 
     //saves->Write_system("test");
 
@@ -60,7 +60,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     on_Traced_toggled(true);
 
-    //Load("test");
+    Load("test");
     playlist->addMedia(QUrl("qrc:/Transfer.mp3"));
     playlist->addMedia(QUrl("qrc:/Drifting.mp3"));
     music->setPlaylist(playlist);
@@ -251,21 +251,21 @@ void MainWindow::Sysfactory(int sel){
 
         int sol = 59000 + rand()%2000;
 
-        int alt1 = 250 + rand()%100;
+        int alt1 = 200 + rand()%100;
 
-        int alt2 = 500 +rand()%400;
+        int alt2 = 600 +rand()%400;
 
         addParticle(2*sol,1425/2  ,700/2  ,0,0,1);
 
         //addParticle(sol,1425/2  ,700/2 - 40 ,-sqrt(g*sol/160),0,0);
 
-        //addParticle(700, 1425/2 + alt1, 700/2 ,0,sqrt(g*2*sol/alt1),0);
+        addParticle(700, 1425/2 + alt1, 700/2 ,0,sqrt(g*2*sol/alt1),0);
 
         addParticle(1000, 1425/2 - alt2, 700/2 ,0,-sqrt(g*2*sol/alt2),0);
 
-        //addRocket(200,1425/2 + alt1 ,700/2 + 20 , sqrt(g * 700/ 20), sqrt(g*2*sol/alt1) , 2 , 2);
+        addRocket(200,1425/2 + alt1 ,700/2 + 20 , sqrt(g * 700/ 20), sqrt(g*2*sol/alt1) , 2 , 2);
 
-        addRocket(200,1425/2 ,700/2 + 150  , - sqrt(1.3*g*2*sol/150) , 0 , 2 , 1);
+        //addRocket(200,1425/2 ,700/2 + 150  , - sqrt(g*2*sol/150) , 0 , 1 , 1);
     }
 
     if(sel == -1){//transfer
@@ -817,5 +817,11 @@ void MainWindow::on_actionShow_Visualization_triggered(bool checked)
 void MainWindow::on_Barnes_Hut_triggered(bool checked)
 {
         system->barnes_hut = checked;
+}
+
+
+void MainWindow::on_actionInter_planetary_triggered()
+{
+    Load("inter1");
 }
 
