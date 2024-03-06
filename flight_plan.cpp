@@ -859,10 +859,10 @@ void Flight_plan::Inter_planet(int planet_Dest, int planet_home, std::vector<Par
 
         burn(dv,0,ref,ter);
 
-        wait(7000);
+        wait(10000);
         if(h_0<h_p){
 
-            while(Apoapsis(0,ref,ter) < distance(0,planet_Dest,ref,ter)){
+            while(Apoapsis(0,ref,ter) < distance(0,planet_Dest,ref,ter) * 1.1){
 
                 setheading("prograde",0,ref,ter);
 

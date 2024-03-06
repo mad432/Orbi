@@ -474,6 +474,11 @@ void System::clear(){
         //delete flight;
 
     }
+    if(flights->size()>0){
+
+        _sleep(100);
+
+    }
     flights->clear();
 
     *size = 0;

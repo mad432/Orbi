@@ -822,6 +822,6 @@ void MainWindow::on_Barnes_Hut_triggered(bool checked)
 
 void MainWindow::on_actionInter_planetary_triggered()
 {
-    Load("inter1");
+    Sysfactory(-2);
 }
 
