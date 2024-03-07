@@ -185,13 +185,13 @@ double Flight_plan::eccentricity(int planet_, std::vector<Particle*>* ref, bool 
 }
 
 int Flight_plan::escape_angle(int planet_,std::vector<Particle*>* ref, bool *ter,double vel){
+    //calculates the angle the rocket will leave from a planet
 
     double ve = sqrt(abs(pow(vel,2) - 2 * G * planet(planet_,ref,ter)->Getmass() /distance(2,planet_,ref,ter)));
 
-    double ydot = abs(pow(ve,2)/(pow(G * planet(planet_,ref,ter)->Getmass(),2)/ve));
 
-    std::cout<<"esc_angle : "<<180/M_PI*asin(ydot)<<std::endl;
-    return 180/M_PI*asin(ydot);
+    std::cout<<"esc_angle : "<<180/3.14*acos((ve-1)/sqrt(G * planet(planet_,ref,ter)->Getmass() /distance(2,planet_,ref,ter)))<<std::endl;
+    return 180/3.14*acos((ve - 1)/sqrt(G * planet(planet_,ref,ter)->Getmass() /distance(2,planet_,ref,ter)));
 }
 
 
@@ -820,9 +820,9 @@ void Flight_plan::Inter_planet(int planet_Dest, int planet_home, std::vector<Par
 
         double dv = sqrt((pow(hohmann,2) + (2 * G * planet(planet_home,ref,ter)->Getmass() /distance(2,planet_home,ref,ter)))) - int_vel;
 
-        int trans_angle = abs_ang(120 * (1 - ( 1 / (sqrt(8)) * sqrt( pow(h_0/h_p + 1 , 3)))))%180;//transfer angle
+        int trans_angle = abs_ang(180 * (1 - ( 1 / (sqrt(8)) * sqrt( pow(h_0/h_p + 1 , 3)))))%180;//transfer angle
 
-        std::cout<<trans_angle<<": dvd"<<std::endl;
+        std::cout<<trans_angle<<": dv"<<std::endl;
         waitangle:
 
         while(trans_angle - 1 > angle(planet_home,0,planet_Dest,ref,ter) || angle(planet_home,0,planet_Dest,ref,ter) > trans_angle + 1 || current(ref, ter)->getvx() * (planet(1, ref, ter)->getx()-planet(0 , ref, ter)->getx()) + current(ref, ter)->getvy() * (planet(1, ref, ter)->gety()-planet(0 , ref, ter)->gety()) < 0){
@@ -834,7 +834,7 @@ void Flight_plan::Inter_planet(int planet_Dest, int planet_home, std::vector<Par
 
         }
 
-        int dept_angle =escape_angle(planet_home,ref,ter,dv);
+        int dept_angle =escape_angle(planet_home,ref,ter,dv + int_vel);
 
         if(h_p < h_0){
             dept_angle = 180 - dept_angle;
