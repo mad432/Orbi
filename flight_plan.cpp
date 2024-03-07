@@ -48,7 +48,7 @@ Flight_plan::Flight_plan(int _cur , double G_ , int program_, std::vector <Parti
 
 Particle * Flight_plan::planet(int pla ,std::vector<Particle*>* ref, bool *ter){
 
-    //fetches one of the referense planets
+    //fetches one of the referenced planets
 
     void * here = (*ref)[pla];
 
@@ -577,7 +577,7 @@ void Flight_plan::circularize(int planet_, std::vector<Particle*>* ref, int rock
 
            }
 
-           while(periapsis(planet_,ref,ter)<altitude-2){
+           while(periapsis(planet_,ref,ter) < altitude - 2){
 
                burn(0.1,planet_,ref,ter,"prograde");
 
@@ -769,7 +769,7 @@ void Flight_plan::Capture(int planet_, std::vector<Particle*>* ref, int rocket, 
 
         //d_i = distance(rocket,1,ref,ter);
 
-        if(periapsis(1,ref,ter)<planet(planet_,ref,ter)->getsize()){
+        if(periapsis(planet_,ref,ter)<planet(planet_,ref,ter)->getsize()){
             setheading("radial out" , planet_,ref,ter);
             burn(0.1, 1, ref,ter);
         }else{
@@ -820,7 +820,7 @@ void Flight_plan::Inter_planet(int planet_Dest, int planet_home, std::vector<Par
 
         double dv = sqrt((pow(hohmann,2) + (2 * G * planet(planet_home,ref,ter)->Getmass() /distance(2,planet_home,ref,ter)))) - int_vel;
 
-        int trans_angle = abs_ang(140 * (1 - ( 1 / (sqrt(8)) * sqrt( pow(h_0/h_p + 1 , 3)))))%180;//transfer angle
+        int trans_angle = abs_ang(120 * (1 - ( 1 / (sqrt(8)) * sqrt( pow(h_0/h_p + 1 , 3)))))%180;//transfer angle
 
         std::cout<<trans_angle<<": dvd"<<std::endl;
         waitangle:
@@ -844,7 +844,7 @@ void Flight_plan::Inter_planet(int planet_Dest, int planet_home, std::vector<Par
 
         //std::cout<<dept_angle<<std::endl;
 
-        while ((angle(0,planet_home,rocket,ref,ter) > dept_angle+20 || angle(0,planet_home,rocket,ref,ter) < dept_angle-20) /*|| (distance(planet_Dest,planet_home,ref,ter)>distance(planet_Dest,rocket,ref,ter))*/) {
+        while ((angle(0,planet_home,rocket,ref,ter) > dept_angle + 2 || angle(0,planet_home,rocket,ref,ter) < dept_angle - 2) /*|| (distance(planet_Dest,planet_home,ref,ter)>distance(planet_Dest,rocket,ref,ter))*/) {
 
             std::cout<<abs(trans_angle - angle(planet_home,0,planet_Dest,ref,ter))<<std::endl;
 
@@ -862,7 +862,7 @@ void Flight_plan::Inter_planet(int planet_Dest, int planet_home, std::vector<Par
         wait(10000);
         if(h_0<h_p){
 
-            while(Apoapsis(0,ref,ter) < distance(0,planet_Dest,ref,ter) * 1.1){
+            while(Apoapsis(0,ref,ter) < distance(0,planet_Dest,ref,ter)){
 
                 setheading("prograde",0,ref,ter);
 
