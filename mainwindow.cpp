@@ -175,11 +175,11 @@ void MainWindow::timetick(){
 
             }
 
-            QGraphicsEllipseItem* el = scene->addEllipse(int(par->getx()),int(par->gety()),1,1,pen);
+            QGraphicsEllipseItem*tracel= scene->addEllipse(int(par->getx()),int(par->gety()),1,1,pen);
 
-            el->setOpacity(.5);
+            tracel->setOpacity(.5);
 
-            trace.push_back(el);
+            trace.push_back(tracel);
         }
     }
     tick++;
