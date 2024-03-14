@@ -592,6 +592,8 @@ void Flight_plan::circularize(int planet_, std::vector<Particle*>* ref, int rock
                burn(0.1,planet_,ref,ter,"prograde");
 
            }
+
+           circularize(planet_,ref,rocket,ter,altitude);
        }
 
 }
