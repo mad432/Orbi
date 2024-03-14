@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     on_pushButton_clicked();
 
-    //Sysfactory(-2);
+    //Sysfactory(-3);
 
     //saves->Write_system("test");
 
@@ -237,6 +237,21 @@ void MainWindow::addRocket(int Mass, long double _x, long double _y , long doubl
         int stage = 0;
 
         system->add_flight(rock, plan , references, stage);
+
+    }else if(plan == 3){
+
+        std::vector <Particle *> references = {};
+
+        references.push_back(system->Getparticles()[0]);
+
+        references.push_back(system->Getparticles()[ref]);
+
+        references.push_back(rock);
+
+        int stage = 0;
+
+        system->add_flight(rock, plan , references, stage);
+
     }
 }
 
@@ -244,6 +259,18 @@ void MainWindow::addRocket(int Mass, long double _x, long double _y , long doubl
 void MainWindow::Sysfactory(int sel){
 
     on_pushButton_clicked();
+
+    if(sel == -3){on_GSlider_valueChanged(10);//sets G
+
+        int sol = 59000 + rand()%2000;
+
+        addParticle(2*sol,1425/2  ,700/2  ,0,0,1);
+
+        int alt1 = 200 + rand()%100;
+
+        addRocket(200,1425/2 + alt1 ,700/2 + 20 , sqrt(g * 700/ 20), sqrt(g*2*sol/alt1) , 3 , 0);
+
+    }
 
     if(sel == -2){
 

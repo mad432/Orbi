@@ -6,14 +6,14 @@
 #include <math.h>
 #include <stdio.h>
 #include <cstdio>
-//#include <glad.c>
-//#include <glm/glm.hpp>
-//#include <GLFW/glfw3.h>
-//#include <glm/gtc/matrix_transform.hpp>
-//#include <glm/gtc/type_ptr.hpp>
-//#include <GravShader/GravShader.h>
-//#include <GravShader/compute.h>
-//#include <GravShader/batch_renderer.h>
+#include <glad.c>
+#include <glm/glm.hpp>
+#include <GLFW/glfw3.h>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <GravShader/GravShader.h>
+#include <GravShader/compute.h>
+#include <GravShader/batch_renderer.h>
 
 
 System* System::Instance = NULL;
@@ -459,8 +459,8 @@ void System::collision(Particle* par, Particle* par1){
 
 }
 void System::clear(){
-    root->clear();
 
+    root->clear();
 
     for(auto par : *particles){
         delete par;
