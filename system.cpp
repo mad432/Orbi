@@ -62,7 +62,7 @@ bool System::barnes_hut = true;
 
 QuadTree System::_root;
 
-QuadTree* System::root = new QuadTree();
+QuadTree* System::root = &_root;
 
 std::vector <Flight_plan*> System::flights_ = {};
 
@@ -461,7 +461,6 @@ void System::collision(Particle* par, Particle* par1){
 void System::clear(){
 
     root->clear();
-
     for(auto par : *particles){
         delete par;
     }
@@ -522,8 +521,6 @@ double System::lorentz(double vx, double vy){
 void System::constree(int start, int end){
     //constructs the tree for barnes-hut
     if(start >= end){
-        start = 0;
-        end = 0;
         return;
     }
 
@@ -557,20 +554,20 @@ bool System::process(){
     if(barnes_hut){
 
         root->clear();
-        if(false){
+        if(!barnes_vis){
             for(int i = 0; i < threads ; i++ ){
-                //std::lock_guard<std::mutex> guard(myMutex);
-                if(start < length - parper){
+
+                if(start <= length - parper){
 
                     Mythreads[i] = std::thread(constree, start, start + parper);
 
-                    std::cout<<"thread : "<<i<<" from :"<<start<<" to :"<<start+parper<<std::endl;
+                    //std::cout<<"thread : "<<i<<" from :"<<start<<" to :"<<start+parper<<std::endl;
 
                 }else{
 
                     Mythreads[i] = std::thread(constree, start, length);
 
-                    std::cout<<"thread : "<<i<<" from :"<<start<<" to :"<<*size<<std::endl;
+                    //std::cout<<"thread : "<<i<<" from :"<<start<<" to :"<<*size<<std::endl;
 
                 }
                 start = start + parper;
@@ -585,12 +582,15 @@ bool System::process(){
                 Mythreads[i].join();
             }
             start =  parper;
-            Mythreads = new std::thread[threads];
+            //Mythreads = new std::thread[threads];
 
         }else{
             constree(0,length);
 
         }
+
+        std::cout<<root->count<<std::endl;
+        root->count = 0;
 
     }
 

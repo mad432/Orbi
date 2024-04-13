@@ -61,20 +61,20 @@ MainWindow::MainWindow(QWidget *parent)
     on_Traced_toggled(true);
 
     Load("test");
-    playlist->addMedia(QUrl("qrc:/Transfer.mp3"));
-    playlist->addMedia(QUrl("qrc:/Drifting.mp3"));
-    music->setPlaylist(playlist);
-    music->setVolume(20);
-    music->play();
-    music->playlist()->shuffle();
-    connect(music, &QMediaPlayer::stateChanged, [this](QMediaPlayer::State state) {
-            music->setVolume(20);
+//    playlist->addMedia(QUrl("qrc:/Transfer.mp3"));
+//    playlist->addMedia(QUrl("qrc:/Drifting.mp3"));
+//    music->setPlaylist(playlist);
+//    music->setVolume(20);
+//    music->play();
+//    music->playlist()->shuffle();
+//    connect(music, &QMediaPlayer::stateChanged, [this](QMediaPlayer::State state) {
+//            music->setVolume(20);
 
-            if (state == QMediaPlayer::State::StoppedState)
-            {
-                music->play();
-            }
-    });
+//            if (state == QMediaPlayer::State::StoppedState)
+//            {
+//                music->play();
+//            }
+//    });
 
 
 
@@ -473,6 +473,8 @@ void MainWindow::Sysfactory(int sel){
     }else if (sel == 8){//smash
         on_GSlider_valueChanged(40);
 
+        on_pushButton_clicked();
+
         int num = 300+rand()%200;
 
         for(int i = 0 ; i < num; i++){
@@ -833,10 +835,15 @@ void MainWindow::on_actionPerformance_Test_triggered()
 
 void MainWindow::on_actionShow_Visualization_triggered(bool checked)
 {
+    system ->barnes_vis = checked;
     if(system->root->scene()==nullptr && checked){
+
         scene->addItem(system->root);
+
     }else{
+
         scene->removeItem(system->root);
+
     }
 }
 

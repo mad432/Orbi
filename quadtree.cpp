@@ -1,5 +1,7 @@
 #include "quadtree.h"
 
+int QuadTree::count = 0;
+
 QuadTree::QuadTree()
 {
     upleft = nullptr;
@@ -140,10 +142,8 @@ void QuadTree::get_actors(Particle * par, std::vector <Particle*>* ret){
 }
 
 void QuadTree::constructnode(Particle * par){
-    if(here == nullptr){
-        here = new Particle(0,0,0,0,0,1,9999999);
-    }
     // takes in a new particle and alters the nodes approriatly
+    mymutex.lock();
 
     if(pars->size() == 0){
         //std::cout<<"here"<<std::endl;
@@ -157,6 +157,7 @@ void QuadTree::constructnode(Particle * par){
         mass = par->Getmass();
         pars->push_back(par);
         //radius = par->getsize()*3.14;
+        mymutex.unlock();
         return;
 
     }else if(pars->size() == 1){//if there is only one particle we need to create 2 new nodes to make sure each particle has its own leaf
@@ -282,23 +283,25 @@ void QuadTree::constructnode(Particle * par){
     //here->setvx((par->getvx() * par->Getmass() + here->getvx() * mass)/(par->Getmass() + mass));
     //here->setvy((par->getvy() * par->Getmass() + here->getvy() * mass)/(par->Getmass() + mass));
 
-    if(par->getx()+par->getsize() > x1){
-        x1 = par->getx()+par->getsize();
+    if(par->getx() + par->getsize() > x1){
+        x1 = par->getx() + par->getsize();
 
-    }else if(par->getx()-par->getsize() < x0){
-        x0 = par->getx()-par->getsize();
+    }else if(par->getx() - par->getsize() < x0){
+        x0 = par->getx() - par->getsize();
     }
 
-    if(par->gety()+par->getsize() > y1){
-        y1 = par->gety()+par->getsize();
+    if(par->gety() + par->getsize() > y1){
+        y1 = par->gety() + par->getsize();
 
-    }else if(par->gety()-par->getsize() < y0){
-        y0 = par->gety()-par->getsize();
+    }else if(par->gety() - par->getsize() < y0){
+        y0 = par->gety() - par->getsize();
     }
     radius = sqrt(pow(x1-x0,2)+pow(y1-y0,2));
     here->setx(x);
     here->sety(y);
     here->setmass(mass);
+    count++;
+    mymutex.unlock();
 //    if (radius < par->getsize()){
 //        std::cout<<"crash"<<std::endl;
 //    }

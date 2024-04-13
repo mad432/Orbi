@@ -29,7 +29,9 @@ class QuadTree: public QObject, public QGraphicsItem
 
         void clear();
         void constructnode(Particle * par);
-private:
+
+        static int count;
+    private:
 
         double min_dist = 0;
 

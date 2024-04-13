@@ -93,6 +93,8 @@ public:
     double get_step(){return *step;}
     static QuadTree * root;
 
+    bool barnes_vis= false;
+
 
 
 private:
