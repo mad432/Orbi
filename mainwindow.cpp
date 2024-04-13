@@ -637,6 +637,7 @@ void MainWindow::on_pushButton_clicked()//clear
 {
     pause();
     player = nullptr;
+    system->root->clear();
     system->clear();
     for(auto dot:trace){
         delete dot;
