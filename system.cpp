@@ -1,4 +1,3 @@
-
 #include "system.h"
 #include <iostream>
 #include <thread>
@@ -6,14 +5,6 @@
 #include <math.h>
 #include <stdio.h>
 #include <cstdio>
-#include <glad.c>
-#include <glm/glm.hpp>
-#include <GLFW/glfw3.h>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <GravShader/GravShader.h>
-#include <GravShader/compute.h>
-#include <GravShader/batch_renderer.h>
 
 
 System* System::Instance = NULL;
@@ -68,103 +59,22 @@ std::vector <Flight_plan*> System::flights_ = {};
 
 std::vector <Flight_plan*>* System::flights = &flights_;
 
-//void framebuffer_size_callback( GLFWwindow* window, int width, int height ) {
-//    glViewport( 0, 0, width, height );
-//}
-//void process_input( GLFWwindow* window ) {
-//    // close window on pressing esc
-//    if ( glfwGetKey( window, GLFW_KEY_ESCAPE ) == GLFW_PRESS ) {
-//        glfwSetWindowShouldClose( window, true );
-//    }
-//}
+bool System::is_start = true;
+
 
 
 System::System()
 {
-//    #define WINDOW_WIDTH 500
-//    #define WINDOW_HEIGHT 500
-//    #define DEBUG_ACTIVE false
-//    // init glfw and some settings
-//    glfwInit();
-//    glfwWindowHint( GLFW_CONTEXT_VERSION_MAJOR, 4 );
-//    glfwWindowHint( GLFW_CONTEXT_VERSION_MINOR, 3 );
-//    glfwWindowHint( GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE );
-
-//    // create window object
-//    GLFWwindow* window = glfwCreateWindow(
-//        WINDOW_WIDTH,
-//        WINDOW_HEIGHT,
-//        "compute shader test",
-//        NULL,
-//        NULL );
-
-//    // ensure creation was successful
-//    if ( window == NULL ) {
-//        std::cerr << "failed to create glfw window" << std::endl;
-//        glfwTerminate();
-//    }
-
-//    // set context
-//    glfwMakeContextCurrent( window );
-
-//    // load glad before we make any opengl calls
-//    if ( !gladLoadGLLoader( (GLADloadproc) glfwGetProcAddress ) ) {
-//        std::cerr << "failed to initialise glad" << std::endl;
-//    }
-
-
-//    glViewport( 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT );
-//    glfwSetFramebufferSizeCallback( window, framebuffer_size_callback );
-
-
-
-
-//    GravShader visual_shader( "Libs/GravShader/GravShader.vert", "Libs/GravShader/GravShader.frag" );
-//    BatchRenderer renderer;
-
-//    #pragma endregion
-//    float values[10000] = {0};
-
-//    int c = 0;
-//    while ( c < 100 ) {
-//        // input
-//        c++;
-//        Compute compute_shader( "Libs/GravShader/GravShader.comp", glm::uvec2( c, 1 ));
-
-//        compute_shader.use();
-
-//        values[c] = c;
-//        compute_shader.set_values( values );
-
-//        // input
-//        process_input( window );
-
-//        // update
-//        compute_shader.use();
-//        compute_shader.dispatch();
-//        compute_shader.wait();
-
-//        auto data = compute_shader.get_values();
-//        for ( auto d : data ) {
-//            std::cout << d << " ";
-//        }
-//        std::cout << std::endl;
-
-//        glfwPollEvents();
-//        glfwSwapBuffers( window );
-//    }
-
-//    #pragma endregion
 
 
 }
 
 System::~System(){
-     //glfwTerminate();
 }
 
 
 void System::Idreset(){
+    //root->clear();
 
     //resets the particles index in the system
 
@@ -199,6 +109,7 @@ void System::Remove(int id){
 
 
 Particle* System::addParticle(Particle* par){
+    //root->clear();
 
     //adds a particle to system
 
@@ -210,6 +121,7 @@ Particle* System::addParticle(Particle* par){
 }
 
 Particle* System::addParticle(int Mass, long double _x, long double _y , long double _vx, long double _vy, bool fixed){
+    //root->clear();
 
     //adds a particle to system
 
@@ -460,12 +372,12 @@ void System::collision(Particle* par, Particle* par1){
 }
 void System::clear(){
 
-    root->clear();
     for(auto par : *particles){
         delete par;
     }
 
     particles->clear();
+
     for(auto flight : *flights){
 
         flight->terminate();
@@ -473,12 +385,16 @@ void System::clear(){
         //delete flight;
 
     }
+
     if(flights->size()>0){
 
         _sleep(100);
 
     }
     flights->clear();
+    root->clear();
+    is_start = false;
+
 
     *size = 0;
 
@@ -526,7 +442,9 @@ void System::constree(int start, int end){
 
     std::vector <Particle *> hold = *particles;
     for (int i = start ; i < end ; i++){
+
         root->constructnode(hold[i]);
+
     }
 
 }
@@ -551,10 +469,12 @@ bool System::process(){
 
     std::vector <Particle *> hold = *particles;
 
-    if(barnes_hut){
+    if(barnes_hut && is_start == true){
 
         root->clear();
+
         if(!barnes_vis){
+
             for(int i = 0; i < threads ; i++ ){
 
                 if(start <= length - parper){
@@ -585,11 +505,12 @@ bool System::process(){
             //Mythreads = new std::thread[threads];
 
         }else{
+
             constree(0,length);
 
         }
 
-        std::cout<<root->count<<std::endl;
+        //std::cout<<root->count<<std::endl;
         root->count = 0;
 
     }
@@ -641,6 +562,10 @@ bool System::process(){
         }
 
     }
+    if(barnes_hut && is_start == false){
+        is_start = true;
+    }
+
 //    tickcount++;
 //    std::cout<<tickcount<<std::endl;
     //if(root != nullptr){
