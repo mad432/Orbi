@@ -163,6 +163,8 @@ private:
 
     static System* Instance;
 
+    static bool is_start;
+
     System();
 
 };
