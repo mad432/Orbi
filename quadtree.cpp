@@ -33,21 +33,28 @@ QuadTree::~QuadTree(){
 void QuadTree::clear() {
     //clears the tree
     if (downright != nullptr) {
+
         downright->clear();
         delete downright;
         downright = nullptr;
     }
+
     if (upright != nullptr) {
+
         upright->clear();
         delete upright;
         upright = nullptr;
     }
+
     if (downleft != nullptr) {
+
         downleft->clear();
         delete downleft;
         downleft = nullptr;
     }
+
     if (upleft != nullptr) {
+
         upleft->clear();
         delete upleft;
         upleft = nullptr;
@@ -145,7 +152,7 @@ void QuadTree::constructnode(Particle * par){
     // takes in a new particle and alters the nodes approriatly
     mymutex.lock();
 
-    if(pars->size() == 0){
+    if(size == 0){
         //std::cout<<"here"<<std::endl;
 
         x = par->getx();
@@ -158,9 +165,10 @@ void QuadTree::constructnode(Particle * par){
         pars->push_back(par);
         //radius = par->getsize()*3.14;
         mymutex.unlock();
+        size++;
         return;
 
-    }else if(pars->size() == 1){//if there is only one particle we need to create 2 new nodes to make sure each particle has its own leaf
+    }else if(size == 1){//if there is only one particle we need to create 2 new nodes to make sure each particle has its own leaf
 
         x = (par->getx() * par->Getmass() + x * mass)/(par->Getmass() + mass);
 
@@ -169,6 +177,8 @@ void QuadTree::constructnode(Particle * par){
         mass = mass + par->Getmass();
 
         pars->push_back(par);
+
+        size++;
         //Particle * par1 = par;
 
         for(Particle * par1 : *pars){
@@ -271,13 +281,14 @@ void QuadTree::constructnode(Particle * par){
 
                 }
             }
+    }
 //            for(Particle* par3: *pars){
 //                if((sqrt(pow(par3->getx() - x, 2) + pow(par3->gety() - y , 2) > radius))){
 //                    radius = sqrt(pow(par3->getx() - x, 2) + pow(par3->gety() - y , 2));
 //                }
 
 //            }
-        }
+
 
 
     //here->setvx((par->getvx() * par->Getmass() + here->getvx() * mass)/(par->Getmass() + mass));
@@ -296,11 +307,11 @@ void QuadTree::constructnode(Particle * par){
     }else if(par->gety() - par->getsize() < y0){
         y0 = par->gety() - par->getsize();
     }
-    radius = sqrt(pow(x1-x0,2)+pow(y1-y0,2));
+    radius = sqrt(pow(x1 - x0, 2)+pow(y1 - y0, 2));
     here->setx(x);
     here->sety(y);
     here->setmass(mass);
-    count++;
+    //count++;
     mymutex.unlock();
 //    if (radius < par->getsize()){
 //        std::cout<<"crash"<<std::endl;
@@ -325,9 +336,9 @@ void QuadTree::paint(QPainter *painter, const QStyleOptionGraphicsItem *item, QW
 
     painter->setBrush(QBrush(Qt::gray));
     painter->setOpacity(0.1);
-    painter->drawEllipse(x - radius, y - radius,2*radius, 2*radius);
+    painter->drawEllipse(x - radius, y - radius, 2 * radius, 2 * radius);
     painter->setBrush(QBrush(Qt::darkCyan));
-    painter->drawEllipse(x-here->getsize()/2,y-here->getsize()/2,here->getsize(),here->getsize());
+    painter->drawEllipse(x - here->getsize() / 2, y - here->getsize()/2, here->getsize(), here->getsize());
     if(downright != nullptr){
         //painter->setBrush(QBrush(Qt::blue));
         downright->paint(painter,item,widget);

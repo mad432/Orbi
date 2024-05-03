@@ -34,6 +34,7 @@ class QuadTree: public QObject, public QGraphicsItem
     private:
 
         double min_dist = 0;
+        int size = 0;
 
 
         double mass = 0;

@@ -47,34 +47,34 @@ MainWindow::MainWindow(QWidget *parent)
 
     timer1->start(0);
 
-    on_pushButton_clicked();
+    //on_pushButton_clicked();
 
-    //Sysfactory(-3);
+    //Sysfactory(8);
 
     //saves->Write_system("test");
 
     //on_pushButton_clicked();
 
-//    _sleep(100);
+    //_sleep(100);
 //////    on_GSlider_valueChanged(50);
 
     on_Traced_toggled(true);
 
     Load("test");
-//    playlist->addMedia(QUrl("qrc:/Transfer.mp3"));
-//    playlist->addMedia(QUrl("qrc:/Drifting.mp3"));
-//    music->setPlaylist(playlist);
-//    music->setVolume(20);
-//    music->play();
-//    music->playlist()->shuffle();
-//    connect(music, &QMediaPlayer::stateChanged, [this](QMediaPlayer::State state) {
-//            music->setVolume(20);
+    playlist->addMedia(QUrl("qrc:/Transfer.mp3"));
+    playlist->addMedia(QUrl("qrc:/Drifting.mp3"));
+    music->setPlaylist(playlist);
+    music->setVolume(20);
+    music->play();
+    music->playlist()->shuffle();
+    connect(music, &QMediaPlayer::stateChanged, [this](QMediaPlayer::State state) {
+            music->setVolume(20);
 
-//            if (state == QMediaPlayer::State::StoppedState)
-//            {
-//                music->play();
-//            }
-//    });
+            if (state == QMediaPlayer::State::StoppedState)
+            {
+                music->play();
+            }
+    });
 
 
 
@@ -299,7 +299,7 @@ void MainWindow::Sysfactory(int sel){
 
         on_GSlider_valueChanged(50);//sets G
 
-        int sol = 10000+rand()%15000;
+        int sol = 10000 + rand()%15000;
 
         addParticle(sol,1425/2 ,700/2 ,0,0,1);
 
@@ -406,7 +406,7 @@ void MainWindow::Sysfactory(int sel){
 
         for(int i = 0 ; i < num; i++){
 
-            int rmass = rand()%20+5;
+            int rmass = rand()%20 + 5;
 
             int rxp = rand()%1425;
 
@@ -428,19 +428,20 @@ void MainWindow::Sysfactory(int sel){
 
         for(int i = 0 ; i < num; i++){
 
-            int rmass = rand()%20+5;
+            int rmass = rand()%20 + 5;
 
             int rxp = rand()%1425;
 
             int ryp = rand()%700;
 
-            int rxv = rand()%20-10;
+            int rxv = rand()%20 - 10;
 
-            int ryv = rand()%20-10+(700/2-rxp*.5)*.13;
+            int ryv = rand()%20-10 + (700/2-rxp*.5)*.13;
 
             addParticle(rmass,rxp,ryp,rxv,ryv,0);
          }
     }else if (sel == 7) {//performance test
+
             on_GSlider_valueChanged(40);
 
             int num = 5000;
@@ -451,7 +452,7 @@ void MainWindow::Sysfactory(int sel){
 
             for(int i = 0 ; i < num; i++){
 
-                int rmass = rand()%20+5;
+                int rmass = rand()%20 + 5;
 
                 x += 50;
 
@@ -464,9 +465,9 @@ void MainWindow::Sysfactory(int sel){
 
                 int ryp = y+rand()%49;
 
-                int rxv = rand()%20-10;
+                int rxv = rand()%20 - 10;
 
-                int ryv = rand()%20-10;
+                int ryv = rand()%20 - 10;
 
                 addParticle(rmass,rxp,ryp,rxv,ryv,0);
             }
